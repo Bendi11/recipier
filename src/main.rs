@@ -1,9 +1,8 @@
 // Disable console on windows
 #![windows_subsystem = "windows"]
-
-mod updater;
 mod gui;
-
+mod recipe;
+mod measure; 
 
 
 fn main() {
@@ -18,6 +17,6 @@ fn main() {
             (None, None) => "unknown error".to_owned()
         });
     }));
-
+    
     
 }

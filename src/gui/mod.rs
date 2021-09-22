@@ -1,6 +1,3 @@
-mod state;
+use fltk::{app, frame::Frame, prelude::*, window::Window};
 
-/// Launch the GUI application, nicely displaying any errors that occur
-pub fn launch() {
 
-}

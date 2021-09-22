@@ -4,8 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-druid = { version = "0.7", features = ["image"] } # GUI library
-self_update = "0.27" # Self-updating from the most recent Github release
+fltk = "1.1" # GUI library
 semver = "1.0" # Checking versions of github releases
 
 [profile.release]
