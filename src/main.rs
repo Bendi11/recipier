@@ -1,8 +1,8 @@
 // Disable console on windows
 #![windows_subsystem = "windows"]
-mod gui;
-mod recipe;
-mod measure; 
+pub mod gui;
+pub mod recipe;
+pub mod measure; 
 
 
 fn main() {

@@ -7,11 +7,11 @@ use std::fmt;
 /// The value of the enum variant is the conversion factor to grams
 #[derive(Clone, Copy, Debug, )]
 pub enum MassUnit {
-    Gram = 1.,
-    Kilogram = 1000.,
-    Milligram = 0.001,
-    Ounce = 28.34952,
-    Pound = 453.59237,
+    Gram,
+    Kilogram,
+    Milligram,
+    Ounce,
+    Pound,
 } 
 
 impl fmt::Display for MassUnit {
@@ -27,50 +27,99 @@ impl fmt::Display for MassUnit {
 }
 
 impl MassUnit {
+    /// Get the conversion factor for this unit to grams
+    pub const fn conversion_factor(&self) -> f32 {
+        match self {
+            Self::Gram => 1.,
+            Self::Kilogram => 1000.,
+            Self::Milligram => 0.001,
+            Self::Ounce => 28.34952,
+            Self::Pound => 453.59237,
+        }
+    }
+
     /// Convert a measurement in a unit of `self` to a measurement in grams
     pub fn to_grams(&self, val: f32) -> f32 {
-        val * ( (self as f64) as f32 )
+        val * self.conversion_factor()
     }
     
     /// Convert a measurement in grams to a measurement in `self` units
     pub fn from_grams(&self, val: f32) -> f32 {
-        val / ( ( self as f64 ) as f32 )
+        val / self.conversion_factor()
     }
 }
 
 /// A measurement of mass with unit of measurement
 #[derive(Clone, Debug, )]
 pub struct Mass {
-
+    unit: MassUnit,
+    val: f32
 }
 
+impl Mass {
+    /// Create a new mass with the given unit of measure and value
+    pub fn new(unit: MassUnit, val: f32) -> Self {
+        Self {
+            unit,
+            val
+        }
+    }
+
+    /// Convert this measure's unit of mass to another unit
+    pub fn convert(&self, unit: MassUnit) -> Self {
+        Self {
+            val: unit.from_grams(self.unit.to_grams(self.val)),
+            unit,
+        }
+    }
+}
+
+impl fmt::Display for Mass {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "s" } else { "" })
+    }
+}
 
 /// A volume of a substance, like cups, liters, etc.
 ///
 /// The value of this enum as an f64 is the conversion factor from measurement to liters
 #[derive(Clone, Copy, Debug, )]
 pub enum VolumeUnit {
-    Cup = 0.24,
-    Liter = 1.,
-    Milliliter = 0.001,
-    Teaspoon = 0.00492892,
-    Tablespoon = 0.014787,
-    Pint = 0.473176,
-    Quart = 0.946353,
-    Gallon = 3.78541,
-    FluidOz = 0.0295735,
+    Cup,
+    Liter,
+    Milliliter,
+    Teaspoon,
+    Tablespoon,
+    Pint,
+    Quart,
+    Gallon,
+    FluidOz,
 }
 
 impl VolumeUnit {
+    /// Get the conversion factor to liters for this unit
+    pub const fn conversion_factor(&self) -> f32 {
+        match self {
+            Self::Cup => 0.24,
+            Self::Liter => 1.,
+            Self::Milliliter => 0.001,
+            Self::Teaspoon => 0.00492892,
+            Self::Tablespoon => 0.014787,
+            Self::Pint => 0.473176,
+            Self::Quart => 0.946353,
+            Self::Gallon => 3.78541,
+            Self::FluidOz => 0.0295735,
+        }
+    }
     /// Convert a measurement in `self` units to liters
     pub fn to_liters(&self, val: f32) -> f32 {
-        val * ( (self as f64) as f32 )
+        val * self.conversion_factor()
     }
     
     /// Convert a measurement in liters to a measurement in units of 
     /// `self`
     pub fn from_liters(&self, val: f32) -> f32 {
-        val / ( (self as f64) as f32)
+        val / self.conversion_factor()
     }
 }
 
@@ -119,10 +168,17 @@ impl Volume {
 
 impl fmt::Display for Volume {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!("{} {}{}", self.val, self.unit, if self.val == 1.0 { "s" } else { "" })
+        write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "s" } else { "" })
     }
 }
 
+impl PartialEq for Volume {
+    fn eq(&self, other: &Self) -> bool {
+        let my_liters = self.unit.to_liters(self.val);
+        let their_liters = other.unit.to_liters(other.val);
+        my_liters.eq(&their_liters)
+    }
+}
 impl PartialOrd for Volume {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         let my_liters = self.unit.to_liters(self.val);

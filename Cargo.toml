@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 fltk = "1.1" # GUI library
+generational-arena = "0.2" # Pool of all recipes
 semver = "1.0" # Checking versions of github releases
 
 [profile.release]
