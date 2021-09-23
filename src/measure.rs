@@ -168,7 +168,7 @@ impl Volume {
 
 impl fmt::Display for Volume {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "s" } else { "" })
+        write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "" } else { "s" })
     }
 }
 

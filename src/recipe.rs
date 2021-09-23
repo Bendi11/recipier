@@ -10,6 +10,12 @@ pub struct Ingredient {
     pub amount: IngredientAmount,
 }
 
+impl fmt::Display for Ingredient {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.name, self.amount)
+    }
+}
+
 /// Enumeration for how an ingredient's amount is displayed
 #[derive(Clone, Debug, )]
 pub enum IngredientAmount {

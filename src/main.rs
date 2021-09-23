@@ -1,8 +1,10 @@
 // Disable console on windows
-#![windows_subsystem = "windows"]
+//#![windows_subsystem = "windows"]
 pub mod gui;
 pub mod recipe;
-pub mod measure; 
+pub mod measure;
+
+use crate::{recipe::{Ingredient, IngredientAmount, Recipe}, measure::{Volume, VolumeUnit}};
 
 
 fn main() {
@@ -17,6 +19,5 @@ fn main() {
             (None, None) => "unknown error".to_owned()
         });
     }));
-    
     
 }
