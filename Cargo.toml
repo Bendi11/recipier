@@ -7,6 +7,7 @@ edition = "2018"
 eframe = "0.14" # GUI library
 generational-arena = "0.2" # Pool of all recipes
 semver = "1.0" # Checking versions of github releases
+sublime_fuzzy = "0.7" # Fuzzy finding recipes by search key
 
 [profile.release]
 codegen-units = 1
