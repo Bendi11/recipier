@@ -2,6 +2,7 @@ use eframe::{
     egui::{self, Color32, Key, TextEdit, TextStyle, Visuals, Widget, Label, Button}, 
     epi::App
 };
+use std::collections::BTreeMap;
 use generational_arena::{Arena, Index};
 use crate::{
     recipe::Recipe
@@ -18,6 +19,9 @@ pub struct RecipeApp {
     /// What screen is being displayed
     view: View,
 
+    /// A list of recipes that we have searched for
+    matched_recipes: Option<BTreeMap<isize, Index>>,
+
     /// What recipe is being edited
     editing_recipe: Option<Index>,
 
@@ -31,8 +35,70 @@ impl RecipeApp {
             recipes: Arena::new(),
             view: View::Overview,
             editing_recipe: None,
-            search_text: String::new()
+            search_text: String::new(),
+            matched_recipes: None,
         }
+    }
+
+    /// Show the top menu bar, returning `true` if a button was pressed
+    fn top_menubar(&mut self, ctx: &egui::CtxRef) {
+        egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+            ui.add_space(2.);
+
+            
+            ui.columns(2, |ui| {
+
+                if ui[1].add(Button::new("Home")).clicked() {
+                    self.view = View::Overview;
+                } else if ui[0].add(Button::new("Add")).clicked() {
+                    let new = self.recipes.insert(Recipe::default());
+                    self.editing_recipe = Some(new);
+                    self.view = View::EditRecipe;
+                } 
+            });
+
+            let search = TextEdit::singleline(&mut self.search_text)
+                .hint_text("search");
+                ui.centered_and_justified(|ui| search.ui(ui));
+            if ctx.input().key_pressed(Key::Enter) {
+                const SEARCH_THRESHOLD: isize = 20;
+                self.matched_recipes = Some({
+                    let mut matches = BTreeMap::new();
+                    for (idx, recipe) in self.recipes.iter() {
+                        let max = match sublime_fuzzy::best_match(self.search_text.as_str(), recipe.name.as_str()) {
+                            Some(score) => score.score(),
+                            None => continue,
+                        }.max(match sublime_fuzzy::best_match(self.search_text.as_str(), recipe.name.as_str()) {
+                            Some(score) => score.score(),
+                            None => continue,
+                        });
+                        if max >= SEARCH_THRESHOLD {
+                            matches.insert(max, idx);
+                        }
+                    }
+                    matches
+                });
+                self.view = View::Search;
+            }
+            
+        });
+    }
+
+    fn show_recipe(ui: &mut egui::Ui, recipe: &Recipe) {
+        ui.heading(&recipe.name);
+        if let Some(ingredients) = recipe.ingredients.as_ref() {
+            ui.collapsing("Ingredients", |ui| {
+                for ingredient in ingredients.iter() {
+                    ui.label(format!("- {}", ingredient.to_string()));
+                }
+            });
+        }
+        ui.separator();
+        if let Some(time) = recipe.time {
+            ui.label(humantime::format_duration(time).to_string());
+        }
+        let label = Label::new(&recipe.body).wrap(true);
+        ui.group(|ui| label.ui(ui));
     }
 }
 
@@ -50,47 +116,32 @@ impl App for RecipeApp {
     fn update(&mut self, ctx: &eframe::egui::CtxRef, _frame: &mut eframe::epi::Frame<'_>) {
         match self.view {
             View::Overview => {
-                egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
-                    ui.add_space(2.);
-
-                    ui.columns(2, |ui| {
-                        if ui[0].add(Button::new("Add")).clicked() {
-
-                        } else if ui[1].add(Button::new("Edit")).clicked() {
-
-                        }
-                    });
-
-                    let search = TextEdit::singleline(&mut self.search_text)
-                        .hint_text("search");
-                    if ui.centered_and_justified(|ui| search.ui(ui)).response.lost_focus() && ctx.input().key_pressed(Key::Enter) {
-                        self.view = View::Search;
-                    }
-                });
+                self.top_menubar(ctx);
 
                 egui::CentralPanel::default().show(ctx, |ui| {
                     if self.recipes.is_empty() {
                         ui.add(Label::new("No Recipes Yet!"));
                     } else {
                         for (_, recipe) in self.recipes.iter() {
-                            ui.heading(&recipe.name);
-                            if let Some(ingredients) = recipe.ingredients.as_ref() {
-                                ui.collapsing("Ingredients", |ui| {
-                                    for ingredient in ingredients.iter() {
-                                        ui.label(format!("- {}", ingredient.to_string()));
-                                    }
-                                });
-                            }
+                            Self::show_recipe(ui, recipe);
                             ui.separator();
-                            let label = Label::new(&recipe.body).wrap(true);
-                            ui.group(|ui| label.ui(ui));
-                            
                         }
                     }
                 });
             },  
             View::Search => {
-                
+                self.top_menubar(ctx);
+
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    if let Some(matched) = self.matched_recipes.as_ref() {
+                        for (_, idx) in matched.iter() {
+                            let recipe = self.recipes.get(*idx).unwrap();
+                            Self::show_recipe(ui, recipe);
+                            ui.separator();
+                        }
+                    }
+                });
+
             }
             _ => unimplemented!()
         }

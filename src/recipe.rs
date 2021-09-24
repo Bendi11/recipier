@@ -1,5 +1,5 @@
 //! Structures holding recipe data
-use std::fmt;
+use std::{fmt, time};
 
 use crate::measure::{Mass, Volume};
 
@@ -46,4 +46,16 @@ pub struct Recipe {
     pub name: String,
     pub ingredients: Option<Vec<Ingredient>>,
     pub body: String,
+    pub time: Option<time::Duration>,
+}
+
+impl Default for Recipe {
+    fn default() -> Self {
+        Self {
+            name: "".to_owned(),
+            ingredients: None,
+            body: "".to_owned(),
+            time: None
+        }
+    }
 }

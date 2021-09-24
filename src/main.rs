@@ -37,7 +37,8 @@ fn main() {
 - Allow noodles to cook for around 3 minutes, stirring occasionally
 - Remove heat and add flavor packet to noodles, ensuring that flavor spreads to noodles by stirring
 - Leave for 5-10 minutes to cool and enjoy
-".to_owned()
+".to_owned(),
+            time: Some(std::time::Duration::from_secs(600))
     });
     let opts = eframe::NativeOptions::default();
     eframe::run_native(Box::new(app), opts);
