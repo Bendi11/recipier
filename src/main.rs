@@ -1,11 +1,10 @@
 // Disable console on windows
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 pub mod gui;
 pub mod recipe;
 pub mod measure;
 
 use crate::{recipe::{Ingredient, IngredientAmount, Recipe}, measure::{Volume, VolumeUnit}};
-
 
 fn main() {
     //Add panic handler for better error messages
@@ -19,5 +18,8 @@ fn main() {
             (None, None) => "unknown error".to_owned()
         });
     }));
+    let app = gui::RecipeApp::new();
+    let opts = eframe::NativeOptions::default();
+    eframe::run_native(Box::new(app), opts);
     
 }
