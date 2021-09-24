@@ -1,16 +1,19 @@
 use eframe::{
-    egui::{self, Color32, Key, TextEdit, TextStyle, Visuals, Widget, Label, Button}, 
+    egui::{self, Key, TextEdit, Visuals, Widget, Label, Button}, 
     epi::App
 };
+use serde::{Serialize, Deserialize};
 use std::collections::BTreeMap;
 use generational_arena::{Arena, Index};
 use crate::{
     recipe::Recipe
 };
 
+const SAVE_FILE: &str = "./recipes.json";
+
 
 /// Recipe application holding all state for the GUI and all recipes
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecipeApp {
     /// An allocator for recipes, so that recipes can be addressed by handle instead of
     /// needing smart pointers or references
@@ -30,7 +33,14 @@ pub struct RecipeApp {
 }
 
 impl RecipeApp {
-    pub fn new() -> Self {
+    /// Attempt to load a saved recipe file, or create a default recipe app with no recipes
+    pub fn load_or_default() -> Self {
+        if let Ok(file) = std::fs::File::open(SAVE_FILE) {
+            if let Ok(app) = serde_json::from_reader(file) {
+                return app
+            }
+        }
+
         Self {
             recipes: Arena::new(),
             view: View::Overview,
@@ -113,6 +123,12 @@ impl App for RecipeApp {
         ctx.set_style(style);
     }
 
+    fn on_exit(&mut self) {
+        if let Ok(save) = std::fs::File::create(SAVE_FILE) {
+            serde_json::to_writer(save, &self);
+        }
+    }
+
     fn update(&mut self, ctx: &eframe::egui::CtxRef, _frame: &mut eframe::epi::Frame<'_>) {
         match self.view {
             View::Overview => {
@@ -149,7 +165,7 @@ impl App for RecipeApp {
 }
 
 /// What screen the user is currently seeing
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum View {
     Overview,
     Search,

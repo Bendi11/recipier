@@ -1,11 +1,12 @@
 //! Units of measurement in recipes, that also hold the unit they were
 //! originally entered in
 use std::fmt;
+use serde::{Serialize, Deserialize};
 
 /// A unit of mass like kg, pound, ounce, etc.
 ///
 /// The value of the enum variant is the conversion factor to grams
-#[derive(Clone, Copy, Debug, )]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum MassUnit {
     Gram,
     Kilogram,
@@ -50,7 +51,7 @@ impl MassUnit {
 }
 
 /// A measurement of mass with unit of measurement
-#[derive(Clone, Debug, )]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Mass {
     unit: MassUnit,
     val: f32
@@ -83,7 +84,7 @@ impl fmt::Display for Mass {
 /// A volume of a substance, like cups, liters, etc.
 ///
 /// The value of this enum as an f64 is the conversion factor from measurement to liters
-#[derive(Clone, Copy, Debug, )]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum VolumeUnit {
     Cup,
     Liter,
@@ -140,7 +141,7 @@ impl fmt::Display for VolumeUnit {
 }
 
 /// An amount of a substance with a given unit of measurement
-#[derive(Clone, Debug, )]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Volume {
     /// The unit that this volume is measured in
     unit: VolumeUnit,
