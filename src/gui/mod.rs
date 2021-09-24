@@ -94,8 +94,16 @@ impl RecipeApp {
         });
     }
 
+    /// Show a widget for a recipe
     fn show_recipe(ui: &mut egui::Ui, recipe: &Recipe) {
-        ui.heading(&recipe.name);
+        ui.columns(2, |ui| {
+            ui[0].heading(&recipe.name);
+            if ui[1].button("Edit").clicked() {
+
+            }
+        });
+
+        
         if let Some(ingredients) = recipe.ingredients.as_ref() {
             ui.collapsing("Ingredients", |ui| {
                 for ingredient in ingredients.iter() {
@@ -103,9 +111,11 @@ impl RecipeApp {
                 }
             });
         }
+
         ui.separator();
+
         if let Some(time) = recipe.time {
-            ui.label(humantime::format_duration(time).to_string());
+            ui.label(format!("Time: {}", humantime::format_duration(time)));
         }
         let label = Label::new(&recipe.body).wrap(true);
         ui.group(|ui| label.ui(ui));
@@ -125,7 +135,7 @@ impl App for RecipeApp {
 
     fn on_exit(&mut self) {
         if let Ok(save) = std::fs::File::create(SAVE_FILE) {
-            serde_json::to_writer(save, &self);
+            let _ = serde_json::to_writer(save, &self);
         }
     }
 
@@ -151,7 +161,8 @@ impl App for RecipeApp {
                 egui::CentralPanel::default().show(ctx, |ui| {
                     if let Some(matched) = self.matched_recipes.as_ref() {
                         for (_, idx) in matched.iter() {
-                            let recipe = self.recipes.get(*idx).unwrap();
+                            let idx = *idx;
+                            let recipe = self.recipes.get(idx).unwrap();
                             Self::show_recipe(ui, recipe);
                             ui.separator();
                         }
