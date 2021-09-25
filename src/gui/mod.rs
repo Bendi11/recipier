@@ -249,7 +249,7 @@ impl RecipeApp {
         });
 
         egui::CollapsingHeader::new("Ingredients")
-            .id_source(std::time::Instant::now())
+            .id_source(idx)
             .show(ui, |ui| {
                 for ingredient in recipe.ingredients.iter() {
                     ui.label(format!("- {}", ingredient.to_string()));
@@ -371,7 +371,7 @@ impl App for RecipeApp {
                                 self.edit.adding_time = false;
                             }
                         },
-                        false => if ui.button("Add Time").clicked() {
+                        false => if ui.button("Add Time").on_hover_text("Add an estimate for how long the recipe takes to make").clicked() {
                             self.edit.adding_time = true;
                         }
                     }

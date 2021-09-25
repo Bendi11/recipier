@@ -105,7 +105,7 @@ impl fmt::Display for Mass {
 /// A volume of a substance, like cups, liters, etc.
 ///
 /// The value of this enum as an f64 is the conversion factor from measurement to liters
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum VolumeUnit {
     Cup,
     Liter,
@@ -162,7 +162,7 @@ impl fmt::Display for VolumeUnit {
 }
 
 /// An amount of a substance with a given unit of measurement
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Volume {
     /// The unit that this volume is measured in
     pub unit: VolumeUnit,
@@ -191,20 +191,5 @@ impl Volume {
 impl fmt::Display for Volume {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "" } else { "s" })
-    }
-}
-
-impl PartialEq for Volume {
-    fn eq(&self, other: &Self) -> bool {
-        let my_liters = self.unit.to_liters(self.val);
-        let their_liters = other.unit.to_liters(other.val);
-        my_liters.eq(&their_liters)
-    }
-}
-impl PartialOrd for Volume {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        let my_liters = self.unit.to_liters(self.val);
-        let their_liters = other.unit.to_liters(other.val);
-        my_liters.partial_cmp(&their_liters)
     }
 }
