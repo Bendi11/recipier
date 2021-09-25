@@ -3,6 +3,26 @@
 use std::fmt;
 use serde::{Serialize, Deserialize};
 
+/// Units of time a user can pick
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub enum TimeUnit {
+    Second,
+    Minute,
+    Hour,
+    Day,
+}
+
+impl fmt::Display for TimeUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Second => write!(f, "seconds"),
+            Self::Minute => write!(f, "minutes"),
+            Self::Hour => write!(f, "hours"),
+            Self::Day => write!(f, "days")
+        }
+    }
+}
+
 /// A unit of mass like kg, pound, ounce, etc.
 ///
 /// The value of the enum variant is the conversion factor to grams
@@ -80,6 +100,7 @@ impl fmt::Display for Mass {
         write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "s" } else { "" })
     }
 }
+
 
 /// A volume of a substance, like cups, liters, etc.
 ///

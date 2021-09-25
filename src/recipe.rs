@@ -45,7 +45,7 @@ impl fmt::Display for IngredientAmount {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Recipe {
     pub name: String,
-    pub ingredients: Option<Vec<Ingredient>>,
+    pub ingredients: Vec<Ingredient>,
     pub body: String,
     pub time: Option<time::Duration>,
 }
@@ -55,7 +55,7 @@ impl Recipe {
     pub fn top_ramen() -> Self {
         Self {
             name: "Top Ramen".to_owned(),
-            ingredients: Some(vec![
+            ingredients: vec![
                 Ingredient {
                     name: "Top Ramen Packet".to_owned(),
                     amount: IngredientAmount::Count(1)
@@ -64,7 +64,7 @@ impl Recipe {
                     name: "Water".to_owned(),
                     amount: IngredientAmount::Volume(Volume::new(crate::measure::VolumeUnit::Cup, 2.))
                 },
-            ]),
+            ],
             body: 
     "- Add water to small / medium pot and bring to boil
     - Remove noodle brick from packet and add to water
@@ -81,7 +81,7 @@ impl Default for Recipe {
     fn default() -> Self {
         Self {
             name: "".to_owned(),
-            ingredients: None,
+            ingredients: vec![],
             body: "".to_owned(),
             time: None
         }
