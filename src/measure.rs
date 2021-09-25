@@ -26,7 +26,7 @@ impl fmt::Display for TimeUnit {
 /// A unit of mass like kg, pound, ounce, etc.
 ///
 /// The value of the enum variant is the conversion factor to grams
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum MassUnit {
     Gram,
     Kilogram,
@@ -71,10 +71,10 @@ impl MassUnit {
 }
 
 /// A measurement of mass with unit of measurement
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Mass {
-    unit: MassUnit,
-    val: f32
+    pub unit: MassUnit,
+    pub val: f32
 }
 
 impl Mass {
@@ -165,9 +165,9 @@ impl fmt::Display for VolumeUnit {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Volume {
     /// The unit that this volume is measured in
-    unit: VolumeUnit,
+    pub unit: VolumeUnit,
     /// The amount of the given unit
-    val: f32,
+    pub val: f32,
 }
 
 impl Volume {

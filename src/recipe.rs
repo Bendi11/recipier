@@ -18,7 +18,7 @@ impl fmt::Display for Ingredient {
 }
 
 /// Enumeration for how an ingredient's amount is displayed
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum IngredientAmount {
     /// A raw number, displayed as x{n}
     Count(usize),
@@ -29,6 +29,17 @@ pub enum IngredientAmount {
     /// No amount given
     None,
 }   
+
+impl IngredientAmount {
+    pub fn unit_string(&self) -> String {
+        match self {
+            Self::Count(_) => "count".to_owned(),
+            Self::Mass(Mass { val: _, unit} ) => unit.to_string(),
+            Self::Volume(Volume { val: _, unit} ) => unit.to_string(),
+            Self::None => "no unit".to_owned()
+        }
+    }
+}
 
 impl fmt::Display for IngredientAmount {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

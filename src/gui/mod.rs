@@ -5,7 +5,7 @@ use eframe::{
 use serde::{Serialize, Deserialize};
 use std::{collections::BTreeMap, fmt, time};
 use generational_arena::{Arena, Index};
-use crate::{measure::TimeUnit, recipe::{IngredientAmount, Recipe}};
+use crate::{measure::{Mass, MassUnit, TimeUnit, Volume, VolumeUnit}, recipe::{Ingredient, IngredientAmount, Recipe}};
 
 const SAVE_FILE: &str = "./recipes.json";
 
@@ -43,24 +43,47 @@ pub struct EditState {
     time_unit: TimeUnit,
 
     /// A list of ingredients that the user is editing
-    ingredients: Vec<(String, IngredientAmount)>,
+    ingredients: Vec<(String, Option<(String, IngredientAmount)>)>,
 
     /// What is wrong with the current edited recipe
     wrongs: Vec<EditWrong>,
 
+    /// The name of the edited recipe
+    name: String,
+
     /// What recipe is being edited
-    editing_recipe: Option<(Index, Recipe)>,
+    editing_recipe: Option<Index>,
+
+    /// The body of the recipe
+    body: String,
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 enum EditWrong {
     BadTime,
+    BadAmount,
 }
 
 impl fmt::Display for EditWrong {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::BadTime => write!(f, "Invalid time")
+            Self::BadTime => write!(f, "Invalid time"),
+            Self::BadAmount => write!(f, "Invalid ingredient amount"),
+        }
+    }
+}
+
+impl Default for EditState {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            wrongs: vec![],
+            editing_recipe: None,
+            ingredients: vec![],
+            time_unit: TimeUnit::Minute,
+            time_string: String::new(),
+            adding_time: false,
+            body: String::new()
         }
     }
 }
@@ -68,12 +91,82 @@ impl fmt::Display for EditWrong {
 impl EditState {
     /// Reset the editor state to not be editing anything
     pub fn reset(&mut self) {
-        self.adding_time = false;
-        self.time_string = String::new();
-        self.time_unit = TimeUnit::Minute;
-        self.editing_recipe = None;
-        self.wrongs = vec![];
-        self.ingredients = vec![];
+        *self = Self::default();
+    }
+
+    /// Construct a recipe from the inputted values, returning None if an error occured
+    fn to_recipe(&self) -> Result<Recipe, EditWrong> {
+        Ok(Recipe {
+            time: match self.adding_time {
+                true => {
+                    let time_val: f64 = match self.time_string.parse() {
+                        Ok(val) => val,
+                        Err(_) => {
+                            return Err(EditWrong::BadTime)
+                        }
+                    };
+                    let time = match self.time_unit {
+                        TimeUnit::Second => time::Duration::from_secs_f64(time_val),
+                        TimeUnit::Minute => time::Duration::from_secs_f64(time_val * 60.),
+                        TimeUnit::Hour => time::Duration::from_secs_f64(time_val * 3600.),
+                        TimeUnit::Day => time::Duration::from_secs_f64(time_val * 3600. * 24.),
+                    };
+                    Some(time)
+                },
+                false => None
+            },
+            ingredients: self.ingredients.iter().map(|(name, amount)| {
+                if let Some((amount, unit)) = amount {
+                    let amount_val: f64 = match amount.parse() {
+                        Ok(val) => val,
+                        Err(_) => {
+                            return Err(EditWrong::BadAmount);
+                        }
+                    };
+
+                    Ok(Ingredient {
+                        name: name.clone(),
+                        amount: match unit {
+                            IngredientAmount::Count(_) => IngredientAmount::Count(amount_val as usize),
+                            IngredientAmount::Mass(Mass { unit, val: _ }) => IngredientAmount::Mass(Mass::new(*unit, amount_val as f32)),
+                            IngredientAmount::Volume(Volume { unit, val: _ }) => IngredientAmount::Volume(Volume::new(*unit, amount_val as f32)),
+                            IngredientAmount::None => IngredientAmount::None
+                        }
+                    })
+
+                } else {
+                    Ok(Ingredient {
+                        name: name.clone(),
+                        amount: IngredientAmount::None
+                    })
+                }
+                    
+            }).collect::<Result<Vec<_>, _>>()?,
+            
+            name: self.name.clone(),
+            body: self.body.clone(),
+        })
+    }
+
+    pub fn from_recipe(rec: &Recipe, idx: Index) -> Self {
+        Self {
+            adding_time: rec.time.is_some(),
+            time_string: match rec.time {
+                Some(time) => (time.as_secs_f64() / 60.).to_string(),
+                None => String::new()
+            },
+            time_unit: TimeUnit::Minute,
+            name: rec.name.clone(),
+            body: rec.body.clone(),
+            ingredients: rec.ingredients.iter().map(|ingredient| (ingredient.name.clone(), match ingredient.amount {
+                IngredientAmount::None => None,
+                IngredientAmount::Count(num) => Some((num.to_string(), IngredientAmount::Count(0))),
+                IngredientAmount::Mass(Mass { val, unit }) => Some((val.to_string(), IngredientAmount::Mass(Mass { val: 0., unit}))),
+                IngredientAmount::Volume(Volume { val, unit }) => Some((val.to_string(), IngredientAmount::Volume(Volume { val: 0., unit}))),
+            })).collect::<Vec<_>>(),
+            editing_recipe: Some(idx),
+            wrongs: vec![]
+        }
     }
 }
 
@@ -89,14 +182,7 @@ impl RecipeApp {
         Self {
             recipes: Arena::new(),
             view: View::Overview,
-            edit: EditState {
-                adding_time: false,
-                editing_recipe: None,
-                time_string: String::new(),
-                time_unit: TimeUnit::Minute,
-                wrongs: vec![],
-                ingredients: vec![]
-            },
+            edit: EditState::default(),
             search_text: String::new(),
             matched_recipes: None,
             
@@ -112,8 +198,9 @@ impl RecipeApp {
                 if ui[1].add(Button::new("Home")).clicked() {
                     self.view = View::Overview;
                 } else if ui[0].add(Button::new("Add")).clicked() {
+                    self.edit.reset();
                     let new = self.recipes.insert(Recipe::default());
-                    self.edit.editing_recipe = Some((new, Recipe::default()));
+                    self.edit.editing_recipe = Some(new);
                     self.view = View::EditRecipe;
                 } 
             });
@@ -145,7 +232,7 @@ impl RecipeApp {
     }
 
     /// Show a widget for a recipe
-    fn show_recipe(ui: &mut egui::Ui, idx: Index, recipes: &Arena<Recipe>, view: &mut View, editing_recipe: &mut Option<(Index, Recipe)>) {
+    fn show_recipe(ui: &mut egui::Ui, idx: Index, recipes: &Arena<Recipe>, view: &mut View, edit: &mut EditState) {
         let recipe = recipes.get(idx).unwrap();
         ui.columns(3, |ui| {
             ui[0].heading(&recipe.name);
@@ -153,20 +240,21 @@ impl RecipeApp {
 
             if ui[1].button("Edit").clicked() {
                 *view = View::EditRecipe;
-                *editing_recipe = Some((idx, recipe.clone()));
+                *edit = EditState::from_recipe(recipe, idx);
             }
             if ui[2].button("Delete").clicked() {
                 *view = View::AreYouSure;
-                *editing_recipe = Some((idx, recipe.clone()));
+                *edit = EditState::from_recipe(recipe, idx);
             }
         });
 
-        
-        ui.collapsing("Ingredients", |ui| {
-            for ingredient in recipe.ingredients.iter() {
-                ui.label(format!("- {}", ingredient.to_string()));
-            }
-        });
+        egui::CollapsingHeader::new("Ingredients")
+            .id_source(std::time::Instant::now())
+            .show(ui, |ui| {
+                for ingredient in recipe.ingredients.iter() {
+                    ui.label(format!("- {}", ingredient.to_string()));
+                }
+            });
 
         ui.separator();
 
@@ -205,7 +293,7 @@ impl App for RecipeApp {
                         ui.add(Label::new("No Recipes Yet!"));
                     } else {
                         for (idx, _) in self.recipes.iter() {
-                            Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit.editing_recipe);
+                            Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
                             ui.separator();
                         }
                     }
@@ -218,7 +306,7 @@ impl App for RecipeApp {
                     if let Some(matched) = self.matched_recipes.as_ref() {
                         for (_, idx) in matched.iter() {
                             let idx = *idx;
-                            Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit.editing_recipe);
+                            Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
                             ui.separator();
                         }
                     }
@@ -245,48 +333,32 @@ impl App for RecipeApp {
                             .on_hover_text("Save edits to the current recipe")
                             .clicked() {
                             self.edit.wrongs.clear();
-                            if let Some((idx, recipe)) = self.edit.editing_recipe.as_ref() {
-                                let mut recipe = recipe.clone();
-                                let mut ok = true;
-                                if self.edit.adding_time {
-                                    let time_val: f64 = match self.edit.time_string.parse() {
-                                        Ok(val) => val,
-                                        Err(_) => {
-                                            self.edit.wrongs.push(EditWrong::BadTime);
-                                            ok = false;
-                                            0.
-                                        }
-                                    };
-                                    let time = match self.edit.time_unit {
-                                        TimeUnit::Second => time::Duration::from_secs_f64(time_val),
-                                        TimeUnit::Minute => time::Duration::from_secs_f64(time_val * 60.),
-                                        TimeUnit::Hour => time::Duration::from_secs_f64(time_val * 3600.),
-                                        TimeUnit::Day => time::Duration::from_secs_f64(time_val * 3600. * 24.),
-                                    };
-                                    recipe.time = Some(time);
-                                }
-                                if ok {
-                                    *self.recipes.get_mut(*idx).unwrap() = recipe;
-                                    self.view = View::Overview;
-                                }   
+                            match self.edit.to_recipe() {
+                                Ok(new) => {
+                                    if let Some(idx) = self.edit.editing_recipe {
+                                        *self.recipes.get_mut(idx).unwrap() = new;
+                                        self.view = View::Overview;
+                                    }
+                                },
+                                Err(e) => self.edit.wrongs.push(e)
                             }
+
                         }
                     })
                 });
 
                 egui::CentralPanel::default().show(ctx, |ui| {
-                    if let Some((_, ref mut recipe)) = self.edit.editing_recipe {
-                        for wrong in self.edit.wrongs.iter() {
-                            ui.colored_label(Color32::from_rgb(255, 61, 61), wrong.to_string());
-                        }
-                        ui.small("Title");
-                        ui.text_edit_singleline(&mut recipe.name).on_hover_text("Edit the title of the recipe");
-                        ui.separator();
+                    for wrong in self.edit.wrongs.iter() {
+                        ui.colored_label(Color32::from_rgb(255, 61, 61), wrong.to_string());
+                    }
+                    ui.small("Title");
+                    ui.text_edit_singleline(&mut self.edit.name).on_hover_text("Edit the title of the recipe");
+                    ui.separator();
 
-                        ui.checkbox(&mut self.edit.adding_time, "Add Time");
-                        if self.edit.adding_time {
-                            ui.text_edit_singleline(&mut self.edit.time_string);
+                    match self.edit.adding_time {
+                        true => {
                             ui.small("Time");
+                            ui.text_edit_singleline(&mut self.edit.time_string);
                             egui::ComboBox::from_label("unit")
                                 .selected_text(self.edit.time_unit.to_string())
                                 .show_ui(ui, |ui| {
@@ -295,15 +367,79 @@ impl App for RecipeApp {
                                     ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Hour, "hour");
                                     ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Day, "day");
                                 });
+                            if ui.small_button("Remove Time").clicked() {
+                                self.edit.adding_time = false;
+                            }
+                        },
+                        false => if ui.button("Add Time").clicked() {
+                            self.edit.adding_time = true;
                         }
-                        ui.separator();
-                        
                     }
+
+                    ui.separator();
+                    ui.collapsing("Ingredients", |ui| {
+                        let mut remove = None;
+                        for (idx, (name, amount)) in self.edit.ingredients.iter_mut().enumerate() {
+                            ui.columns(4, |ui| {
+                                ui[0].text_edit_singleline(name).on_hover_text("Ingredient Name");
+                                match amount {
+                                    Some((amount, unit)) => {
+                                        ui[1].text_edit_singleline(amount).on_hover_text("Ingredient Amount");
+                                        egui::ComboBox::from_id_source(idx)
+                                            .selected_text(unit.unit_string())
+                                            .show_ui(&mut ui[2], |ui| {
+                                                ui.selectable_value(unit, IngredientAmount::None, "no unit");
+
+                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Ounce}), "ounce");
+                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Pound}), "pound");
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Cup}), "cup");
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Tablespoon}), "tablespoon");
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Teaspoon}), "teaspoon");
+
+                                                ui.selectable_value(unit, IngredientAmount::Count(0), "count");
+
+                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Gram}), "gram");
+                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Kilogram}), "kilogram");
+                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Milligram}), "milligram");
+                                            
+                                                
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::FluidOz}), "fluid ounce");
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Liter}), "liter");
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Milliliter}), "milliliter");
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Pint}), "pint");
+                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Quart}), "quart");
+                                                
+                                            });
+                                    },
+                                    None => if ui[1].small_button("Add Amount").clicked() {
+                                        *amount = Some((String::new(), IngredientAmount::None));
+                                    }
+                                }
+                                
+                                if ui[3].button("Remove").clicked() {
+                                    remove = Some(idx);
+                                }
+                            });
+                        }
+                        if let Some(idx) = remove {
+                            self.edit.ingredients.remove(idx);
+                        }
+                        
+                        if ui.button("+ Add Ingredient").clicked() {
+                            self.edit.ingredients.push((String::new(), None));
+                        }
+                    });
+
+                    ui.separator();
+                    ui.label("Recipe Body");
+                    ui.add(egui::TextEdit::multiline(&mut self.edit.body)
+                        .desired_width(ui.available_width())
+                    );
                     
                 });
             },
             View::AreYouSure => {
-                if let Some((idx, _)) = self.edit.editing_recipe.as_ref() {
+                if let Some(idx) = self.edit.editing_recipe.as_ref() {
                     let idx = *idx;
                     egui::CentralPanel::default().show(ctx, |ui| {
                         let real_name = match self.recipes.get(idx) {
