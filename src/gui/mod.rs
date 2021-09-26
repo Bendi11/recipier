@@ -63,8 +63,8 @@ impl RecipeApp {
 
 
             let search = TextEdit::singleline(&mut self.search.term)
-                .hint_text("search").desired_width(ui.available_width());
-                ui.centered_and_justified(|ui| search.ui(ui));
+                .hint_text("search");
+            ui.add(search);
             if ctx.input().key_pressed(Key::Enter) {
                 self.search.matched = {
                     let mut matches = BTreeMap::new();
