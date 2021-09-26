@@ -268,13 +268,14 @@ impl RecipeApp {
 
 impl App for RecipeApp {
     fn name(&self) -> &str {
-        "recipier"
+        "Recipier"
     }
 
     fn setup(&mut self, ctx: &egui::CtxRef, _frame: &mut eframe::epi::Frame<'_>, _storage: Option<&dyn eframe::epi::Storage>) {
         let mut style = (*ctx.style()).clone();
         style.visuals = Visuals::light();
         ctx.set_style(style);
+        
     }
 
     fn on_exit(&mut self) {

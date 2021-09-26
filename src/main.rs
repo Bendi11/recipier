@@ -1,8 +1,12 @@
 // Disable console on windows
 #![windows_subsystem = "windows"]
+
+use image::GenericImageView;
 pub mod gui;
 pub mod recipe;
 pub mod measure;
+
+const ICON: &[u8] = include_bytes!("../assets/icon.png");
 
 fn main() {
     //Add panic handler for better error messages
@@ -17,7 +21,15 @@ fn main() {
         });
     }));
     let app = gui::RecipeApp::load_or_default();
-    let opts = eframe::NativeOptions::default();
+    let mut opts = eframe::NativeOptions::default();
+
+    let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
+    
+    opts.icon_data = Some(eframe::epi::IconData {
+        rgba: icon.as_rgba8().unwrap().to_vec(),
+        width: icon.width(),
+        height: icon.height()
+    });
     eframe::run_native(Box::new(app), opts);
     
 }
