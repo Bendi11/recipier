@@ -205,8 +205,9 @@ impl RecipeApp {
                 } 
             });
 
+
             let search = TextEdit::singleline(&mut self.search_text)
-                .hint_text("search");
+                .hint_text("search").desired_width(ui.available_width());
                 ui.centered_and_justified(|ui| search.ui(ui));
             if ctx.input().key_pressed(Key::Enter) {
                 const SEARCH_THRESHOLD: isize = 0;
@@ -228,6 +229,11 @@ impl RecipeApp {
                 });
                 self.view = View::Search;
             }
+
+            
+            ui.collapsing("Advanced Search", |ui| {
+
+            });
         });
     }
 
