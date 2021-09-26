@@ -21,154 +21,12 @@ pub struct RecipeApp {
     view: View,
 
     /// A list of recipes that we have searched for
-    matched_recipes: Option<BTreeMap<isize, Index>>,
+    search: SearchState,
 
     /// Edit state
     edit: EditState,
-
-    /// What text is in the search bar
-    search_text: String,
 }
 
-/// Recipe edit state
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct EditState {
-    /// If the user is adding a time to the recipe
-    adding_time: bool,
-
-    /// The user-inputted time value
-    time_string: String,
-
-    /// What unit of time the user is inputting
-    time_unit: TimeUnit,
-
-    /// A list of ingredients that the user is editing
-    ingredients: Vec<(String, Option<(String, IngredientAmount)>)>,
-
-    /// What is wrong with the current edited recipe
-    wrongs: Vec<EditWrong>,
-
-    /// The name of the edited recipe
-    name: String,
-
-    /// What recipe is being edited
-    editing_recipe: Option<Index>,
-
-    /// The body of the recipe
-    body: String,
-}
-
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
-enum EditWrong {
-    BadTime,
-    BadAmount,
-}
-
-impl fmt::Display for EditWrong {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::BadTime => write!(f, "Invalid time"),
-            Self::BadAmount => write!(f, "Invalid ingredient amount"),
-        }
-    }
-}
-
-impl Default for EditState {
-    fn default() -> Self {
-        Self {
-            name: String::new(),
-            wrongs: vec![],
-            editing_recipe: None,
-            ingredients: vec![],
-            time_unit: TimeUnit::Minute,
-            time_string: String::new(),
-            adding_time: false,
-            body: String::new()
-        }
-    }
-}
-
-impl EditState {
-    /// Reset the editor state to not be editing anything
-    pub fn reset(&mut self) {
-        *self = Self::default();
-    }
-
-    /// Construct a recipe from the inputted values, returning None if an error occured
-    fn to_recipe(&self) -> Result<Recipe, EditWrong> {
-        Ok(Recipe {
-            time: match self.adding_time {
-                true => {
-                    let time_val: f64 = match self.time_string.parse() {
-                        Ok(val) => val,
-                        Err(_) => {
-                            return Err(EditWrong::BadTime)
-                        }
-                    };
-                    let time = match self.time_unit {
-                        TimeUnit::Second => time::Duration::from_secs_f64(time_val),
-                        TimeUnit::Minute => time::Duration::from_secs_f64(time_val * 60.),
-                        TimeUnit::Hour => time::Duration::from_secs_f64(time_val * 3600.),
-                        TimeUnit::Day => time::Duration::from_secs_f64(time_val * 3600. * 24.),
-                    };
-                    Some(time)
-                },
-                false => None
-            },
-            ingredients: self.ingredients.iter().map(|(name, amount)| {
-                if let Some((amount, unit)) = amount {
-                    let amount_val: f64 = match amount.parse() {
-                        Ok(val) => val,
-                        Err(_) => {
-                            return Err(EditWrong::BadAmount);
-                        }
-                    };
-
-                    Ok(Ingredient {
-                        name: name.clone(),
-                        amount: match unit {
-                            IngredientAmount::Count(_) => IngredientAmount::Count(amount_val as usize),
-                            IngredientAmount::Mass(Mass { unit, val: _ }) => IngredientAmount::Mass(Mass::new(*unit, amount_val as f32)),
-                            IngredientAmount::Volume(Volume { unit, val: _ }) => IngredientAmount::Volume(Volume::new(*unit, amount_val as f32)),
-                            IngredientAmount::None => IngredientAmount::None
-                        }
-                    })
-
-                } else {
-                    Ok(Ingredient {
-                        name: name.clone(),
-                        amount: IngredientAmount::None
-                    })
-                }
-                    
-            }).collect::<Result<Vec<_>, _>>()?,
-            
-            name: self.name.clone(),
-            body: self.body.clone(),
-        })
-    }
-
-    pub fn from_recipe(rec: &Recipe, idx: Index) -> Self {
-        Self {
-            adding_time: rec.time.is_some(),
-            time_string: match rec.time {
-                Some(time) => (time.as_secs_f64() / 60.).to_string(),
-                None => String::new()
-            },
-            time_unit: TimeUnit::Minute,
-            name: rec.name.clone(),
-            body: rec.body.clone(),
-            ingredients: rec.ingredients.iter().map(|ingredient| (ingredient.name.clone(), match ingredient.amount {
-                IngredientAmount::None => None,
-                IngredientAmount::Count(num) => Some((num.to_string(), IngredientAmount::Count(0))),
-                IngredientAmount::Mass(Mass { val, unit }) => Some((val.to_string(), IngredientAmount::Mass(Mass { val: 0., unit}))),
-                IngredientAmount::Volume(Volume { val, unit }) => Some((val.to_string(), IngredientAmount::Volume(Volume { val: 0., unit}))),
-            })).collect::<Vec<_>>(),
-            editing_recipe: Some(idx),
-            wrongs: vec![]
-        }
-    }
-}
 
 impl RecipeApp {
     /// Attempt to load a saved recipe file, or create a default recipe app with no recipes
@@ -183,9 +41,7 @@ impl RecipeApp {
             recipes: Arena::new(),
             view: View::Overview,
             edit: EditState::default(),
-            search_text: String::new(),
-            matched_recipes: None,
-            
+            search: SearchState::default(),            
         }
     }
 
@@ -206,69 +62,91 @@ impl RecipeApp {
             });
 
 
-            let search = TextEdit::singleline(&mut self.search_text)
+            let search = TextEdit::singleline(&mut self.search.term)
                 .hint_text("search").desired_width(ui.available_width());
                 ui.centered_and_justified(|ui| search.ui(ui));
             if ctx.input().key_pressed(Key::Enter) {
-                const SEARCH_THRESHOLD: isize = 0;
-                self.matched_recipes = Some({
+                self.search.matched = {
                     let mut matches = BTreeMap::new();
                     for (idx, recipe) in self.recipes.iter() {
-                        let max = match sublime_fuzzy::best_match(self.search_text.as_str(), recipe.name.as_str()) {
-                            Some(score) => score.score(),
-                            None => continue,
-                        }.max(match sublime_fuzzy::best_match(self.search_text.as_str(), recipe.name.as_str()) {
-                            Some(score) => score.score(),
-                            None => continue,
-                        });
-                        if max >= SEARCH_THRESHOLD {
-                            matches.insert(max, idx);
+                        let mut scores = [isize::MIN, isize::MIN, isize::MIN];
+                        if self.search.in_titles {
+                            if let Some(score) = sublime_fuzzy::best_match(self.search.term.as_str(), recipe.name.as_str()) {
+                                scores[0] = score.score();
+                            }
+                        }
+                        if self.search.in_body {
+                            if let Some(score) = sublime_fuzzy::best_match(self.search.term.as_str(), recipe.body.as_str()) {
+                                scores[1] = score.score();
+                            }
+                        }
+                        if self.search.in_ingredients {
+                            if let Some(score) = recipe.ingredients
+                                .iter()
+                                .map(|i| sublime_fuzzy::best_match(self.search.term.as_str(), i.name.as_str()).map(|s| s.score()).unwrap_or(isize::MIN))
+                                .max() {
+                                scores[2] = score;
+                            }
+                        }
+                        
+                        let max = scores.iter().max().unwrap();
+                        if max >= &self.search.threshold {
+                            matches.insert(*max, idx);
                         }
                     }
                     matches
-                });
+                };
                 self.view = View::Search;
             }
 
             
             ui.collapsing("Advanced Search", |ui| {
-
+                ui.horizontal(|ui| {
+                    ui.checkbox(&mut self.search.in_titles, "Search in titles");
+                    ui.checkbox(&mut self.search.in_body, "Search in recipe body");
+                    ui.checkbox(&mut self.search.in_ingredients, "Search in recipe ingredients");
+                    egui::Slider::new(&mut self.search.threshold, 0isize..=100)
+                        .text("Search threshold")
+                        .ui(ui)
+                        .on_hover_text("Adjust how little a recipe must match the search term to be included in results");
+                })
             });
         });
     }
 
     /// Show a widget for a recipe
     fn show_recipe(ui: &mut egui::Ui, idx: Index, recipes: &Arena<Recipe>, view: &mut View, edit: &mut EditState) {
-        let recipe = recipes.get(idx).unwrap();
-        ui.columns(3, |ui| {
-            ui[0].heading(&recipe.name);
-            ui[0].add_space(10.);
-
-            if ui[1].button("Edit").clicked() {
-                *view = View::EditRecipe;
-                *edit = EditState::from_recipe(recipe, idx);
-            }
-            if ui[2].button("Delete").clicked() {
-                *view = View::AreYouSure;
-                *edit = EditState::from_recipe(recipe, idx);
-            }
-        });
-
-        egui::CollapsingHeader::new("Ingredients")
-            .id_source(idx)
-            .show(ui, |ui| {
-                for ingredient in recipe.ingredients.iter() {
-                    ui.label(format!("- {}", ingredient.to_string()));
+        if let Some(recipe) = recipes.get(idx) {
+            ui.columns(3, |ui| {
+                ui[0].heading(&recipe.name);
+                ui[0].add_space(10.);
+    
+                if ui[1].button("Edit").clicked() {
+                    *view = View::EditRecipe;
+                    *edit = EditState::from_recipe(recipe, idx);
+                }
+                if ui[2].button("Delete").clicked() {
+                    *view = View::AreYouSure;
+                    *edit = EditState::from_recipe(recipe, idx);
                 }
             });
-
-        ui.separator();
-
-        if let Some(time) = recipe.time {
-            ui.label(format!("Time: {}", humantime::format_duration(time)));
+    
+            egui::CollapsingHeader::new("Ingredients")
+                .id_source(idx)
+                .show(ui, |ui| {
+                    for ingredient in recipe.ingredients.iter() {
+                        ui.label(format!("- {}", ingredient.to_string()));
+                    }
+                });
+    
+            ui.separator();
+    
+            if let Some(time) = recipe.time {
+                ui.label(format!("Time: {}", humantime::format_duration(time)));
+            }
+            let label = Label::new(&recipe.body).wrap(true);
+            ui.group(|ui| label.ui(ui));
         }
-        let label = Label::new(&recipe.body).wrap(true);
-        ui.group(|ui| label.ui(ui));
     }
 }
 
@@ -310,12 +188,10 @@ impl App for RecipeApp {
                 self.top_menubar(ctx);
 
                 egui::CentralPanel::default().show(ctx, |ui| {
-                    if let Some(matched) = self.matched_recipes.as_ref() {
-                        for (_, idx) in matched.iter() {
-                            let idx = *idx;
-                            Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
-                            ui.separator();
-                        }
+                    for (_, idx) in self.search.matched.iter() {
+                        let idx = *idx;
+                        Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
+                        ui.separator();
                     }
                 });
 
@@ -476,6 +352,183 @@ impl App for RecipeApp {
         }
     }
 }
+
+/// State holding how and what the user is searching for
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct SearchState {
+    /// The search term to match in searched text
+    term: String,
+
+    /// If the user is searching in recipe titles for the search term
+    in_titles: bool,
+
+    /// If the user is searching in recipe descriptions for the term
+    in_body: bool,
+
+    /// A sorted list of matched recipes
+    matched: BTreeMap<isize, Index>,
+
+    /// Search ingredients for term?
+    in_ingredients: bool,
+
+    /// Lowest score of string comparison that will be included
+    threshold: isize,
+}
+
+impl Default for SearchState {
+    fn default() -> Self {
+        Self {
+            term: String::new(),
+            in_titles: true,
+            in_body: true,
+            in_ingredients: false,
+            threshold: 20,
+            matched: BTreeMap::new()
+        }
+    }
+}
+
+/// Recipe edit state
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct EditState {
+    /// If the user is adding a time to the recipe
+    adding_time: bool,
+
+    /// The user-inputted time value
+    time_string: String,
+
+    /// What unit of time the user is inputting
+    time_unit: TimeUnit,
+
+    /// A list of ingredients that the user is editing
+    ingredients: Vec<(String, Option<(String, IngredientAmount)>)>,
+
+    /// What is wrong with the current edited recipe
+    wrongs: Vec<EditWrong>,
+
+    /// The name of the edited recipe
+    name: String,
+
+    /// What recipe is being edited
+    editing_recipe: Option<Index>,
+
+    /// The body of the recipe
+    body: String,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+enum EditWrong {
+    BadTime,
+    BadAmount,
+}
+
+impl fmt::Display for EditWrong {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::BadTime => write!(f, "Invalid time"),
+            Self::BadAmount => write!(f, "Invalid ingredient amount"),
+        }
+    }
+}
+
+impl Default for EditState {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            wrongs: vec![],
+            editing_recipe: None,
+            ingredients: vec![],
+            time_unit: TimeUnit::Minute,
+            time_string: String::new(),
+            adding_time: false,
+            body: String::new()
+        }
+    }
+}
+
+impl EditState {
+    /// Reset the editor state to not be editing anything
+    pub fn reset(&mut self) {
+        *self = Self::default();
+    }
+
+    /// Construct a recipe from the inputted values, returning None if an error occured
+    fn to_recipe(&self) -> Result<Recipe, EditWrong> {
+        Ok(Recipe {
+            time: match self.adding_time {
+                true => {
+                    let time_val: f64 = match self.time_string.parse() {
+                        Ok(val) => val,
+                        Err(_) => {
+                            return Err(EditWrong::BadTime)
+                        }
+                    };
+                    let time = match self.time_unit {
+                        TimeUnit::Second => time::Duration::from_secs_f64(time_val),
+                        TimeUnit::Minute => time::Duration::from_secs_f64(time_val * 60.),
+                        TimeUnit::Hour => time::Duration::from_secs_f64(time_val * 3600.),
+                        TimeUnit::Day => time::Duration::from_secs_f64(time_val * 3600. * 24.),
+                    };
+                    Some(time)
+                },
+                false => None
+            },
+            ingredients: self.ingredients.iter().map(|(name, amount)| {
+                if let Some((amount, unit)) = amount {
+                    let amount_val: f64 = match amount.parse() {
+                        Ok(val) => val,
+                        Err(_) => {
+                            return Err(EditWrong::BadAmount);
+                        }
+                    };
+
+                    Ok(Ingredient {
+                        name: name.clone(),
+                        amount: match unit {
+                            IngredientAmount::Count(_) => IngredientAmount::Count(amount_val as usize),
+                            IngredientAmount::Mass(Mass { unit, val: _ }) => IngredientAmount::Mass(Mass::new(*unit, amount_val as f32)),
+                            IngredientAmount::Volume(Volume { unit, val: _ }) => IngredientAmount::Volume(Volume::new(*unit, amount_val as f32)),
+                            IngredientAmount::None => IngredientAmount::None
+                        }
+                    })
+
+                } else {
+                    Ok(Ingredient {
+                        name: name.clone(),
+                        amount: IngredientAmount::None
+                    })
+                }
+                    
+            }).collect::<Result<Vec<_>, _>>()?,
+            
+            name: self.name.clone(),
+            body: self.body.clone(),
+        })
+    }
+
+    /// Construct an `EditState` from a recipe
+    pub fn from_recipe(rec: &Recipe, idx: Index) -> Self {
+        Self {
+            adding_time: rec.time.is_some(),
+            time_string: match rec.time {
+                Some(time) => (time.as_secs_f64() / 60.).to_string(),
+                None => String::new()
+            },
+            time_unit: TimeUnit::Minute,
+            name: rec.name.clone(),
+            body: rec.body.clone(),
+            ingredients: rec.ingredients.iter().map(|ingredient| (ingredient.name.clone(), match ingredient.amount {
+                IngredientAmount::None => None,
+                IngredientAmount::Count(num) => Some((num.to_string(), IngredientAmount::Count(0))),
+                IngredientAmount::Mass(Mass { val, unit }) => Some((val.to_string(), IngredientAmount::Mass(Mass { val: 0., unit}))),
+                IngredientAmount::Volume(Volume { val, unit }) => Some((val.to_string(), IngredientAmount::Volume(Volume { val: 0., unit}))),
+            })).collect::<Vec<_>>(),
+            editing_recipe: Some(idx),
+            wrongs: vec![]
+        }
+    }
+}
+
 
 /// What screen the user is currently seeing
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
