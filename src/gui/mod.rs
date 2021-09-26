@@ -144,8 +144,14 @@ impl RecipeApp {
             if let Some(time) = recipe.time {
                 ui.label(format!("Time: {}", humantime::format_duration(time)));
             }
+
             let label = Label::new(&recipe.body).wrap(true);
-            ui.group(|ui| label.ui(ui));
+            egui::ScrollArea::from_max_height(100.)
+                .id_source(idx)
+                .show(ui, |ui| {
+                    label.ui(ui);
+                })
+            
         }
     }
 }
@@ -177,10 +183,13 @@ impl App for RecipeApp {
                     if self.recipes.is_empty() {
                         ui.add(Label::new("No Recipes Yet!"));
                     } else {
-                        for (idx, _) in self.recipes.iter() {
-                            Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
-                            ui.separator();
-                        }
+                        egui::ScrollArea::from_max_height(ui.available_height())
+                            .show(ui, |ui| {
+                                for (idx, _) in self.recipes.iter() {
+                                    Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
+                                    ui.separator();
+                                }
+                            });
                     }
                 });
             },  
@@ -188,11 +197,14 @@ impl App for RecipeApp {
                 self.top_menubar(ctx);
 
                 egui::CentralPanel::default().show(ctx, |ui| {
-                    for (_, idx) in self.search.matched.iter() {
-                        let idx = *idx;
-                        Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
-                        ui.separator();
-                    }
+                    egui::ScrollArea::from_max_height(ui.available_height())
+                        .show(ui, |ui| {
+                            for (_, idx) in self.search.matched.iter() {
+                                let idx = *idx;
+                                Self::show_recipe(ui, idx, &self.recipes, &mut self.view, &mut self.edit);
+                                ui.separator();
+                            }
+                        });
                 });
 
             },
@@ -231,93 +243,97 @@ impl App for RecipeApp {
                 });
 
                 egui::CentralPanel::default().show(ctx, |ui| {
-                    for wrong in self.edit.wrongs.iter() {
-                        ui.colored_label(Color32::from_rgb(255, 61, 61), wrong.to_string());
-                    }
-                    ui.small("Title");
-                    ui.text_edit_singleline(&mut self.edit.name).on_hover_text("Edit the title of the recipe");
-                    ui.separator();
-
-                    match self.edit.adding_time {
-                        true => {
-                            ui.small("Time");
-                            ui.text_edit_singleline(&mut self.edit.time_string);
-                            egui::ComboBox::from_label("unit")
-                                .selected_text(self.edit.time_unit.to_string())
-                                .show_ui(ui, |ui| {
-                                    ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Second, "second");
-                                    ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Minute, "minute");
-                                    ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Hour, "hour");
-                                    ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Day, "day");
-                                });
-                            if ui.small_button("Remove Time").clicked() {
-                                self.edit.adding_time = false;
+                    egui::ScrollArea::from_max_height(ui.available_height())
+                        .show(ui, |ui| {
+                            for wrong in self.edit.wrongs.iter() {
+                                ui.colored_label(Color32::from_rgb(255, 61, 61), wrong.to_string());
                             }
-                        },
-                        false => if ui.button("Add Time").on_hover_text("Add an estimate for how long the recipe takes to make").clicked() {
-                            self.edit.adding_time = true;
-                        }
-                    }
-
-                    ui.separator();
-                    ui.collapsing("Ingredients", |ui| {
-                        let mut remove = None;
-                        for (idx, (name, amount)) in self.edit.ingredients.iter_mut().enumerate() {
-                            ui.columns(4, |ui| {
-                                ui[0].text_edit_singleline(name).on_hover_text("Ingredient Name");
-                                match amount {
-                                    Some((amount, unit)) => {
-                                        ui[1].text_edit_singleline(amount).on_hover_text("Ingredient Amount");
-                                        egui::ComboBox::from_id_source(idx)
-                                            .selected_text(unit.unit_string())
-                                            .show_ui(&mut ui[2], |ui| {
-                                                ui.selectable_value(unit, IngredientAmount::None, "no unit");
-
-                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Ounce}), "ounce");
-                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Pound}), "pound");
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Cup}), "cup");
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Tablespoon}), "tablespoon");
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Teaspoon}), "teaspoon");
-
-                                                ui.selectable_value(unit, IngredientAmount::Count(0), "count");
-
-                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Gram}), "gram");
-                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Kilogram}), "kilogram");
-                                                ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Milligram}), "milligram");
-                                            
-                                                
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::FluidOz}), "fluid ounce");
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Liter}), "liter");
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Milliliter}), "milliliter");
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Pint}), "pint");
-                                                ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Quart}), "quart");
-                                                
-                                            });
-                                    },
-                                    None => if ui[1].small_button("Add Amount").clicked() {
-                                        *amount = Some((String::new(), IngredientAmount::None));
+                            ui.small("Title");
+                            ui.text_edit_singleline(&mut self.edit.name).on_hover_text("Edit the title of the recipe");
+                            ui.separator();
+        
+                            match self.edit.adding_time {
+                                true => {
+                                    ui.small("Time");
+                                    ui.text_edit_singleline(&mut self.edit.time_string);
+                                    egui::ComboBox::from_label("unit")
+                                        .selected_text(self.edit.time_unit.to_string())
+                                        .show_ui(ui, |ui| {
+                                            ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Second, "second");
+                                            ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Minute, "minute");
+                                            ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Hour, "hour");
+                                            ui.selectable_value(&mut self.edit.time_unit, TimeUnit::Day, "day");
+                                        });
+                                    if ui.small_button("Remove Time").clicked() {
+                                        self.edit.adding_time = false;
                                     }
+                                },
+                                false => if ui.button("Add Time").on_hover_text("Add an estimate for how long the recipe takes to make").clicked() {
+                                    self.edit.adding_time = true;
+                                }
+                            }
+        
+                            ui.separator();
+                            ui.collapsing("Ingredients", |ui| {
+                                let mut remove = None;
+                                for (idx, (name, amount)) in self.edit.ingredients.iter_mut().enumerate() {
+                                    ui.columns(4, |ui| {
+                                        ui[0].text_edit_singleline(name).on_hover_text("Ingredient Name");
+                                        match amount {
+                                            Some((amount, unit)) => {
+                                                ui[1].text_edit_singleline(amount).on_hover_text("Ingredient Amount");
+                                                egui::ComboBox::from_id_source(idx)
+                                                    .selected_text(unit.unit_string())
+                                                    .show_ui(&mut ui[2], |ui| {
+                                                        ui.selectable_value(unit, IngredientAmount::None, "no unit");
+        
+                                                        ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Ounce}), "ounce");
+                                                        ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Pound}), "pound");
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Cup}), "cup");
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Tablespoon}), "tablespoon");
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Teaspoon}), "teaspoon");
+        
+                                                        ui.selectable_value(unit, IngredientAmount::Count(0), "count");
+        
+                                                        ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Gram}), "gram");
+                                                        ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Kilogram}), "kilogram");
+                                                        ui.selectable_value(unit, IngredientAmount::Mass(Mass { val: 0., unit: MassUnit::Milligram}), "milligram");
+                                                    
+                                                        
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::FluidOz}), "fluid ounce");
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Liter}), "liter");
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Milliliter}), "milliliter");
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Pint}), "pint");
+                                                        ui.selectable_value(unit, IngredientAmount::Volume(Volume { val: 0., unit: VolumeUnit::Quart}), "quart");
+                                                        
+                                                    });
+                                            },
+                                            None => if ui[1].small_button("Add Amount").clicked() {
+                                                *amount = Some((String::new(), IngredientAmount::None));
+                                            }
+                                        }
+                                        
+                                        if ui[3].button("Remove").clicked() {
+                                            remove = Some(idx);
+                                        }
+                                    });
+                                }
+                                if let Some(idx) = remove {
+                                    self.edit.ingredients.remove(idx);
                                 }
                                 
-                                if ui[3].button("Remove").clicked() {
-                                    remove = Some(idx);
+                                if ui.button("+ Add Ingredient").clicked() {
+                                    self.edit.ingredients.push((String::new(), None));
                                 }
                             });
-                        }
-                        if let Some(idx) = remove {
-                            self.edit.ingredients.remove(idx);
-                        }
-                        
-                        if ui.button("+ Add Ingredient").clicked() {
-                            self.edit.ingredients.push((String::new(), None));
-                        }
-                    });
-
-                    ui.separator();
-                    ui.label("Recipe Body");
-                    ui.add(egui::TextEdit::multiline(&mut self.edit.body)
-                        .desired_width(ui.available_width())
-                    );
+        
+                            ui.separator();
+                            ui.label("Recipe Body");
+                            ui.add(egui::TextEdit::multiline(&mut self.edit.body)
+                                .desired_width(ui.available_width())
+                            );
+                        });
+                    
                     
                 });
             },
