@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use super::measure::{Mass, Volume};
 
 /// One ingredient in a recipe, with amount of the ingredient and ingredient name
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Ingredient {
     pub name: String,
     pub amount: IngredientAmount,
@@ -53,7 +53,7 @@ impl fmt::Display for IngredientAmount {
 }
 
 /// Struct containing all data a user can add to a recipe
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Recipe {
     /// The name of the recipe
     pub name: String,

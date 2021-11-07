@@ -26,7 +26,7 @@ fn main() {
         .resizable(true)
         .title("Recipier")
         .set_window_state(WindowState::RESTORED);
-    let state = State::new();
+    let state = State::init("./save.json");
 
     //let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
     if let Err(e) = AppLauncher::with_window(window).configure_env(|env, _state| {

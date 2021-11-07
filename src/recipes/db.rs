@@ -3,12 +3,13 @@
 use std::fmt;
 
 use hashbrown::HashMap;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::recipe::Recipe;
 
 /// A structure holding recipe ID to data pairs with methods to add, remove, and modify recipes
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Database {
     /// A map of recipe IDs to recipe data
     data: HashMap<RecipeId, RecipeEntry>,
@@ -19,6 +20,13 @@ impl Database {
     #[inline]
     pub fn get(&self, id: RecipeId) -> Option<&Recipe> {
         self.data.get(&id).map(|entry| &entry.recipe)
+    }
+
+    /// Create a new empty database
+    pub fn new() -> Self {
+        Self {
+            data: HashMap::new()
+        }
     }
 
     /// Insert a recipe into the database, automatically creating an ID and returning it
@@ -44,7 +52,7 @@ impl Database {
 
 /// Structure used as values in the [Database], containing recipe data + metadata only used
 /// internally in the database
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 struct RecipeEntry {
     /// The recipe data
     recipe: Recipe,
@@ -52,7 +60,7 @@ struct RecipeEntry {
 }
 
 /// A unique identifier for a recipe in a database
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct RecipeId(Uuid);
 
 impl fmt::Display for RecipeId {
