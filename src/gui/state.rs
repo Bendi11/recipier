@@ -13,15 +13,23 @@ pub struct State {
     pub recipes: Database,
     /// What we are currently rendering on the GUI
     pub screen: AppScreen,
+    /// The state of the add screen
+    pub add_data: AddState,
+}
+
+/// All state in the Add screen
+#[derive(Debug, Clone, PartialEq, Data, Deserialize, Serialize)]
+pub struct AddState {
+    name: String
 }
 
 /// The screen that the [State] is currently viewing
-#[derive(Debug, Clone, PartialEq, Data, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Data, Deserialize, Serialize)]
 pub enum AppScreen {
+    //View a central list of recipes
+    View,
     /// Adding a new recipe
-    Add {
-
-    }
+    Add
 }
 
 impl State {
@@ -47,7 +55,17 @@ impl Default for State {
     fn default() -> Self {
         Self {
             recipes: Database::new(),
-            screen: AppScreen::Add {}
+            screen: AppScreen::default(),
+            add_data: AddState {
+                name: String::new()
+            }
+        }
+    }
+}
+impl Default for AppScreen {
+    fn default() -> Self {
+        Self::View {
+
         }
     }
 }

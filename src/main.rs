@@ -3,6 +3,8 @@
 
 use druid::{AppLauncher, Color, WindowDesc, WindowState, theme};
 use gui::{root_widget, state::State};
+use log::LevelFilter;
+use simplelog::ConfigBuilder;
 pub mod recipes;
 pub mod gui;
 
@@ -20,7 +22,16 @@ fn main() {
             (None, None) => "unknown error".to_owned()
         });
     }));
-
+    
+    match std::fs::File::create("./recipier.log") {
+        Ok(log) => if let Err(e) = simplelog::WriteLogger::init(LevelFilter::max(), ConfigBuilder::new().build(), log) {
+            eprintln!("Failed to initialize logger: {}", e);
+        },
+        Err(e) => {
+            eprintln!("Failed to open log file at ./recipier.log: {}", e);
+        }
+    }
+    
     
     let window = WindowDesc::new(root_widget)
         .resizable(true)
