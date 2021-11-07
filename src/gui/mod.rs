@@ -4,7 +4,7 @@ pub mod add;
 
 use std::str::FromStr;
 
-use druid::{Widget, WidgetExt, theme, widget::{Axis, Container, Flex, Label, Svg, SvgData, Tabs, TabsEdge, TabsTransition, ViewSwitcher}};
+use druid::{Widget, WidgetExt, theme, widget::{Container, Flex, Label, Svg, SvgData, ViewSwitcher}};
 
 use state::State;
 
@@ -16,7 +16,23 @@ pub fn root_widget() -> impl Widget<State> {
         |state, _env| state.screen,
         |screen, _data, _env| match screen {
             AppScreen::Add => {
-                Box::new(Label::new("test"))
+                let home_svg = SvgData::from_str(include_str!("../../assets/icons/home.svg")).unwrap();
+                let home_button = Container::new(Svg::new(home_svg)
+                    .on_click(|ctx, state: &mut State, _env| {
+                        state.screen = AppScreen::View;
+                        ctx.set_handled()
+                    })
+                )
+                .fix_size(25., 25.);
+
+                let layout = Flex::column()
+                    .with_flex_spacer(10.)
+                    .with_child(Flex::row()
+                        .with_child(home_button)
+                        .with_flex_spacer(10.)
+                    );
+
+                Box::new(layout)
             },
             AppScreen::View => Box::new(recipes_widget())
         }
@@ -27,7 +43,8 @@ pub fn root_widget() -> impl Widget<State> {
 
 /// Build the recipes list widget
 pub fn recipes_widget() -> impl Widget<State> {
-    let mut layout = Flex::column();
+    let mut layout = Flex::column()
+        .with_spacer(10.);
 
     let plus_svg = match SvgData::from_str(include_str!("../../assets/icons/plus.svg")) {
         Ok(svg) => svg,

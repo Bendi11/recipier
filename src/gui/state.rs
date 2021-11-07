@@ -4,7 +4,7 @@ use std::{fs::File, path::Path};
 use druid::{Data, Lens};
 use serde::{Deserialize, Serialize};
 
-use crate::recipes::db::Database;
+use crate::recipes::{db::Database, recipe::IngredientAmount};
 
 /// The global app state used in the GUI
 #[derive(Debug, Clone, Data, Lens, Deserialize, Serialize)]
@@ -20,7 +20,13 @@ pub struct State {
 /// All state in the Add screen
 #[derive(Debug, Clone, PartialEq, Data, Deserialize, Serialize)]
 pub struct AddState {
-    name: String
+    /// The name of the added recipe
+    name: String,
+    /// A list of added ingredients and amounts
+    #[data(ignore)]
+    ingredients: Vec<(String, IngredientAmount)>,
+    /// The instructions text
+    instructions: String,
 }
 
 /// The screen that the [State] is currently viewing
@@ -57,7 +63,9 @@ impl Default for State {
             recipes: Database::new(),
             screen: AppScreen::default(),
             add_data: AddState {
-                name: String::new()
+                name: String::new(),
+                ingredients: vec![],
+                instructions: String::new()
             }
         }
     }
