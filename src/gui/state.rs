@@ -15,6 +15,9 @@ pub struct State {
     pub screen: AppScreen,
     /// The state of the add screen
     pub add_data: AddState,
+
+    /// The size of the window
+    pub window_size: (f64, f64),
 }
 
 /// All state in the Add screen
@@ -66,7 +69,8 @@ impl Default for State {
                 name: String::new(),
                 ingredients: vec![],
                 instructions: String::new()
-            }
+            },
+            window_size: (400., 640.)
         }
     }
 }

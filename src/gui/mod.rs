@@ -7,9 +7,8 @@ use std::str::FromStr;
 use druid::{Widget, WidgetExt, theme, widget::{Container, Flex, Label, List, Scroll, Svg, SvgData, ViewSwitcher}};
 
 use state::State;
-use uuid::Uuid;
 
-use crate::{gui::state::AppScreen, recipes::{db::RecipeId, recipe::Recipe}};
+use crate::{gui::state::AppScreen, recipes:: recipe::Recipe};
 
 use self::add::add_recipe_widget;
 
@@ -45,7 +44,7 @@ pub fn recipes_widget() -> impl Widget<State> {
             ctx.set_handled()
         })
     )
-    .fix_size(25., 25.);
+    .fix_size(50., 50.);
 
     let title_bar = Flex::row()
         .with_child(Label::new("Recipes")

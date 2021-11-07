@@ -24,6 +24,16 @@ impl AppDelegate<State> for Delegate {
             }
         }
     }
+
+    fn event(&mut self, _ctx: &mut druid::DelegateCtx, _window_id: druid::WindowId, event: druid::Event, data: &mut State, _env: &druid::Env) -> Option<druid::Event> {
+        match event {
+            druid::Event::WindowSize(size) => {
+                data.window_size = (size.width, size.height)
+            },
+            _ => ()
+        }
+        Some(event)
+    }
 }
 
 fn main() {
@@ -48,12 +58,14 @@ fn main() {
         }
     }
     
-    
+    let state = State::init(SAVE_FILE);
+
     let window = WindowDesc::new(root_widget)
         .resizable(true)
         .title("Recipier")
-        .set_window_state(WindowState::RESTORED);
-    let state = State::init(SAVE_FILE);
+        .set_window_state(WindowState::RESTORED)
+        .window_size(state.window_size);
+    
 
     //let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
     if let Err(e) = AppLauncher::with_window(window).configure_env(|env, _state| {

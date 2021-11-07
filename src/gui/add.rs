@@ -17,7 +17,7 @@ pub fn add_recipe_widget() -> impl Widget<State> {
             ctx.set_handled()
         })
     )
-    .fix_size(25., 25.);
+    .fix_size(50., 50.);
 
     let layout = Flex::column()
         .with_spacer(10.)
