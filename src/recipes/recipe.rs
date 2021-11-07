@@ -55,9 +55,15 @@ impl fmt::Display for IngredientAmount {
 /// Struct containing all data a user can add to a recipe
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Recipe {
+    /// The name of the recipe
     pub name: String,
+    /// How many servings a recipe makes
+    pub servings: f32,
+    /// A list of ingredients in the recipe
     pub ingredients: Vec<Ingredient>,
+    /// The recipe's instructions
     pub body: String,
+    /// The time that the recipe takes to make
     pub time: Option<time::Duration>,
 }
 
@@ -66,6 +72,7 @@ impl Recipe {
     pub fn top_ramen() -> Self {
         Self {
             name: "Top Ramen".to_owned(),
+            servings: 2.,
             ingredients: vec![
                 Ingredient {
                     name: "Top Ramen Packet".to_owned(),
@@ -92,6 +99,7 @@ impl Default for Recipe {
     fn default() -> Self {
         Self {
             name: "".to_owned(),
+            servings: 0.,
             ingredients: vec![],
             body: "".to_owned(),
             time: None

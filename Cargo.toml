@@ -7,7 +7,7 @@ edition = "2018"
 druid = { version = "0.7", features = ["image"] } # GUI library
 
 hashbrown = { version = "0.11", features = ["serde"] } # Faster hash maps for recipe database
-uuid = { version = "0.8", features = ["serde"] } # Generating unique identifiers for each recipe
+uuid = { version = "0.8", features = ["serde", "v4"] } # Generating unique identifiers for each recipe
 
 semver = "1.0" # Checking versions of github releases when auto updating
 
@@ -18,6 +18,9 @@ serde = { version = "1.0", features = ["derive"] } # Saving all recipes
 serde_json = "1.0" # Saving recipes and eventually github API responses
 
 image = "0.23" # For decoding image formats
+
+log = { version = "0.4", features = ["release_max_level_warn"] } # Logging facade macros
+simplelog = "0.10" # Logging backend
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1" # Adding icon to window build

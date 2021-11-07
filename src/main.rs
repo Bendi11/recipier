@@ -20,6 +20,8 @@ fn main() {
             (None, None) => "unknown error".to_owned()
         });
     }));
+
+    
     let window = WindowDesc::new(root_widget)
         .resizable(true)
         .title("Recipier")
