@@ -18,7 +18,7 @@ pub struct State {
 }
 
 /// All state in the Add screen
-#[derive(Debug, Clone, PartialEq, Data, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Data, Deserialize, Serialize, Lens)]
 pub struct AddState {
     /// The name of the added recipe
     name: String,
