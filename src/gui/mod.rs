@@ -12,12 +12,6 @@ use crate::gui::state::AppScreen;
 
 /// Build the main screen widget
 pub fn root_widget() -> impl Widget<State> {
-    /*let tabs = Tabs::new()
-        .with_edge(TabsEdge::Leading)
-        .with_axis(Axis::Horizontal)
-        .with_transition(TabsTransition::Slide(50_000))
-        .with_tab("Recipes", recipes_widget())
-        .with_tab("Add", add::);*/
     let switcher = ViewSwitcher::<State, _>::new(
         |state, _env| state.screen,
         |screen, _data, _env| match screen {

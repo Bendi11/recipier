@@ -1,7 +1,7 @@
 // Disable console on windows
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use druid::{AppLauncher, Color, WindowDesc, WindowState, theme};
+use druid::{AppDelegate, AppLauncher, Color, WindowDesc, WindowState, theme};
 use gui::{root_widget, state::State};
 use log::LevelFilter;
 use simplelog::ConfigBuilder;
@@ -9,6 +9,22 @@ pub mod recipes;
 pub mod gui;
 
 //const ICON: &[u8] = include_bytes!("../assets/icon.png");
+
+const SAVE_FILE: &str = "./save.json";
+
+struct Delegate;
+impl AppDelegate<State> for Delegate {
+    fn window_removed(&mut self, _id: druid::WindowId, data: &mut State, _env: &druid::Env, _ctx: &mut druid::DelegateCtx) {
+        match std::fs::File::create(SAVE_FILE) {
+            Ok(file) => if let Err(e) = serde_json::to_writer(file, &data) {
+                log::error!("Failed to serialize app state: {}", e);
+            },
+            Err(e) => {
+                log::error!("Failed to open save file: {}", e);
+            }
+        }
+    }
+}
 
 fn main() {
     //Add panic handler for better error messages
@@ -37,12 +53,15 @@ fn main() {
         .resizable(true)
         .title("Recipier")
         .set_window_state(WindowState::RESTORED);
-    let state = State::init("./save.json");
+    let state = State::init(SAVE_FILE);
 
     //let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
     if let Err(e) = AppLauncher::with_window(window).configure_env(|env, _state| {
         env.set(theme::BACKGROUND_DARK, Color::AQUA);
-    }).launch(state) {
+    }).delegate(Delegate).launch(state) {
         panic!("Failed to launch app: {}", e);
     }
+
+    
+    
 }
