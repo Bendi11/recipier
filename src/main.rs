@@ -1,10 +1,8 @@
 // Disable console on windows
-#![windows_subsystem = "windows"]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use image::GenericImageView;
-pub mod gui;
-pub mod recipe;
-pub mod measure;
+pub mod recipes;
 
 const ICON: &[u8] = include_bytes!("../assets/icon.png");
 
@@ -20,16 +18,9 @@ fn main() {
             (None, None) => "unknown error".to_owned()
         });
     }));
-    let app = gui::RecipeApp::load_or_default();
-    let mut opts = eframe::NativeOptions::default();
 
     let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
     
-    opts.icon_data = Some(eframe::epi::IconData {
-        rgba: icon.as_rgba8().unwrap().to_vec(),
-        width: icon.width(),
-        height: icon.height()
-    });
-    eframe::run_native(Box::new(app), opts);
+    
     
 }

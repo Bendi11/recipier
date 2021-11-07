@@ -2,7 +2,7 @@
 use std::{fmt, time};
 use serde::{Serialize, Deserialize};
 
-use crate::measure::{Mass, Volume};
+use super::measure::{Mass, Volume};
 
 /// One ingredient in a recipe, with amount of the ingredient and ingredient name
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -73,7 +73,7 @@ impl Recipe {
                 },
                 Ingredient {
                     name: "Water".to_owned(),
-                    amount: IngredientAmount::Volume(Volume::new(crate::measure::VolumeUnit::Cup, 2.))
+                    amount: IngredientAmount::Volume(Volume::new(super::measure::VolumeUnit::Cup, 2.))
                 },
             ],
             body: 

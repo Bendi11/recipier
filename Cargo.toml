@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-eframe = "0.14" # GUI library
+druid = { version = "0.7", features = ["image"] } # GUI library
 generational-arena = { version = "0.2", features = ["serde"] } # Pool of all recipes
 semver = "1.0" # Checking versions of github releases
 sublime_fuzzy = "0.7" # Fuzzy finding recipes by search key
