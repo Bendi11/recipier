@@ -5,12 +5,18 @@ edition = "2018"
 
 [dependencies]
 druid = { version = "0.7", features = ["image"] } # GUI library
-generational-arena = { version = "0.2", features = ["serde"] } # Pool of all recipes
-semver = "1.0" # Checking versions of github releases
+
+hashbrown = { version = "0.11", features = ["serde"] } # Faster hash maps for recipe database
+uuid = { version = "0.8", features = ["serde"] } # Generating unique identifiers for each recipe
+
+semver = "1.0" # Checking versions of github releases when auto updating
+
 sublime_fuzzy = "0.7" # Fuzzy finding recipes by search key
 humantime = "2.1" # Formatting recipe time estimates
+
 serde = { version = "1.0", features = ["derive"] } # Saving all recipes
 serde_json = "1.0" # Saving recipes and eventually github API responses
+
 image = "0.23" # For decoding image formats
 
 [target.'cfg(windows)'.build-dependencies]
