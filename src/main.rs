@@ -1,10 +1,12 @@
 // Disable console on windows
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use image::GenericImageView;
+use druid::{AppLauncher, Color, WindowDesc, WindowState, theme};
+use gui::{root_widget, state::State};
 pub mod recipes;
+pub mod gui;
 
-const ICON: &[u8] = include_bytes!("../assets/icon.png");
+//const ICON: &[u8] = include_bytes!("../assets/icon.png");
 
 fn main() {
     //Add panic handler for better error messages
@@ -18,9 +20,16 @@ fn main() {
             (None, None) => "unknown error".to_owned()
         });
     }));
+    let window = WindowDesc::new(root_widget)
+        .resizable(true)
+        .title("Recipier")
+        .set_window_state(WindowState::RESTORED);
+    let state = State::new();
 
-    let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
-    
-    
-    
+    //let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
+    if let Err(e) = AppLauncher::with_window(window).configure_env(|env, _state| {
+        env.set(theme::BACKGROUND_DARK, Color::AQUA);
+    }).launch(state) {
+        panic!("Failed to launch app: {}", e);
+    }
 }
