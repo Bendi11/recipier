@@ -67,6 +67,12 @@ pub struct Recipe {
     pub time: Option<time::Duration>,
 }
 
+impl druid::Data for Recipe {
+    fn same(&self, other: &Self) -> bool {
+        self.eq(other)
+    }
+}
+
 impl Recipe {
     /// Return a `Recipe` for top ramen
     pub fn top_ramen() -> Self {

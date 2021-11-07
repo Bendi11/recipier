@@ -24,9 +24,11 @@ impl Database {
 
     /// Create a new empty database
     pub fn new() -> Self {
-        Self {
+        let mut this = Self {
             data: HashMap::new()
-        }
+        };
+        this.insert(Recipe::top_ramen());
+        this
     }
 
     /// Insert a recipe into the database, automatically creating an ID and returning it
@@ -50,6 +52,7 @@ impl Database {
     }
 }
 
+
 /// Structure used as values in the [Database], containing recipe data + metadata only used
 /// internally in the database
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -60,8 +63,36 @@ struct RecipeEntry {
 }
 
 /// A unique identifier for a recipe in a database
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,)]
 pub struct RecipeId(Uuid);
+
+impl druid::Data for RecipeId {
+    fn same(&self, other: &Self) -> bool {
+        self.eq(other)
+    }
+}
+
+impl druid::widget::ListIter<Recipe> for Database {
+    fn for_each(&self, mut cb: impl FnMut(&Recipe, usize)) {
+        let mut idx = 0;
+        for i in self.data.iter() {
+            cb(&i.1.recipe, idx);
+            idx += 1;
+        }
+    }
+
+    fn for_each_mut(&mut self, mut cb: impl FnMut(&mut Recipe, usize)) {
+        let mut idx = 0;
+        for i in self.data.iter_mut() {
+            cb(&mut i.1.recipe, idx);
+            idx += 1;
+        }
+    }
+
+    fn data_len(&self) -> usize {
+        self.data.len()
+    }
+}
 
 impl fmt::Display for RecipeId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

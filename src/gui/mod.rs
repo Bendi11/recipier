@@ -4,11 +4,12 @@ pub mod add;
 
 use std::str::FromStr;
 
-use druid::{Widget, WidgetExt, theme, widget::{Container, Flex, Label, Svg, SvgData, ViewSwitcher}};
+use druid::{Widget, WidgetExt, theme, widget::{Container, Flex, Label, List, Scroll, Svg, SvgData, ViewSwitcher}};
 
 use state::State;
+use uuid::Uuid;
 
-use crate::gui::state::AppScreen;
+use crate::{gui::state::AppScreen, recipes::{db::RecipeId, recipe::Recipe}};
 
 /// Build the main screen widget
 pub fn root_widget() -> impl Widget<State> {
@@ -70,9 +71,16 @@ pub fn recipes_widget() -> impl Widget<State> {
         .with_flex_spacer(100.)
         .with_child(plus_icon);
         
-
+    let list = Scroll::new(List::new(|| {
+        Label::new(|item: &Recipe, _env: &'_ _| {
+            item.name.clone()
+        })
+        
+    })).lens(State::recipes);
     
     layout.add_child(title_bar);
+    layout.add_spacer(10.);
+    layout.add_child(list);
 
     
     layout
