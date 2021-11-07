@@ -1,5 +1,5 @@
 //! Structures holding recipe data
-use std::{fmt, time};
+use std::{fmt, sync::Arc, time};
 use serde::{Serialize, Deserialize};
 
 use super::measure::{Mass, Volume};
@@ -52,17 +52,17 @@ impl fmt::Display for IngredientAmount {
     }
 }
 
-/// Struct containing all data a user can add to a recipe
+/// Immutable struct containing all data a user can add to a recipe
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Recipe {
     /// The name of the recipe
-    pub name: String,
+    pub name: Arc<str>,
     /// How many servings a recipe makes
     pub servings: f32,
     /// A list of ingredients in the recipe
-    pub ingredients: Vec<Ingredient>,
+    pub ingredients: Box<[Ingredient]>,
     /// The recipe's instructions
-    pub body: String,
+    pub body: Arc<str>,
     /// The time that the recipe takes to make
     pub time: Option<time::Duration>,
 }

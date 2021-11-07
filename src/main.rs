@@ -51,10 +51,18 @@ fn main() {
     
     match std::fs::File::create("./recipier.log") {
         Ok(log) => if let Err(e) = simplelog::WriteLogger::init(LevelFilter::max(), ConfigBuilder::new().build(), log) {
-            eprintln!("Failed to initialize logger: {}", e);
+            eprintln!("failed to initialize logger: {}", e);
         },
         Err(e) => {
-            eprintln!("Failed to open log file at ./recipier.log: {}", e);
+            if let Err(logerr) = simplelog::TermLogger::init(
+                LevelFilter::max(), 
+                ConfigBuilder::new().build(), 
+                simplelog::TerminalMode::Stderr, 
+                simplelog::ColorChoice::Auto
+            ) {
+                eprintln!("failed to open log file: {}\nand to initialize terminal logger: {}", e, logerr);
+            }
+            log::info!("failed to open log file at ./recipier.log: {}, logging to terminal instead", e);
         }
     }
     

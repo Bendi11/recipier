@@ -4,7 +4,7 @@ pub mod add;
 
 use std::str::FromStr;
 
-use druid::{Widget, WidgetExt, theme, widget::{Container, Flex, Label, List, Scroll, Svg, SvgData, ViewSwitcher}};
+use druid::{Widget, WidgetExt, text::RichText, theme, widget::{Container, Flex, Label, List, Scroll, Svg, SvgData, ViewSwitcher}};
 
 use state::State;
 
@@ -47,19 +47,23 @@ pub fn recipes_widget() -> impl Widget<State> {
     .fix_size(50., 50.);
 
     let title_bar = Flex::row()
-        .with_child(Label::new("Recipes")
-            .with_text_size(theme::TEXT_SIZE_LARGE)
-            .with_font(theme::UI_FONT_BOLD)
-        )
         .with_flex_spacer(100.)
-        .with_child(plus_icon);
+        .with_child(plus_icon)
+        .with_spacer(10.);
         
     let list = Scroll::new(List::new(|| {
-        Label::new(|item: &Recipe, _env: &'_ _| {
-            item.name.clone()
-        })
+        Flex::column()
+            .with_child(Label::new(|recipe: &Recipe, _env: &'_ _| RichText::)
+                .align_left()
+                
+            )
+
+            .expand_width()
+            .border(theme::BORDER_DARK, 2.)
         
-    })).lens(State::recipes);
+    }))
+    .vertical()
+    .lens(State::recipes);
     
     layout.add_child(title_bar);
     layout.add_spacer(10.);
