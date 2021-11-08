@@ -1,14 +1,15 @@
 //! Module with function to build the GUI screens
 pub mod state;
 pub mod add;
+pub mod impls;
 
 use std::str::FromStr;
 
-use druid::{Widget, WidgetExt, text::RichText, theme, widget::{Container, Flex, Label, List, Scroll, Svg, SvgData, ViewSwitcher}};
+use druid::{Widget, WidgetExt, text::RichText, theme, widget::{Container, Flex, Label, LineBreaking, List, Scroll, Svg, SvgData, ViewSwitcher}};
 
 use state::State;
 
-use crate::{gui::state::AppScreen, recipes:: recipe::Recipe};
+use crate::{gui::state::{AddState, AppScreen}, recipes:: recipe::{Ingredient, Recipe}};
 
 use self::add::add_recipe_widget;
 
@@ -50,13 +51,32 @@ pub fn recipes_widget() -> impl Widget<State> {
         .with_flex_spacer(100.)
         .with_child(plus_icon)
         .with_spacer(10.);
-        
-    let list = Scroll::new(List::new(|| {
+    
+    
+
+    let recipe_list = Scroll::new(List::new(|| {
+        let ingredients_list = Scroll::new(List::new(|| {
+                Flex::row()
+                    .with_child(Label::raw()
+                        .lens(Ingredient::name)
+                    )
+                    .with_child(Label::new(|ingredient: &Ingredient, _env: &'_ _| ingredient.amount.to_string()))
+                    .expand_width()
+            }).lens(Recipe::ingredients)
+        ).vertical();
+
         Flex::column()
-            .with_child(Label::new(|recipe: &Recipe, _env: &'_ _| RichText::)
-                .align_left()
-                
+            .with_child(Label::raw()
+                .with_font(theme::UI_FONT_BOLD)
+                .with_text_size(50.)
+                .expand_width()
+                .lens(Recipe::name)
             )
+            .with_spacer(20.)
+            .with_child(ingredients_list)
+            .with_spacer(20.)
+            .with_child(Label::raw().lens(Recipe::body).expand_width())
+            
 
             .expand_width()
             .border(theme::BORDER_DARK, 2.)
@@ -67,7 +87,7 @@ pub fn recipes_widget() -> impl Widget<State> {
     
     layout.add_child(title_bar);
     layout.add_spacer(10.);
-    layout.add_child(list);
+    layout.add_child(recipe_list);
 
     
     layout

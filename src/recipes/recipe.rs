@@ -5,9 +5,10 @@ use serde::{Serialize, Deserialize};
 use super::measure::{Mass, Volume};
 
 /// One ingredient in a recipe, with amount of the ingredient and ingredient name
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, druid::Lens, druid::Data)]
 pub struct Ingredient {
-    pub name: String,
+    pub name: Arc<str>,
+    #[data(ignore)]
     pub amount: IngredientAmount,
 }
 
@@ -53,14 +54,14 @@ impl fmt::Display for IngredientAmount {
 }
 
 /// Immutable struct containing all data a user can add to a recipe
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, druid::Lens)]
 pub struct Recipe {
     /// The name of the recipe
     pub name: Arc<str>,
     /// How many servings a recipe makes
     pub servings: f32,
     /// A list of ingredients in the recipe
-    pub ingredients: Box<[Ingredient]>,
+    pub ingredients: Arc<[Ingredient]>,
     /// The recipe's instructions
     pub body: Arc<str>,
     /// The time that the recipe takes to make
@@ -77,38 +78,27 @@ impl Recipe {
     /// Return a `Recipe` for top ramen
     pub fn top_ramen() -> Self {
         Self {
-            name: "Top Ramen".to_owned(),
+            name: "Top Ramen".into(),
             servings: 2.,
-            ingredients: vec![
+            ingredients: Arc::new([
                 Ingredient {
-                    name: "Top Ramen Packet".to_owned(),
+                    name: "Top Ramen Packet".into(),
                     amount: IngredientAmount::Count(1)
                 },
                 Ingredient {
-                    name: "Water".to_owned(),
+                    name: "Water".into(),
                     amount: IngredientAmount::Volume(Volume::new(super::measure::VolumeUnit::Cup, 2.))
                 },
-            ],
+            ]),
             body: 
     "- Add water to small / medium pot and bring to boil
     - Remove noodle brick from packet and add to water
     - Allow noodles to cook for around 3 minutes, stirring occasionally
     - Remove heat and add flavor packet to noodles, ensuring that flavor spreads to noodles by stirring
     - Leave for 5-10 minutes to cool and enjoy
-    ".to_owned(),
+    ".into(),
                 time: Some(std::time::Duration::from_secs(600))
         }
     }
 }
 
-impl Default for Recipe {
-    fn default() -> Self {
-        Self {
-            name: "".to_owned(),
-            servings: 0.,
-            ingredients: vec![],
-            body: "".to_owned(),
-            time: None
-        }
-    }
-}
