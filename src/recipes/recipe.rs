@@ -68,11 +68,7 @@ pub struct Recipe {
     pub time: Option<time::Duration>,
 }
 
-impl druid::Data for Recipe {
-    fn same(&self, other: &Self) -> bool {
-        self.eq(other)
-    }
-}
+
 
 impl Recipe {
     /// Return a `Recipe` for top ramen
@@ -91,12 +87,11 @@ impl Recipe {
                 },
             ]),
             body: 
-    "- Add water to small / medium pot and bring to boil
-    - Remove noodle brick from packet and add to water
-    - Allow noodles to cook for around 3 minutes, stirring occasionally
-    - Remove heat and add flavor packet to noodles, ensuring that flavor spreads to noodles by stirring
-    - Leave for 5-10 minutes to cool and enjoy
-    ".into(),
+r#"- Add water to small / medium pot and bring to boil
+- Remove noodle brick from packet and add to water
+- Allow noodles to cook for around 3 minutes, stirring occasionally
+- Remove heat and add flavor packet to noodles, ensuring that flavor spreads to noodles by stirring
+- Leave for 5-10 minutes to cool and enjoy"#.into(),
                 time: Some(std::time::Duration::from_secs(600))
         }
     }

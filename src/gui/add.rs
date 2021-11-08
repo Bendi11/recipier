@@ -2,9 +2,9 @@
 
 use std::str::FromStr;
 
-use druid::{Widget, WidgetExt, theme, widget::{Container, Flex, LensWrap, Svg, SvgData, TextBox}};
+use druid::{Cursor, Widget, WidgetExt, text::format::ParseFormatter, theme, widget::{Container, Flex, LensWrap, List, RadioGroup, Scroll, Svg, SvgData, TextBox, ValueTextBox}};
 
-use crate::gui::state::{AddState, AppScreen};
+use crate::{gui::state::{AddState, AppScreen, EditedIngredient}, recipes::{measure::{Mass, MassUnit, Volume, VolumeUnit}, recipe::IngredientAmount}};
 
 use super::state::State;
 
@@ -36,6 +36,54 @@ pub fn add_recipe_widget() -> impl Widget<State> {
     .lens(State::add_data)
     .align_left();
 
+    let ingredient_name_editor = Container::new(
+        TextBox::<String>::new()
+            .with_placeholder("Ingredient Name")
+            .with_text_size(theme::TEXT_SIZE_NORMAL)
+        ).rounded(theme::TEXTBOX_BORDER_RADIUS)
+        .border(theme::BORDER_DARK, theme::TEXTBOX_BORDER_WIDTH);
+
+    
+    let ingredient_amount_editor = Container::new(
+        ValueTextBox::<f32>::new(
+                TextBox::new()
+                .with_placeholder("Ingredient Amount")
+                .with_text_size(theme::TEXT_SIZE_NORMAL),
+            ParseFormatter::new()
+            ).validate_while_editing(false)
+        ).rounded(theme::TEXTBOX_BORDER_RADIUS)
+        .border(theme::BORDER_DARK, theme::TEXTBOX_BORDER_WIDTH);
+
+    let ingredient_amount_unit_selector = RadioGroup::new([
+        ("x", IngredientAmount::Count(0)),
+        //Volume units
+        ("cup", IngredientAmount::Volume(Volume::new(VolumeUnit::Cup, 0.))),
+        ("liter", IngredientAmount::Volume(Volume::new(VolumeUnit::Liter, 0.))),
+        ("milliliter", IngredientAmount::Volume(Volume::new(VolumeUnit::Milliliter, 0.))),
+        ("tsp", IngredientAmount::Volume(Volume::new(VolumeUnit::Teaspoon, 0.))),
+        ("tbsp", IngredientAmount::Volume(Volume::new(VolumeUnit::Tablespoon, 0.))),
+        ("pint", IngredientAmount::Volume(Volume::new(VolumeUnit::Pint, 0.))),
+        ("quart", IngredientAmount::Volume(Volume::new(VolumeUnit::Quart, 0.))),
+        ("gallon", IngredientAmount::Volume(Volume::new(VolumeUnit::Gallon, 0.))),
+        //Mass units
+        ("gram", IngredientAmount::Mass(Mass::new(MassUnit::Gram, 0.))),
+        ("kg", IngredientAmount::Mass(Mass::new(MassUnit::Kilogram, 0.))),
+        ("mg", IngredientAmount::Mass(Mass::new(MassUnit::Milligram, 0.))),
+        ("oz", IngredientAmount::Mass(Mass::new(MassUnit::Ounce, 0.))),
+        ("lb", IngredientAmount::Mass(Mass::new(MassUnit::Pound, 0.))), 
+    ]);
+
+    let ingredients_editor = Container::new(
+        Scroll::new(List::new(||
+            Flex::row()
+                .with_child(ingredient_name_editor.lens(EditedIngredient::name))
+                .with_spacer(20.)
+                .with_child(ingredient_amount_editor.lens(EditedIngredient::amt_num))
+                .with_spacer(20.)
+                .with_child(ingredient_amount_unit_selector.lens(EditedIngredient::amount))
+        )).lens(AddState::ingredients)
+    )
+    
     layout
         .with_spacer(10.)
         .with_child(name_text)

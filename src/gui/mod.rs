@@ -5,7 +5,7 @@ pub mod impls;
 
 use std::str::FromStr;
 
-use druid::{Widget, WidgetExt, text::RichText, theme, widget::{Container, Flex, Label, LineBreaking, List, Scroll, Svg, SvgData, ViewSwitcher}};
+use druid::{Insets, Widget, WidgetExt, text::RichText, theme, widget::{Container, Flex, Label, LineBreaking, List, Scroll, Svg, SvgData, ViewSwitcher}};
 
 use state::State;
 
@@ -64,20 +64,34 @@ pub fn recipes_widget() -> impl Widget<State> {
                     .expand_width()
             }).lens(Recipe::ingredients)
         ).vertical();
-
+        
         Flex::column()
             .with_child(Label::raw()
                 .with_font(theme::UI_FONT_BOLD)
-                .with_text_size(50.)
+                .with_text_size(35.)
+                .with_line_break_mode(LineBreaking::WordWrap)
                 .expand_width()
                 .lens(Recipe::name)
             )
+            .with_spacer(10.)
+            .with_child(Label::new(|servings: &f32, _env: &'_ _| format!("{} Serving{}", servings, if servings == &1. { "" } else { "s" }))
+                .with_text_color(theme::PLACEHOLDER_COLOR)
+                .lens(Recipe::servings)
+                .align_left()
+            )
             .with_spacer(20.)
-            .with_child(ingredients_list)
+            .with_child(Container::new(ingredients_list)
+                .border(theme::BORDER_DARK, 2.)
+                .rounded(theme::TEXTBOX_BORDER_RADIUS)
+                .padding(Insets::uniform_xy(10., 0.))
+            )
             .with_spacer(20.)
-            .with_child(Label::raw().lens(Recipe::body).expand_width())
+            .with_child(Label::raw()
+                .with_line_break_mode(LineBreaking::WordWrap)
+                .lens(Recipe::body)
+                .expand_width()
+            )
             
-
             .expand_width()
             .border(theme::BORDER_DARK, 2.)
         

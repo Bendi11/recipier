@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-use hashbrown::HashMap;
+use hashbrown::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -11,7 +11,7 @@ use super::recipe::Recipe;
 /// A structure holding recipe ID to data pairs with methods to add, remove, and modify recipes
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Database {
-    /// A map of recipe IDs to recipe data
+    /// A map of recipe IDs to loaded recipe data
     data: HashMap<RecipeId, RecipeEntry>,
 }
 
@@ -22,6 +22,10 @@ impl Database {
         self.data.get(&id).map(|entry| &entry.recipe)
     }
 
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
     /// Create a new empty database
     pub fn new() -> Self {
         let mut this = Self {
@@ -29,6 +33,16 @@ impl Database {
         };
         this.insert(Recipe::top_ramen());
         this
+    }
+
+    #[inline]
+    pub fn iter(&self) -> impl Iterator<Item = (&RecipeId, &Recipe)> {
+        self.data.iter().map(|(k, v)| (k, &v.recipe))
+    }
+
+    #[inline]
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&RecipeId, &mut Recipe)> {
+        self.data.iter_mut().map(|(k, v)| (k, &mut v.recipe))
     }
 
     /// Insert a recipe into the database, automatically creating an ID and returning it
@@ -59,40 +73,11 @@ impl Database {
 struct RecipeEntry {
     /// The recipe data
     recipe: Recipe,
-
 }
 
 /// A unique identifier for a recipe in a database
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,)]
 pub struct RecipeId(Uuid);
-
-impl druid::Data for RecipeId {
-    fn same(&self, other: &Self) -> bool {
-        self.eq(other)
-    }
-}
-
-impl druid::widget::ListIter<Recipe> for Database {
-    fn for_each(&self, mut cb: impl FnMut(&Recipe, usize)) {
-        let mut idx = 0;
-        for i in self.data.iter() {
-            cb(&i.1.recipe, idx);
-            idx += 1;
-        }
-    }
-
-    fn for_each_mut(&mut self, mut cb: impl FnMut(&mut Recipe, usize)) {
-        let mut idx = 0;
-        for i in self.data.iter_mut() {
-            cb(&mut i.1.recipe, idx);
-            idx += 1;
-        }
-    }
-
-    fn data_len(&self) -> usize {
-        self.data.len()
-    }
-}
 
 impl fmt::Display for RecipeId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

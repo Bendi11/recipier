@@ -1,7 +1,7 @@
 //! App state used throughout the GUI
 use std::{fs::File, path::Path};
 
-use druid::{Data, Lens};
+use druid::{Data, Lens, widget::ListIter};
 use serde::{Deserialize, Serialize};
 
 use crate::recipes::{db::Database, recipe::IngredientAmount};
@@ -20,14 +20,46 @@ pub struct State {
     pub window_size: (f64, f64),
 }
 
+/// A structure holding the data that can be edited by the user when adding an ingredient
+#[derive(Clone, PartialEq, Debug, Data, Lens, Deserialize, Serialize,)]
+pub struct EditedIngredient {
+    /// The name of the ingredient
+    pub name: String,
+    /// The amount as a number of the ingredient
+    pub amt_num: f32,
+    /// The unit to use 
+    pub amount: IngredientAmount,
+}
+
+/// A newtype over `Vec<EditedIngredients>` used to implement [ListIter](druid::widget::ListIter) for the type
+#[derive(Clone, PartialEq, Debug, Data, Deserialize, Serialize,)]
+pub struct EditedIngredients(#[data(same_fn="PartialEq::eq")] pub Vec<EditedIngredient>);
+impl ListIter<EditedIngredient> for EditedIngredients {
+    fn for_each(&self, mut cb: impl FnMut(&EditedIngredient, usize)) {
+        for (idx, item) in self.0.iter().enumerate() {
+            cb(item, idx)
+        }
+    }
+
+    fn for_each_mut(&mut self, mut cb: impl FnMut(&mut EditedIngredient, usize)) {
+        for (idx, item) in self.0.iter_mut().enumerate() {
+            cb(item, idx)
+        }
+    }
+
+    fn data_len(&self) -> usize {
+        self.0.len()
+    }
+}
+
 /// All state in the Add screen
 #[derive(Debug, Clone, PartialEq, Data, Deserialize, Serialize, Lens)]
 pub struct AddState {
     /// The name of the added recipe
     name: String,
     /// A list of added ingredients and amounts
-    #[data(ignore)]
-    ingredients: Vec<(String, IngredientAmount)>,
+    #[data(same_fn="PartialEq::eq")]
+    ingredients: Vec<EditedIngredient>,
     /// The instructions text
     instructions: String,
 }
