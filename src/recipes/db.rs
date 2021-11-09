@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

@@ -1,7 +1,7 @@
 // Disable console on windows
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use druid::{AppDelegate, AppLauncher, Color, WindowDesc, WindowState, theme};
+use druid::{AppDelegate, AppLauncher, WindowDesc, WindowState};
 use gui::{root_widget, data::AppState};
 use log::LevelFilter;
 use simplelog::ConfigBuilder;
