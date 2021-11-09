@@ -1,2 +1,2 @@
 pub mod separator;
-pub mod svgicon;
+pub mod icon;
