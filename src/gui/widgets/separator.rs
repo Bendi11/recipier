@@ -18,7 +18,7 @@ impl Separator {
     #[inline]
     pub fn new(width: f64) -> Self {
         Self {
-            color: theme::COLOR_3.into(),
+            color: Color::BLACK.into(),
             width
         }
     }
