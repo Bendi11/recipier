@@ -17,7 +17,7 @@ pub const COLOR_3: Key<Color> = Key::new("recipier.color3");
 pub const COLOR_4: Key<Color> = Key::new("recipier.color4");
 
 
-pub const SPACING: f64 = 10.;
+pub const SPACING: f64 = 5.;
 
 /// Set environment keys to their appropriate values
 pub fn set(env: &mut Env) {

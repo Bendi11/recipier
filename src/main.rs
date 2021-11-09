@@ -76,7 +76,7 @@ fn main() {
     
 
     //let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
-    if let Err(e) = AppLauncher::with_window(window)/*.configure_env(|env, _state| gui::theme::set(env))*/.delegate(Delegate).launch(state) {
+    if let Err(e) = AppLauncher::with_window(window).configure_env(|env, _state| gui::theme::set(env)).delegate(Delegate).launch(state) {
         panic!("Failed to launch app: {}", e);
     }
 

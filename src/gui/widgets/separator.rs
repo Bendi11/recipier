@@ -18,7 +18,7 @@ impl Separator {
     #[inline]
     pub fn new(width: f64) -> Self {
         Self {
-            color: Color::BLACK.into(),
+            color: theme::COLOR_3.into(),
             width
         }
     }
@@ -38,7 +38,11 @@ impl<D: Data> Widget<D> for Separator {
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &D, env: &druid::Env) {
         let color = self.color.resolve(env);
         let width = ctx.size().width;
-        ctx.fill(RoundedRect::new(0., 0., width, 1., 10.), &color);
+        let offset = if width < 20. {
+            0.
+        } else { 10. };
+
+        ctx.fill(RoundedRect::new(offset, 0., width - offset, self.width, 10.), &color);
     }
 
     fn update(&mut self, _ctx: &mut druid::UpdateCtx, _old_data: &D, _data: &D, _env: &druid::Env) {
