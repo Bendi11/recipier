@@ -1,7 +1,7 @@
 //! Units of measurement in recipes, that also hold the unit they were
 //! originally entered in
+use serde::{Deserialize, Serialize};
 use std::fmt;
-use serde::{Serialize, Deserialize};
 
 /// Units of time a user can pick
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
@@ -18,7 +18,7 @@ impl fmt::Display for TimeUnit {
             Self::Second => write!(f, "seconds"),
             Self::Minute => write!(f, "minutes"),
             Self::Hour => write!(f, "hours"),
-            Self::Day => write!(f, "days")
+            Self::Day => write!(f, "days"),
         }
     }
 }
@@ -33,7 +33,7 @@ pub enum MassUnit {
     Milligram,
     Ounce,
     Pound,
-} 
+}
 
 impl fmt::Display for MassUnit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -42,7 +42,7 @@ impl fmt::Display for MassUnit {
             Self::Kilogram => write!(f, "kilogram"),
             Self::Milligram => write!(f, "milligram"),
             Self::Ounce => write!(f, "ounce"),
-            Self::Pound => write!(f, "pound")
+            Self::Pound => write!(f, "pound"),
         }
     }
 }
@@ -63,7 +63,7 @@ impl MassUnit {
     pub fn to_grams(&self, val: f32) -> f32 {
         val * self.conversion_factor()
     }
-    
+
     /// Convert a measurement in grams to a measurement in `self` units
     pub fn from_grams(&self, val: f32) -> f32 {
         val / self.conversion_factor()
@@ -74,16 +74,13 @@ impl MassUnit {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Mass {
     pub unit: MassUnit,
-    pub val: f32
+    pub val: f32,
 }
 
 impl Mass {
     /// Create a new mass with the given unit of measure and value
     pub fn new(unit: MassUnit, val: f32) -> Self {
-        Self {
-            unit,
-            val
-        }
+        Self { unit, val }
     }
 
     /// Convert this measure's unit of mass to another unit
@@ -97,10 +94,15 @@ impl Mass {
 
 impl fmt::Display for Mass {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "s" } else { "" })
+        write!(
+            f,
+            "{} {}{}",
+            self.val,
+            self.unit,
+            if self.val == 1.0 { "s" } else { "" }
+        )
     }
 }
-
 
 /// A volume of a substance, like cups, liters, etc.
 ///
@@ -137,8 +139,8 @@ impl VolumeUnit {
     pub fn to_liters(&self, val: f32) -> f32 {
         val * self.conversion_factor()
     }
-    
-    /// Convert a measurement in liters to a measurement in units of 
+
+    /// Convert a measurement in liters to a measurement in units of
     /// `self`
     pub fn from_liters(&self, val: f32) -> f32 {
         val / self.conversion_factor()
@@ -173,12 +175,9 @@ pub struct Volume {
 impl Volume {
     #[inline(always)]
     pub const fn new(unit: VolumeUnit, val: f32) -> Self {
-        Self {
-            unit,
-            val
-        }
+        Self { unit, val }
     }
-    
+
     /// Convert this volume measurement into a measurement of the given unit
     pub fn convert(&self, unit: VolumeUnit) -> Self {
         Self {
@@ -190,6 +189,12 @@ impl Volume {
 
 impl fmt::Display for Volume {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}{}", self.val, self.unit, if self.val == 1.0 { "" } else { "s" })
+        write!(
+            f,
+            "{} {}{}",
+            self.val,
+            self.unit,
+            if self.val == 1.0 { "" } else { "s" }
+        )
     }
 }

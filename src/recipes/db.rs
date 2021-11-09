@@ -29,7 +29,7 @@ impl Database {
     /// Create a new empty database
     pub fn new() -> Self {
         let mut this = Self {
-            data: HashMap::new()
+            data: HashMap::new(),
         };
         this.insert(Recipe::top_ramen());
         this
@@ -51,21 +51,21 @@ impl Database {
             let id = RecipeId(Uuid::new_v4());
             match self.data.contains_key(&id) {
                 true => {
-                    log::warn!("Database already contains recipe with ID {}, re-generating...", id);
-                    continue
-                },
+                    log::warn!(
+                        "Database already contains recipe with ID {}, re-generating...",
+                        id
+                    );
+                    continue;
+                }
                 false => {
-                    self.data.insert(id, RecipeEntry {
-                        recipe
-                    });
+                    self.data.insert(id, RecipeEntry { recipe });
                     log::trace!("inserting recipe with ID {} into database...", id);
                 }
             }
-            break id
+            break id;
         }
     }
 }
-
 
 /// Structure used as values in the [Database], containing recipe data + metadata only used
 /// internally in the database
@@ -76,7 +76,7 @@ struct RecipeEntry {
 }
 
 /// A unique identifier for a recipe in a database
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct RecipeId(Uuid);
 
 impl fmt::Display for RecipeId {

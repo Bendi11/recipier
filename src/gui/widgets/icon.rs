@@ -1,6 +1,6 @@
 //! Widgets that contain one bezier path to draw with optional colors
 
-use druid::{Affine, Color, Data, KeyOrValue, RenderContext, Size, Widget, kurbo::BezPath};
+use druid::{kurbo::BezPath, Affine, Color, Data, KeyOrValue, RenderContext, Size, Widget};
 
 pub static BOWL_ICON: IconData = IconData {
     path: include_str!("../../../assets/icon-path.txt"),
@@ -12,7 +12,7 @@ pub static BOWL_ICON: IconData = IconData {
 pub struct IconData {
     /// The path to draw
     pub path: &'static str,
-    /// The size of the svg 
+    /// The size of the svg
     pub size: Size,
 }
 
@@ -23,10 +23,10 @@ pub struct Icon {
     path: BezPath,
     /// Scale factor of the icon
     scale: f64,
-    /// The size of the svg 
+    /// The size of the svg
     size: Size,
     /// What color to render the data in
-    color: KeyOrValue<Color>
+    color: KeyOrValue<Color>,
 }
 
 impl Icon {
@@ -36,7 +36,7 @@ impl Icon {
             path: BezPath::from_svg(data.path).unwrap(),
             scale: 1.,
             size: data.size,
-            color: Color::BLACK.into()
+            color: Color::BLACK.into(),
         }
     }
     /// Builder method to set the rendering color of this icon
@@ -54,19 +54,34 @@ impl Icon {
 
 impl<D: Data> Widget<D> for Icon {
     fn update(&mut self, _ctx: &mut druid::UpdateCtx, _old_data: &D, _data: &D, _env: &druid::Env) {
-        
     }
 
-    fn layout(&mut self, _ctx: &mut druid::LayoutCtx, _bc: &druid::BoxConstraints, _data: &D, _env: &druid::Env) -> Size {
+    fn layout(
+        &mut self,
+        _ctx: &mut druid::LayoutCtx,
+        _bc: &druid::BoxConstraints,
+        _data: &D,
+        _env: &druid::Env,
+    ) -> Size {
         self.size * self.scale
     }
 
-    fn event(&mut self, _ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut D, _env: &druid::Env) {
-        
+    fn event(
+        &mut self,
+        _ctx: &mut druid::EventCtx,
+        _event: &druid::Event,
+        _data: &mut D,
+        _env: &druid::Env,
+    ) {
     }
 
-    fn lifecycle(&mut self, _ctx: &mut druid::LifeCycleCtx, _event: &druid::LifeCycle, _data: &D, _env: &druid::Env) {
-        
+    fn lifecycle(
+        &mut self,
+        _ctx: &mut druid::LifeCycleCtx,
+        _event: &druid::LifeCycle,
+        _data: &D,
+        _env: &druid::Env,
+    ) {
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &D, env: &druid::Env) {

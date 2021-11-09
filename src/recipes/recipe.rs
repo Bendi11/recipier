@@ -1,6 +1,6 @@
 //! Structures holding recipe data
+use serde::{Deserialize, Serialize};
 use std::{fmt, sync::Arc, time};
-use serde::{Serialize, Deserialize};
 
 use super::measure::{Mass, Volume};
 
@@ -29,15 +29,15 @@ pub enum IngredientAmount {
     Mass(Mass),
     /// No amount given
     None,
-}   
+}
 
 impl IngredientAmount {
     pub fn unit_string(&self) -> String {
         match self {
             Self::Count(_) => "count".to_owned(),
-            Self::Mass(Mass { val: _, unit} ) => unit.to_string(),
-            Self::Volume(Volume { val: _, unit} ) => unit.to_string(),
-            Self::None => "no unit".to_owned()
+            Self::Mass(Mass { val: _, unit }) => unit.to_string(),
+            Self::Volume(Volume { val: _, unit }) => unit.to_string(),
+            Self::None => "no unit".to_owned(),
         }
     }
 }
@@ -48,7 +48,7 @@ impl fmt::Display for IngredientAmount {
             Self::Count(amt) => write!(f, "x{}", amt),
             Self::Volume(vol) => vol.fmt(f),
             Self::Mass(mass) => mass.fmt(f),
-            Self::None => Ok(())
+            Self::None => Ok(()),
         }
     }
 }
@@ -68,8 +68,6 @@ pub struct Recipe {
     pub time: Option<time::Duration>,
 }
 
-
-
 impl Recipe {
     /// Return a `Recipe` for top ramen
     pub fn top_ramen() -> Self {
@@ -79,21 +77,23 @@ impl Recipe {
             ingredients: Arc::new([
                 Ingredient {
                     name: "Top Ramen Packet".into(),
-                    amount: IngredientAmount::Count(1)
+                    amount: IngredientAmount::Count(1),
                 },
                 Ingredient {
                     name: "Water".into(),
-                    amount: IngredientAmount::Volume(Volume::new(super::measure::VolumeUnit::Cup, 2.))
+                    amount: IngredientAmount::Volume(Volume::new(
+                        super::measure::VolumeUnit::Cup,
+                        2.,
+                    )),
                 },
             ]),
-            body: 
-r#"- Add water to small / medium pot and bring to boil
+            body: r#"- Add water to small / medium pot and bring to boil
 - Remove noodle brick from packet and add to water
 - Allow noodles to cook for around 3 minutes, stirring occasionally
 - Remove heat and add flavor packet to noodles, ensuring that flavor spreads to noodles by stirring
-- Leave for 5-10 minutes to cool and enjoy"#.into(),
-                time: Some(std::time::Duration::from_secs(600))
+- Leave for 5-10 minutes to cool and enjoy"#
+                .into(),
+            time: Some(std::time::Duration::from_secs(600)),
         }
     }
 }
-
