@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use druid::{AppDelegate, AppLauncher, Color, WindowDesc, WindowState, theme};
-use gui::{root_widget, state::State};
+use gui::{root_widget, data::AppState};
 use log::LevelFilter;
 use simplelog::ConfigBuilder;
 pub mod recipes;
@@ -13,8 +13,8 @@ pub mod gui;
 const SAVE_FILE: &str = "./save.json";
 
 struct Delegate;
-impl AppDelegate<State> for Delegate {
-    fn window_removed(&mut self, _id: druid::WindowId, data: &mut State, _env: &druid::Env, _ctx: &mut druid::DelegateCtx) {
+impl AppDelegate<AppState> for Delegate {
+    fn window_removed(&mut self, _id: druid::WindowId, data: &mut AppState, _env: &druid::Env, _ctx: &mut druid::DelegateCtx) {
         match std::fs::File::create(SAVE_FILE) {
             Ok(file) => if let Err(e) = serde_json::to_writer(file, &data) {
                 log::error!("Failed to serialize app state: {}", e);
@@ -25,10 +25,10 @@ impl AppDelegate<State> for Delegate {
         }
     }
 
-    fn event(&mut self, _ctx: &mut druid::DelegateCtx, _window_id: druid::WindowId, event: druid::Event, data: &mut State, _env: &druid::Env) -> Option<druid::Event> {
+    fn event(&mut self, _ctx: &mut druid::DelegateCtx, _window_id: druid::WindowId, event: druid::Event, data: &mut AppState, _env: &druid::Env) -> Option<druid::Event> {
         match event {
             druid::Event::WindowSize(size) => {
-                data.window_size = (size.width, size.height)
+                data.config.window_size = (size.width, size.height)
             },
             _ => ()
         }
@@ -66,13 +66,13 @@ fn main() {
         }
     }
     
-    let state = State::init(SAVE_FILE);
+    let state = AppState::init(SAVE_FILE);
 
     let window = WindowDesc::new(root_widget)
         .resizable(true)
         .title("Recipier")
         .set_window_state(WindowState::RESTORED)
-        .window_size(state.window_size);
+        .window_size(state.config.window_size);
     
 
     //let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();

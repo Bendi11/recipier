@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-druid = { version = "0.7", features = ["image", "svg"] } # GUI library
+druid = { version = "0.7", features = ["image", "svg", "im"] } # GUI library
 
 hashbrown = { version = "0.11", features = ["serde"] } # Faster hash maps for recipe database
 uuid = { version = "0.8", features = ["serde", "v4"] } # Generating unique identifiers for each recipe
