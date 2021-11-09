@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 
 use self::config::Config;
 
-
 #[derive(Clone, Debug, Data, Lens, Serialize, Deserialize)]
 pub struct AppState {
     /// The configuration data for this state
