@@ -1,4 +1,6 @@
 pub mod config;
+pub mod screen;
+pub mod search;
 
 use std::path::Path;
 
@@ -7,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::recipes::db::Database;
 
-use self::config::Config;
+use self::{config::Config, search::SearchState};
 
 /// Structure holding all state information, must be easily cloneable and comparable or performance will
 /// suffer
@@ -19,6 +21,10 @@ pub struct AppState {
     /// The central database of recipes
     #[serde(serialize_with = "Database::save", deserialize_with = "Database::load")]
     pub recipies: Database,
+
+    /// State for querying the database of recipes
+    #[serde(skip)]
+    pub search: SearchState,
 }
 
 impl AppState {
@@ -54,6 +60,7 @@ impl Default for AppState {
             config: Config {
                 window_size: (480., 700.),
             },
+            search: SearchState::default(),
             recipies: Database::new("./recipes")
         }
     }
