@@ -1,6 +1,6 @@
 pub mod search;
 
-use druid::{LensExt, Widget, WidgetExt, widget::{Button, Flex, Label}};
+use druid::{LensExt, Widget, WidgetExt, widget::{Button, Flex, Label, ViewSwitcher}};
 
 use crate::gui::{
     theme,
@@ -10,7 +10,7 @@ use crate::gui::{
     },
 };
 
-use super::{GOLDEN_RATIO, data::{AppState, search::{Query, SearchState}}};
+use super::{GOLDEN_RATIO, data::{AppState, screen::AppScreen, search::{Query, SearchState}}};
 
 pub fn root_widget() -> impl Widget<AppState> {
     
@@ -32,7 +32,14 @@ pub fn root_widget() -> impl Widget<AppState> {
         .with_default_spacer()
         .with_child(Separator::new(5.).vertical(true).with_color(theme::COLOR_2))
         .with_default_spacer()
-        .with_flex_child(Label::new("Body"), GOLDEN_RATIO);
+        .with_flex_child(ViewSwitcher::new(
+                |state: &AppState, _env| state.screen,
+                |screen, _state, _env| match screen {
+                    AppScreen::Home => Label::new("Home").boxed(),
+                    AppScreen::SearchResults => search::search_screen().boxed()
+                }
+            ), GOLDEN_RATIO
+        );
     
 
     screen
