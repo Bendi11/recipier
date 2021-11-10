@@ -8,6 +8,12 @@ pub const BOWL_ICON: IconData = IconData {
     size: Size::new(16., 16.),
 };
 
+/// A magnifying glass search icon
+pub const SEARCH_ICON: IconData = IconData {
+    path: include_str!("../../../assets/icons/search-path.txt"),
+    size: Size::new(16., 16.)
+};
+
 /// Structure with all data needed to render an icon: size and bezier path
 #[derive(Clone, Debug)]
 pub struct IconData {
@@ -61,6 +67,22 @@ impl Icon {
         self.scale = scale;
         self
     }
+
+    /// Mmethod to enable / disable flexible sizing
+    pub fn set_flex(&mut self, flex: bool) {
+        self.flex = flex;
+    }
+
+    /// Method to set the rendering color of this icon
+    pub fn set_color(&mut self, color: impl Into<KeyOrValue<Color>>) {
+        self.color = color.into();
+    }
+
+    /// Method to set the scale of this icon
+    pub fn set_scale(&mut self, scale: f64) {
+        self.scale = scale;
+    }
+
 }
 
 impl<D: Data> Widget<D> for Icon {

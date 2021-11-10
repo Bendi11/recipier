@@ -1,8 +1,8 @@
 //! Search widget builders that modify the search term state data and dispatch commands to search
 
-use druid::{Data, Event, Widget, WidgetExt, widget::{Controller, TextBox}};
+use druid::{Data, Event, Widget, WidgetExt, widget::{Controller, Flex, TextBox}};
 
-use crate::gui::{CHANGE_SCREEN, data::screen::AppScreen, theme};
+use crate::gui::{CHANGE_SCREEN, data::screen::AppScreen, theme, widgets::{icon::{self, Icon}, RecipierWidget}};
 
 /// Widget controller that sends a navigate to search results command when the enter key is pressed
 struct EnterController;
@@ -26,10 +26,20 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for EnterController {
 /// Return a search bar that modifies a search term string and sends the change screen
 /// command on enter
 pub fn search_bar() -> impl Widget<String> {
-    TextBox::new()
-        .with_text_color(theme::COLOR_2)
-        .with_placeholder("Search")
-        .controller(EnterController)
-        .border(theme::COLOR_2, 1.0)
-        .rounded(25.)
+    Flex::row()
+        .with_flex_child(TextBox::new()
+            .with_text_color(theme::COLOR_3)
+            .with_placeholder("Search")
+            .controller(EnterController)
+            .expand_width(),
+            2.
+        )
+        .with_flex_spacer(0.1)
+        .with_flex_child(Icon::svg(&icon::SEARCH_ICON).with_color(theme::COLOR_3).on_hover(|ctx, _d, this, _env| {
+            this.set_color(theme::COLOR_4); 
+            ctx.request_paint();
+        }, |ctx, _d, this, _env| {
+            this.set_color(theme::COLOR_3);
+            ctx.request_paint();
+        }), 0.4)
 }

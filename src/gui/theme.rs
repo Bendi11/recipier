@@ -75,4 +75,6 @@ pub fn set(env: &mut Env) {
     env.set(BACKGROUND_DARK, env.get(COLOR_1));
     env.set(BACKGROUND_LIGHT, env.get(COLOR_1));
     env.set(WINDOW_BACKGROUND_COLOR, env.get(COLOR_1));
+
+    env.set(CURSOR_COLOR, env.get(COLOR_4));
 }
