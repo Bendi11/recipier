@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::recipes::db::Database;
 
-use self::{config::Config, search::SearchState};
+use self::{config::Config, screen::AppScreen, search::SearchState};
 
 /// Structure holding all state information, must be easily cloneable and comparable or performance will
 /// suffer
@@ -25,6 +25,9 @@ pub struct AppState {
     /// State for querying the database of recipes
     #[serde(skip)]
     pub search: SearchState,
+
+    /// The screen that the application is currently displaying
+    pub screen: AppScreen,
 }
 
 impl AppState {

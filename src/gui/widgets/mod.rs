@@ -18,11 +18,9 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for HoverController<D, W> {
         if let druid::Event::MouseMove(_) = event {
             if ctx.is_hot() && !self.hovered {
                 self.hovered = true;
-                log::trace!("Hovered");
                 (self.cb)(ctx, data, child, env);
             } else if !ctx.is_hot() && self.hovered {
                 self.hovered = false;
-                log::trace!("Un Hovered");
                 (self.undo)(ctx, data, child, env);
             }
         }
