@@ -15,41 +15,6 @@ pub struct SearchState {
     pub results: Option<SearchResults>,
 }
 
-/// Lens providing access to the search results if they are present
-pub struct SearchResultsLens;
-
-impl Lens<SearchState, SearchResults> for SearchResultsLens {
-    fn with<V, F: FnOnce(&SearchResults) -> V>(&self, data: &SearchState, f: F) -> V {
-        match data.results {
-            Some(ref results) => {
-                (f)(results)
-            },
-            None => {
-                let mut results = SearchResults {
-                    recipes: Vector::new(),
-                    term: Arc::from("")
-                };
-                (f)(&results)
-            }
-        }
-    }
-
-    fn with_mut<V, F: FnOnce(&mut SearchResults) -> V>(&self, data: &mut SearchState, f: F) -> V {
-        match data.results {
-            Some(ref mut results) => {
-                (f)(results)
-            },
-            None => {
-                let mut results = SearchResults {
-                    recipes: Vector::new(),
-                    term: Arc::from("")
-                };
-                (f)(&mut results)
-            }
-        }
-    }
-}
-
 /// The result of searching for a query
 #[derive(Clone, Debug, Data, Lens, )]
 pub struct SearchResults {
