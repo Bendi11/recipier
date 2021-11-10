@@ -1,6 +1,6 @@
 pub mod search;
 
-use druid::{Widget, WidgetExt, widget::{Button, Flex, Label}};
+use druid::{LensExt, Widget, WidgetExt, widget::{Button, Flex, Label}};
 
 use crate::gui::{
     theme,
@@ -10,7 +10,7 @@ use crate::gui::{
     },
 };
 
-use super::{GOLDEN_RATIO, data::AppState};
+use super::{GOLDEN_RATIO, data::{AppState, search::{Query, SearchState}}};
 
 pub fn root_widget() -> impl Widget<AppState> {
     
@@ -21,6 +21,8 @@ pub fn root_widget() -> impl Widget<AppState> {
                 .with_scale(10.)
                 .with_color(theme::COLOR_4), 0.1)
         .with_child(Separator::new(5.))
+        .with_default_spacer()
+        .with_child(search::search_bar().lens(AppState::search.then(SearchState::query).then(Query::term)))
         .with_default_spacer()
         .with_child(Button::new("Test").expand_width())
         .padding((5., 0., 0., 0.));
