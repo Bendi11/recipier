@@ -1,10 +1,12 @@
 //! Application command handler
 
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
+use std::sync::Arc;
+
+use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, im::Vector};
 
 use crate::SAVE_FILE;
 
-use super::{CHANGE_SCREEN, data::{AppState, screen::AppScreen}};
+use super::{CHANGE_SCREEN, POPULATE_RESULTS, data::{AppState, screen::AppScreen, search::SearchResults}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -44,6 +46,13 @@ impl AppDelegate<AppState> for RecipierDelegate {
 
             Handled::Yes
 
+        } else if let Some(()) = cmd.get(POPULATE_RESULTS) {
+            data.search.results = Some(SearchResults {
+                recipes: Vector::new(),
+                term: Arc::from(data.search.query.term.as_str())
+            });
+            
+            Handled::Yes
         } else {
             Handled::No
         }

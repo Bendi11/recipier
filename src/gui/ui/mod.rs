@@ -38,7 +38,7 @@ pub fn root_widget() -> impl Widget<AppState> {
                     AppScreen::Home => Label::new("Home").boxed(),
                     AppScreen::SearchResults => search::search_screen().boxed()
                 }
-            ), GOLDEN_RATIO
+            ), GOLDEN_RATIO * 1.7 //Is it still the golden ratio, just... scaled?
         );
     
 
