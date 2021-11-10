@@ -33,15 +33,16 @@ pub fn search_screen() -> impl Widget<AppState> {
         .with_default_spacer()
         .with_child(Separator::new(1.0))
         .with_child(Maybe::or_empty(|| Flex::row()
-                .with_child(Label::new("Results for ").with_font(theme::SMALL_FONT))
-                .with_child(Label::raw().with_font(theme::SMALL_FONT).lens(SearchResults::term))
-            ).lens(AppState::search.then(SearchState::results))
+                .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
+                .with_child(Label::raw().with_font(theme::SYSTEM_FONT).lens(SearchResults::term))
+            )
+            .lens(AppState::search.then(SearchState::results))
+            .align_left()
         )
         .with_flex_child(Maybe::or_empty(|| Scroll::new(
                 Label::new("results") 
             )).lens(AppState::search.then(SearchState::results)), 100.)
 }
-
 
 /// Return a search bar that modifies a search term string and sends the change screen
 /// command on enter
