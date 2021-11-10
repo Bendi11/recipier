@@ -11,6 +11,8 @@ pub struct Separator {
     color: KeyOrValue<Color>,
     /// Width of the drawn separator
     width: f64,
+    /// Ratio of separator size to gap size
+    space_ratio: KeyOrValue<f64>,
     /// If the separator is vertical
     vertical: bool,
 }
@@ -23,6 +25,7 @@ impl Separator {
             color: theme::COLOR_3.into(),
             width,
             vertical: false,
+            space_ratio: 0.01.into()
         }
     }
 
@@ -35,6 +38,12 @@ impl Separator {
     /// Builder method to set the color of the line
     pub fn with_color(mut self, color: impl Into<KeyOrValue<Color>>) -> Self {
         self.color = color.into();
+        self
+    }
+
+    /// Builder method to set the ratio of separator size to gap size
+    pub fn with_ratio(mut self, ratio: impl Into<KeyOrValue<f64>>) -> Self {
+        self.space_ratio = ratio.into();
         self
     }
 }
@@ -51,10 +60,11 @@ impl<D: Data> Widget<D> for Separator {
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &D, env: &druid::Env) {
         let color = self.color.resolve(env);
-        let endpos = if self.vertical { ctx.size().height } else { ctx.size().width };
+        let ratio = self.space_ratio.resolve(env);
 
-        const RATIO: f64 = 10.0;
-        let spacing = endpos / RATIO;
+        let endpos = if self.vertical { ctx.size().height } else { ctx.size().width };
+        let spacing = endpos * ratio;
+        log::trace!("Spacing {}", spacing);
         let offset = (spacing / 2.).min(5.);
 
         match self.vertical {

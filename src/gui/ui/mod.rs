@@ -20,7 +20,7 @@ pub fn root_widget() -> impl Widget<AppState> {
             Icon::svg(&icon::BOWL_ICON)
                 .with_scale(10.)
                 .with_color(theme::COLOR_4), 0.1)
-        .with_child(Separator::new(5.))
+        .with_child(Separator::new(5.).with_ratio(1.))
         .with_default_spacer()
         .with_child(search::search_bar().lens(AppState::search.then(SearchState::query).then(Query::term)))
         .with_default_spacer()
