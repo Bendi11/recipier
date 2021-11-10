@@ -2,7 +2,8 @@
 
 use druid::{kurbo::BezPath, Affine, Color, Data, KeyOrValue, RenderContext, Size, Widget};
 
-pub static BOWL_ICON: IconData = IconData {
+/// Logo bowl icon SVG data
+pub const BOWL_ICON: IconData = IconData {
     path: include_str!("../../../assets/icon-path.txt"),
     size: Size::new(16., 16.),
 };

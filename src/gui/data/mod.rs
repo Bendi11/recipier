@@ -1,9 +1,12 @@
 pub mod config;
 
-use std::path::Path;
+use std::{path::Path, sync::Arc};
 
 use druid::{Data, Lens};
+use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
+
+use crate::recipes::db::Database;
 
 use self::config::Config;
 
@@ -13,6 +16,10 @@ use self::config::Config;
 pub struct AppState {
     /// The configuration data for this state
     pub config: Config,
+
+    /// The central database of recipes
+    #[serde(serialize_with = "Database::save", deserialize_with = "Database::load")]
+    pub recipies: Database,
 }
 
 impl AppState {
@@ -48,6 +55,7 @@ impl Default for AppState {
             config: Config {
                 window_size: (480., 700.),
             },
+            recipies: Database::new("./recipes")
         }
     }
 }

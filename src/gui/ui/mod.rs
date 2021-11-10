@@ -1,7 +1,4 @@
-use druid::{
-    widget::{Flex, Label},
-    Widget, WidgetExt,
-};
+use druid::{LensExt, Widget, WidgetExt, widget::{Button, Flex, Label}};
 
 use crate::gui::{
     theme,
@@ -14,6 +11,7 @@ use crate::gui::{
 use super::data::AppState;
 
 pub fn root_widget() -> impl Widget<AppState> {
+    
     let sidebar = Flex::column()
         .with_spacer(theme::SPACING)
         .with_child(
