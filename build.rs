@@ -11,3 +11,8 @@ fn main() {
         eprintln!("Error adding windows resource file to executable: {}", e);
     }
 }
+
+#[cfg(not(windows))]
+fn main() {
+
+}
