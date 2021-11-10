@@ -34,7 +34,7 @@ pub fn search_screen() -> impl Widget<AppState> {
         .with_child(Separator::new(1.0))
         .with_child(Maybe::or_empty(|| Flex::row()
                 .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
-                .with_child(Label::raw().with_font(theme::SYSTEM_FONT).lens(SearchResults::term))
+                .with_child(Label::raw().with_font(theme::SMALL_FONT).lens(SearchResults::term))
             )
             .lens(AppState::search.then(SearchState::results))
             .align_left()
