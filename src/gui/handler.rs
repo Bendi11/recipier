@@ -4,7 +4,7 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::SAVE_FILE;
 
-use super::{CHANGE_SCREEN, data::AppState};
+use super::{CHANGE_SCREEN, data::{AppState, screen::AppScreen}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -30,12 +30,23 @@ impl AppDelegate<AppState> for RecipierDelegate {
     }
 
 
-    fn command(&mut self, ctx: &mut DelegateCtx, target: Target, cmd: &Command, data: &mut AppState, env: &Env) -> Handled {
-        if let Some(payload) = cmd.get(CHANGE_SCREEN) {
+    fn command(&mut self, _ctx: &mut DelegateCtx, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
+        if let Some(screen) = cmd.get(CHANGE_SCREEN) {
+            if *screen == data.screen {
+                return Handled::Yes
+            }
 
+            match screen {
+                AppScreen::Home => data.screen = *screen,
+                &AppScreen::SearchResults => data.screen = *screen
+            }
+            
+
+            Handled::Yes
+
+        } else {
+            Handled::No
         }
-        
-        Handled::No
     }
 
     fn event(

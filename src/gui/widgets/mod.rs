@@ -1,6 +1,7 @@
 use druid::{Data, Env, EventCtx, Widget, widget::{Controller, ControllerHost}};
 
 pub mod icon;
+pub mod none;
 pub mod separator;
 
 /// A controller that handles hover events using the provided callback

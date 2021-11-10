@@ -1,8 +1,8 @@
 //! Search widget builders that modify the search term state data and dispatch commands to search
 
-use druid::{Data, Event, Widget, WidgetExt, widget::{Controller, Flex, TextBox}};
+use druid::{Data, Event, LensExt, Widget, WidgetExt, widget::{Controller, Either, Flex, Label, TextBox, ViewSwitcher}};
 
-use crate::gui::{CHANGE_SCREEN, data::screen::AppScreen, theme, widgets::{icon::{self, Icon}, RecipierWidget}};
+use crate::gui::{CHANGE_SCREEN, data::{AppState, screen::AppScreen, search::{Query, SearchResults, SearchResultsLens, SearchState}}, theme, widgets::{RecipierWidget, icon::{self, Icon}, none::NoWidget, separator::Separator}};
 
 /// Widget controller that sends a navigate to search results command when the enter key is pressed
 struct EnterController;
@@ -22,6 +22,26 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for EnterController {
         child.event(ctx, event, data, env)
     }
 }
+
+/// Generate the root search results widget
+pub fn search_screen() -> impl Widget<AppState> {
+    Flex::column()
+        .with_default_spacer()
+        .with_child(search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))))
+        .with_default_spacer()
+        .with_child(Separator::new(1.0))
+        .with_child(Either::new(
+            |state: &AppState, _env| state.search.results.is_some(),
+            Flex::row().with_child(Label::new("Results for: "))
+                .with_child(Label::raw()
+                    .with_font(theme::SMALL_FONT)
+                    .lens(AppState::search.then(SearchResultsLens.then(SearchResults::term)))
+                ),
+            NoWidget
+        )
+    )
+}
+
 
 /// Return a search bar that modifies a search term string and sends the change screen
 /// command on enter

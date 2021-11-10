@@ -63,8 +63,9 @@ impl Default for AppState {
             config: Config {
                 window_size: (480., 700.),
             },
+            recipies: Database::new("./recipes"),
             search: SearchState::default(),
-            recipies: Database::new("./recipes")
+            screen: AppScreen::Home
         }
     }
 }
