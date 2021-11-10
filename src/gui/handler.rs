@@ -2,11 +2,14 @@
 
 use std::sync::Arc;
 
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, im::Vector};
+use druid::{im::Vector, AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::SAVE_FILE;
 
-use super::{CHANGE_SCREEN, POPULATE_RESULTS, data::{AppState, screen::AppScreen, search::SearchResults}};
+use super::{
+    data::{screen::AppScreen, search::SearchResults, AppState},
+    CHANGE_SCREEN, POPULATE_RESULTS,
+};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -31,27 +34,31 @@ impl AppDelegate<AppState> for RecipierDelegate {
         }
     }
 
-
-    fn command(&mut self, _ctx: &mut DelegateCtx, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
+    fn command(
+        &mut self,
+        _ctx: &mut DelegateCtx,
+        _target: Target,
+        cmd: &Command,
+        data: &mut AppState,
+        _env: &Env,
+    ) -> Handled {
         if let Some(screen) = cmd.get(CHANGE_SCREEN) {
             if *screen == data.screen {
-                return Handled::Yes
+                return Handled::Yes;
             }
 
             match screen {
                 AppScreen::Home => data.screen = *screen,
-                &AppScreen::SearchResults => data.screen = *screen
+                &AppScreen::SearchResults => data.screen = *screen,
             }
-            
 
             Handled::Yes
-
         } else if let Some(()) = cmd.get(POPULATE_RESULTS) {
             data.search.results = Some(SearchResults {
                 recipes: Vector::new(),
-                term: Arc::from(data.search.query.term.as_str())
+                term: Arc::from(data.search.query.term.as_str()),
             });
-            
+
             Handled::Yes
         } else {
             Handled::No

@@ -65,7 +65,7 @@ impl Default for AppState {
             },
             recipies: Database::new("./recipes"),
             search: SearchState::default(),
-            screen: AppScreen::Home
+            screen: AppScreen::Home,
         }
     }
 }

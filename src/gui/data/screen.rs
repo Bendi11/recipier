@@ -9,7 +9,5 @@ pub enum AppScreen {
     /// The main screen allowing the user to search and view recent recipes
     Home,
     /// Search results screen with the results of a query
-    SearchResults
+    SearchResults,
 }
-
-

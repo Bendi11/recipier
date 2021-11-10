@@ -1,9 +1,9 @@
 pub mod data;
+pub mod handler;
+mod impls;
 pub mod theme;
 pub mod ui;
 pub mod widgets;
-pub mod handler;
-mod impls;
 
 use self::data::screen::AppScreen;
 use druid::Selector;

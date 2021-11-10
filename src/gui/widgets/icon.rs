@@ -11,7 +11,7 @@ pub const BOWL_ICON: IconData = IconData {
 /// A magnifying glass search icon
 pub const SEARCH_ICON: IconData = IconData {
     path: include_str!("../../../assets/icons/search-path.txt"),
-    size: Size::new(16., 16.)
+    size: Size::new(16., 16.),
 };
 
 /// Structure with all data needed to render an icon: size and bezier path
@@ -82,7 +82,6 @@ impl Icon {
     pub fn set_scale(&mut self, scale: f64) {
         self.scale = scale;
     }
-
 }
 
 impl<D: Data> Widget<D> for Icon {
@@ -103,7 +102,7 @@ impl<D: Data> Widget<D> for Icon {
                 true => {
                     self.scale = max.height / self.size.height;
                     Size::new(max.height, max.height)
-                },
+                }
                 false => {
                     self.scale = max.width / self.size.width;
                     Size::new(max.width, max.width)

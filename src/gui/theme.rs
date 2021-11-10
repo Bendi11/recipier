@@ -38,7 +38,9 @@ pub fn set(env: &mut Env) {
     );
     env.set(
         SMALL_FONT,
-        FontDescriptor::new(FontFamily::SYSTEM_UI).with_size(11.).with_style(FontStyle::Italic),
+        FontDescriptor::new(FontFamily::SYSTEM_UI)
+            .with_size(11.)
+            .with_style(FontStyle::Italic),
     );
 
     env.set(COLOR_1, Color::from_hex_str("#F0F5F9").unwrap());

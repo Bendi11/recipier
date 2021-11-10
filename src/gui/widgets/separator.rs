@@ -25,7 +25,7 @@ impl Separator {
             color: theme::COLOR_3.into(),
             width,
             vertical: false,
-            space_ratio: 0.01.into()
+            space_ratio: 0.01.into(),
         }
     }
 
@@ -62,7 +62,11 @@ impl<D: Data> Widget<D> for Separator {
         let color = self.color.resolve(env);
         let ratio = self.space_ratio.resolve(env);
 
-        let endpos = if self.vertical { ctx.size().height } else { ctx.size().width };
+        let endpos = if self.vertical {
+            ctx.size().height
+        } else {
+            ctx.size().width
+        };
         let spacing = endpos * ratio;
         log::trace!("Spacing {}", spacing);
         let offset = (spacing / 2.).min(5.);
@@ -75,7 +79,7 @@ impl<D: Data> Widget<D> for Separator {
             false => ctx.fill(
                 RoundedRect::new(offset, 0., endpos - offset, self.width, 10.),
                 &color,
-            )
+            ),
         }
     }
 
@@ -91,9 +95,8 @@ impl<D: Data> Widget<D> for Separator {
     ) -> Size {
         match self.vertical {
             true => Size::new(self.width, bc.max().height),
-            false => Size::new(bc.max().width, self.width)
+            false => Size::new(bc.max().width, self.width),
         }
-        
     }
 
     fn lifecycle(

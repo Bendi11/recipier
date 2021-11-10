@@ -1,9 +1,12 @@
-use druid::{Data, Env, EventCtx, Widget, widget::{Controller, ControllerHost}};
+use druid::{
+    widget::{Controller, ControllerHost},
+    Data, Env, EventCtx, Widget,
+};
 
 pub mod icon;
+pub mod maybe;
 pub mod none;
 pub mod separator;
-pub mod maybe;
 
 /// A controller that handles hover events using the provided callback
 pub struct HoverController<D, W> {
@@ -16,7 +19,14 @@ pub struct HoverController<D, W> {
 }
 
 impl<D: Data, W: Widget<D>> Controller<D, W> for HoverController<D, W> {
-    fn event(&mut self, child: &mut W, ctx: &mut EventCtx, event: &druid::Event, data: &mut D, env: &Env) {
+    fn event(
+        &mut self,
+        child: &mut W,
+        ctx: &mut EventCtx,
+        event: &druid::Event,
+        data: &mut D,
+        env: &Env,
+    ) {
         if let druid::Event::MouseMove(_) = event {
             if ctx.is_hot() && !self.hovered {
                 self.hovered = true;
@@ -26,7 +36,7 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for HoverController<D, W> {
                 (self.undo)(ctx, data, child, env);
             }
         }
-        
+
         child.event(ctx, event, data, env)
     }
 }
@@ -34,15 +44,19 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for HoverController<D, W> {
 /// Extension methods for widgets with common functionality
 pub trait RecipierWidget<D: Data>: Widget<D> + Sized {
     /// Set a callback function to execute on hover
-    fn on_hover(self, 
+    fn on_hover(
+        self,
         cb: impl Fn(&mut EventCtx, &mut D, &mut Self, &Env) -> () + 'static,
         undo: impl Fn(&mut EventCtx, &mut D, &mut Self, &Env) -> () + 'static,
     ) -> ControllerHost<Self, HoverController<D, Self>> {
-        ControllerHost::new(self, HoverController {
-            cb: Box::new(cb),
-            undo: Box::new(undo),
-            hovered: false
-        })
+        ControllerHost::new(
+            self,
+            HoverController {
+                cb: Box::new(cb),
+                undo: Box::new(undo),
+                hovered: false,
+            },
+        )
     }
 }
 

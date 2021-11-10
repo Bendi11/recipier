@@ -10,7 +10,7 @@ use uuid::Uuid;
 use super::recipe::Recipe;
 
 /// A structure holding recipe ID to data pairs with methods to add, remove, and modify recipes
-/// 
+///
 /// The structure is an Arc over internal state, so is very easy to clone
 #[derive(Clone, Debug)]
 pub struct Database {
@@ -41,11 +41,11 @@ impl Database {
                     Ok(file) => match serde_json::from_reader(file) {
                         Ok(recipe) => {
                             log::trace!("Loaded recipe {} from file after get requested", id);
-                            
+
                             let recipe: Arc<Recipe> = Arc::new(recipe);
                             items.insert(id, DbEntry::Loaded(recipe.clone()));
                             Some(recipe)
-                        },
+                        }
                         Err(e) => {
                             log::error!("Failed to deserialize recipe from file {}: {}", id, e);
                             None
@@ -56,8 +56,8 @@ impl Database {
                         None
                     }
                 }
-            },
-            DbEntry::Loaded(recipe) => Some(recipe.clone())
+            }
+            DbEntry::Loaded(recipe) => Some(recipe.clone()),
         }
     }
 
@@ -70,7 +70,7 @@ impl Database {
     pub fn new(path: impl AsRef<Path>) -> Self {
         let this = Self {
             items: Arc::new(RwLock::new(HashMap::new())),
-            dir: Arc::from(path.as_ref())
+            dir: Arc::from(path.as_ref()),
         };
         //this.insert(Recipe::top_ramen());
         this
@@ -101,8 +101,12 @@ impl Database {
     /// Save this database to a directory of files and a path to the directory
     pub fn save<S: Serializer>(&self, ser: S) -> Result<S::Ok, S::Error> {
         if let Err(e) = std::fs::create_dir_all(&self.dir) {
-            log::error!("Failed to create directory {} to save recipes to: {}", self.dir.display(), e);
-            return self.dir.serialize(ser)
+            log::error!(
+                "Failed to create directory {} to save recipes to: {}",
+                self.dir.display(),
+                e
+            );
+            return self.dir.serialize(ser);
         }
 
         let items = self.items.read();
@@ -110,11 +114,22 @@ impl Database {
             if let DbEntry::Loaded(recipe) = recipe {
                 let path = self.dir.join(id.to_string());
                 match File::create(&path) {
-                    Ok(file) => if let Err(e) = serde_json::to_writer_pretty(file, recipe) {
-                        log::error!("Failed to serialize recipe {} to {}: {}", id, path.display(), e);
-                    },
+                    Ok(file) => {
+                        if let Err(e) = serde_json::to_writer_pretty(file, recipe) {
+                            log::error!(
+                                "Failed to serialize recipe {} to {}: {}",
+                                id,
+                                path.display(),
+                                e
+                            );
+                        }
+                    }
                     Err(e) => {
-                        log::error!("Failed to create / overwrite file {}: {}", path.display(), e);
+                        log::error!(
+                            "Failed to create / overwrite file {}: {}",
+                            path.display(),
+                            e
+                        );
                     }
                 }
             }
@@ -132,26 +147,39 @@ impl Database {
             Ok(dir) => {
                 for item in dir {
                     match item {
-                        Ok(item) => if let Some(name) = item.file_name().to_str() {
-                            match Uuid::parse_str(name) {
-                                Ok(id) => {
-                                    log::trace!("Adding recipe file {} to map as unloaded...", id);
-                                    this.items.write().insert(RecipeId(id), DbEntry::Unloaded);
-                                },
-                                Err(e) => {
-                                    log::warn!("Failed to parse directory item {} as UUID, not adding as entry...", e);
+                        Ok(item) => {
+                            if let Some(name) = item.file_name().to_str() {
+                                match Uuid::parse_str(name) {
+                                    Ok(id) => {
+                                        log::trace!(
+                                            "Adding recipe file {} to map as unloaded...",
+                                            id
+                                        );
+                                        this.items.write().insert(RecipeId(id), DbEntry::Unloaded);
+                                    }
+                                    Err(e) => {
+                                        log::warn!("Failed to parse directory item {} as UUID, not adding as entry...", e);
+                                    }
                                 }
                             }
-                        },
+                        }
                         Err(e) => {
-                            log::warn!("Failed to get directory entry in {}: {}", dir_path.display(), e);
+                            log::warn!(
+                                "Failed to get directory entry in {}: {}",
+                                dir_path.display(),
+                                e
+                            );
                         }
                     }
                 }
-            },
+            }
             Err(e) => {
-                log::error!("Failed to open recipe directory {}: {}", dir_path.display(), e);
-                return Ok(this)
+                log::error!(
+                    "Failed to open recipe directory {}: {}",
+                    dir_path.display(),
+                    e
+                );
+                return Ok(this);
             }
         }
 
