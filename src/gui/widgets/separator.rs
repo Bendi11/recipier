@@ -11,16 +11,25 @@ pub struct Separator {
     color: KeyOrValue<Color>,
     /// Width of the drawn separator
     width: f64,
+    /// If the separator is vertical
+    vertical: bool,
 }
 
 impl Separator {
-    /// Create a new separator with default color
+    /// Create a new horizontal separator with default color
     #[inline]
     pub fn new(width: f64) -> Self {
         Self {
             color: theme::COLOR_3.into(),
             width,
+            vertical: false,
         }
+    }
+
+    /// Builder method to render the separator as horizontal or vertical
+    pub fn vertical(mut self, vertical: bool) -> Self {
+        self.vertical = vertical;
+        self
     }
 
     /// Builder method to set the color of the line
@@ -42,13 +51,22 @@ impl<D: Data> Widget<D> for Separator {
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &D, env: &druid::Env) {
         let color = self.color.resolve(env);
-        let width = ctx.size().width;
-        let offset = if width < 20. { 0. } else { 10. };
+        let endpos = if self.vertical { ctx.size().height } else { ctx.size().width };
 
-        ctx.fill(
-            RoundedRect::new(offset, 0., width - offset, self.width, 10.),
-            &color,
-        );
+        const RATIO: f64 = 10.0;
+        let spacing = endpos / RATIO;
+        let offset = (spacing / 2.).min(5.);
+
+        match self.vertical {
+            true => ctx.fill(
+                RoundedRect::new(0., offset, self.width, endpos - offset, 10.),
+                &color,
+            ),
+            false => ctx.fill(
+                RoundedRect::new(offset, 0., endpos - offset, self.width, 10.),
+                &color,
+            )
+        }
     }
 
     fn update(&mut self, _ctx: &mut druid::UpdateCtx, _old_data: &D, _data: &D, _env: &druid::Env) {
@@ -61,7 +79,11 @@ impl<D: Data> Widget<D> for Separator {
         _data: &D,
         _env: &druid::Env,
     ) -> Size {
-        Size::new(bc.max().width, 1.)
+        match self.vertical {
+            true => Size::new(self.width, bc.max().height),
+            false => Size::new(bc.max().width, self.width)
+        }
+        
     }
 
     fn lifecycle(

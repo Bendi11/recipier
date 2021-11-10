@@ -28,6 +28,8 @@ pub struct Icon {
     size: Size,
     /// What color to render the data in
     color: KeyOrValue<Color>,
+    /// If the widget should scale dynamically
+    flex: bool,
 }
 
 impl Icon {
@@ -37,9 +39,17 @@ impl Icon {
             path: BezPath::from_svg(data.path).unwrap(),
             scale: 1.,
             size: data.size,
+            flex: true,
             color: Color::BLACK.into(),
         }
     }
+
+    /// Builder method to enable / disable flexible sizing
+    pub fn flex(mut self, flex: bool) -> Self {
+        self.flex = flex;
+        self
+    }
+
     /// Builder method to set the rendering color of this icon
     pub fn with_color(mut self, color: impl Into<KeyOrValue<Color>>) -> Self {
         self.color = color.into();
@@ -60,11 +70,26 @@ impl<D: Data> Widget<D> for Icon {
     fn layout(
         &mut self,
         _ctx: &mut druid::LayoutCtx,
-        _bc: &druid::BoxConstraints,
+        bc: &druid::BoxConstraints,
         _data: &D,
         _env: &druid::Env,
     ) -> Size {
-        self.size * self.scale
+        if self.flex {
+            let max = bc.max();
+
+            match max.width > max.height {
+                true => {
+                    self.scale = max.height / self.size.height;
+                    Size::new(max.height, max.height)
+                },
+                false => {
+                    self.scale = max.width / self.size.width;
+                    Size::new(max.width, max.width)
+                }
+            }
+        } else {
+            self.size * self.scale
+        }
     }
 
     fn event(

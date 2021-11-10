@@ -1,9 +1,8 @@
 pub mod config;
 
-use std::{path::Path, sync::Arc};
+use std::path::Path;
 
 use druid::{Data, Lens};
-use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 
 use crate::recipes::db::Database;

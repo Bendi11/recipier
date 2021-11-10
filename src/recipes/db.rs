@@ -1,6 +1,6 @@
 //! A serializable database containing all recipes
 
-use std::{fmt, fs::File, io, path::Path, sync::Arc};
+use std::{fmt, fs::File, path::Path, sync::Arc};
 
 use hashbrown::HashMap;
 use parking_lot::RwLock;
@@ -31,7 +31,6 @@ enum DbEntry {
 
 impl Database {
     /// Get a recipe by UUID from this database, if the recipe is not currently loaded then it will be loaded
-    #[inline]
     pub fn get(&self, id: RecipeId) -> Option<Arc<Recipe>> {
         let items = self.items.read();
         match items.get(&id)? {
@@ -41,6 +40,8 @@ impl Database {
                 match File::open(self.dir.join(id.to_string())) {
                     Ok(file) => match serde_json::from_reader(file) {
                         Ok(recipe) => {
+                            log::trace!("Loaded recipe {} from file after get requested", id);
+                            
                             let recipe: Arc<Recipe> = Arc::new(recipe);
                             items.insert(id, DbEntry::Loaded(recipe.clone()));
                             Some(recipe)
@@ -71,7 +72,7 @@ impl Database {
             items: Arc::new(RwLock::new(HashMap::new())),
             dir: Arc::from(path.as_ref())
         };
-        this.insert(Recipe::top_ramen());
+        //this.insert(Recipe::top_ramen());
         this
     }
 
