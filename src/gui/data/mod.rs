@@ -20,7 +20,7 @@ pub struct AppState {
 
     /// The central database of recipes
     #[serde(serialize_with = "Database::save", deserialize_with = "Database::load")]
-    pub recipies: Database,
+    pub recipes: Database,
 
     /// State for querying the database of recipes
     #[serde(skip)]
@@ -63,7 +63,7 @@ impl Default for AppState {
             config: Config {
                 window_size: (480., 700.),
             },
-            recipies: Database::new("./recipes"),
+            recipes: Database::new("./recipes"),
             search: SearchState::default(),
             screen: AppScreen::Home,
         }

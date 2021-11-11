@@ -2,22 +2,23 @@
 
 use std::sync::Arc;
 
-use druid::{LensExt, Widget, WidgetExt, widget::Label};
+use druid::{LensExt, Widget, WidgetExt, lens, widget::{Flex, Label}};
 
-use crate::{gui::{data::AppState, theme, widgets::maybe::Maybe}, recipes::{db::RecipeId, recipe::Recipe}};
+use crate::{gui::theme, recipes::recipe::Recipe};
 
 /// Show a peek of a recipe with brief details
-pub fn recipe_brief_widget(id: RecipeId) -> impl Widget<AppState> {
-    let title = Maybe::<Arc<Recipe>>::or_empty(|| Label::raw()
+pub fn recipe_brief_widget() -> impl Widget<Arc<Recipe>> {
+    let layout = Flex::column()
+        .with_child(Label::raw()
             .with_font(theme::LABEL_FONT)
-            .lens(druid::lens::Identity.in_arc().then(Recipe::name))
+            .lens(Recipe::name)
         )
-        .lens(AppState::recipies.map(
-            |db| db.get(id), 
-            |db, recipe| if let Some(recipe) = recipe {
-            db.update(id, recipe)
-        })
-    );
+        .with_spacer(0.1)
+        .with_child(Label::new(|data: &Recipe, _env: &'_ _| {
+            format!("Created {}", data.created_on.format("%e %B %Y %I:%M"))
+        }))
+        .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity));
+        
 
-    title
+    layout
 }

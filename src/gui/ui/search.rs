@@ -1,9 +1,6 @@
 //! Search widget builders that modify the search term state data and dispatch commands to search
 
-use druid::{
-    widget::{Controller, Flex, Label, Scroll, TextBox},
-    Data, Event, LensExt, Widget, WidgetExt,
-};
+use druid::{Data, Event, LensExt, Widget, WidgetExt, widget::{Controller, Flex, Label, List, Scroll, TextBox}};
 
 use crate::gui::{
     data::{
@@ -20,6 +17,8 @@ use crate::gui::{
     },
     CHANGE_SCREEN, POPULATE_RESULTS,
 };
+
+use super::recipe::recipe_brief_widget;
 
 /// Widget controller that sends a navigate to search results command when the enter key is pressed
 struct EnterController;
@@ -68,6 +67,11 @@ pub fn search_screen() -> impl Widget<AppState> {
                             .with_font(theme::SMALL_FONT)
                             .lens(SearchResults::term),
                     )
+                    .with_child(Separator::new(5.0))
+                    .with_default_spacer()
+                    .with_child(Scroll::new(List::new(||
+                        recipe_brief_widget()
+                    ).lens(SearchResults::recipes)))
             })
             .lens(AppState::search.then(SearchState::results))
             .align_left(),

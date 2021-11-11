@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use druid::{im::Vector, Data, Lens};
 
-use crate::recipes::db::RecipeId;
+use crate::recipes::recipe::Recipe;
 
 /// Search state containing optional list of search query results and search query details
 #[derive(Clone, Debug, Data, Lens)]
@@ -19,7 +19,7 @@ pub struct SearchState {
 #[derive(Clone, Debug, Data, Lens)]
 pub struct SearchResults {
     /// List of recipes matching the query
-    pub recipes: Vector<RecipeId>,
+    pub recipes: Vector<Arc<Recipe>>,
     /// The original search term
     pub term: Arc<str>,
 }
