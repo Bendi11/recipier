@@ -1,4 +1,5 @@
 //! Structures holding recipe data
+use chrono::{DateTime, Local, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 use std::{fmt, sync::Arc, time};
 
@@ -58,6 +59,8 @@ impl fmt::Display for IngredientAmount {
 pub struct Recipe {
     /// The name of the recipe
     pub name: Arc<str>,
+    /// When this recipe was created
+    pub created_on: DateTime<Utc>,
     /// How many servings a recipe makes
     pub servings: f32,
     /// A list of ingredients in the recipe
@@ -73,6 +76,7 @@ impl Recipe {
     pub fn top_ramen() -> Self {
         Self {
             name: "Top Ramen".into(),
+            created_on: DateTime::from(Local.ymd(2021, 11, 10).and_hms(16, 7, 0)),
             servings: 2.,
             ingredients: Arc::new([
                 Ingredient {

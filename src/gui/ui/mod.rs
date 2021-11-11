@@ -1,4 +1,5 @@
 pub mod search;
+pub mod recipe;
 
 use druid::{
     widget::{Button, Flex, Label, ViewSwitcher},
