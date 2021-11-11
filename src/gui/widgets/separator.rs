@@ -11,8 +11,6 @@ pub struct Separator {
     color: KeyOrValue<Color>,
     /// Width of the drawn separator
     width: f64,
-    /// The size of the separator, calculated in the layout method
-    size: Size,
     /// Ratio of separator size to gap size
     space_ratio: KeyOrValue<f64>,
     /// If the separator is vertical
@@ -27,7 +25,6 @@ impl Separator {
             color: theme::COLOR_3.into(),
             width,
             vertical: false,
-            size: Size::new(0., 0.),
             space_ratio: 0.01.into(),
         }
     }
@@ -71,7 +68,6 @@ impl<D: Data> Widget<D> for Separator {
             ctx.size().width
         };
         let spacing = endpos * ratio;
-        log::trace!("Spacing {}, endpos: {}, ratio: {}", spacing, endpos, ratio);
         let offset = (spacing / 2.).min(5.);
 
         match self.vertical {
@@ -96,11 +92,10 @@ impl<D: Data> Widget<D> for Separator {
         _data: &D,
         _env: &druid::Env,
     ) -> Size {
-        self.size = match self.vertical {
+        match self.vertical {
             true => Size::new(self.width, bc.max().height),
             false => Size::new(bc.max().width, self.width),
-        };
-        self.size
+        }
     }
 
     fn lifecycle(

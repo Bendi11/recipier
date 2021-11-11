@@ -57,30 +57,30 @@ pub fn search_screen() -> impl Widget<AppState> {
         .with_default_spacer()
         .with_child(search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))))
         .with_default_spacer()
+        .with_child(
+            Maybe::or_empty(|| {
+                Flex::row()
+                    .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
+                    .with_child(
+                        Label::raw()
+                            .with_font(theme::SMALL_FONT)
+                            .lens(SearchResults::term),
+                    )
+                    .align_left()
+            })
+            .lens(AppState::search.then(SearchState::results)),
+        )
         .with_child(Separator::new(1.0))
         .with_flex_child(
             Maybe::or_empty(|| {
-                Flex::column()
-                    .with_child(
-                        Flex::row()
-                            .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
-                            .with_child(
-                                Label::raw()
-                                    .with_font(theme::SMALL_FONT)
-                                    .lens(SearchResults::term),
-                            )
-                            .align_left(),
+                Scroll::new(List::new(|| recipe_brief_widget().border(theme::COLOR_4, 5.)
+                        .rounded(5.)
                     )
-                    .with_default_spacer()
-                    .with_flex_child(
-                        Scroll::new(List::new(|| {
-                            recipe_brief_widget().border(theme::COLOR_2, 3.).rounded(5.)
-                        })),
-                        FlexParams::new(10., CrossAxisAlignment::Start),
-                    )
+                )
+                .expand_width()
             })
             .lens(AppState::search.then(SearchState::results)),
-            FlexParams::new(10., CrossAxisAlignment::Start),
+            10.,
         )
 }
 
@@ -114,6 +114,6 @@ pub fn search_bar() -> impl Widget<String> {
                     ctx.submit_command(POPULATE_RESULTS);
                     ctx.submit_command(CHANGE_SCREEN.with(AppScreen::SearchResults));
                 }),
-            0.4,
+            0.3,
         )
 }
