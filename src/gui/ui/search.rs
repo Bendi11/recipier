@@ -71,6 +71,7 @@ pub fn search_screen() -> impl Widget<AppState> {
             .lens(AppState::search.then(SearchState::results)),
         )
         .with_child(Separator::new(1.0))
+        .with_default_spacer()
         .with_flex_child(
             Maybe::new(
                 || {
