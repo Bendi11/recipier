@@ -1,25 +1,12 @@
 //! Search widget builders that modify the search term state data and dispatch commands to search
 
-use druid::{
-    widget::{Controller, CrossAxisAlignment, Flex, FlexParams, Label, List, Scroll, TextBox},
-    Data, Event, LensExt, Widget, WidgetExt,
-};
+use druid::{Data, Event, LensExt, Widget, WidgetExt, widget::{Controller, Flex, Label, List, Scroll, SizedBox, TextBox}};
 
-use crate::gui::{
-    data::{
+use crate::gui::{CHANGE_SCREEN, POPULATE_RESULTS, data::{
         screen::AppScreen,
         search::{Query, SearchResults, SearchState},
         AppState,
-    },
-    theme,
-    widgets::{
-        icon::{self, Icon},
-        maybe::Maybe,
-        separator::Separator,
-        RecipierWidget,
-    },
-    CHANGE_SCREEN, POPULATE_RESULTS,
-};
+    }, theme, widgets::{RecipierWidget, icon::{self, Icon}, maybe::Maybe, none::NoWidget, separator::Separator}};
 
 use super::recipe::recipe_brief_widget;
 
@@ -72,16 +59,17 @@ pub fn search_screen() -> impl Widget<AppState> {
         )
         .with_child(Separator::new(1.0))
         .with_flex_child(
-            Maybe::or_empty(|| {
-                Scroll::new(List::new(|| recipe_brief_widget().border(theme::COLOR_4, 5.)
-                        .rounded(5.)
+            Maybe::new(|| {
+                Scroll::new(List::new(|| recipe_brief_widget().border(theme::COLOR_2, 2.).expand_width()
+                        
                     )
+                    .with_spacing(10.)
                 )
-                .expand_width()
-            })
-            .lens(AppState::search.then(SearchState::results)),
-            10.,
+                .vertical()
+            }, || SizedBox::empty().expand_height()).expand_width()
+            .lens(AppState::search.then(SearchState::results)), 10.
         )
+        .padding((2., 0.))
 }
 
 /// Return a search bar that modifies a search term string and sends the change screen
