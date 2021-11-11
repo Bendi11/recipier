@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use druid::{Data, Lens, im::OrdMap, widget::ListIter};
+use druid::{im::OrdMap, widget::ListIter, Data, Lens};
 
 use crate::recipes::recipe::Recipe;
 

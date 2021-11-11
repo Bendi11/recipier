@@ -1,5 +1,5 @@
-pub mod search;
 pub mod recipe;
+pub mod search;
 
 use druid::{
     widget::{Button, Flex, Label, ViewSwitcher},
@@ -38,7 +38,6 @@ pub fn root_widget() -> impl Widget<AppState> {
             search::search_bar().lens(AppState::search.then(SearchState::query).then(Query::term)),
         )
         .with_default_spacer()
-        .with_child(Button::new("Test").expand_width())
         .with_flex_spacer(0.5)
         .padding((5., 0., 0., 0.));
 

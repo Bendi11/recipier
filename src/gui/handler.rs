@@ -56,8 +56,16 @@ impl AppDelegate<AppState> for RecipierDelegate {
         } else if let Some(()) = cmd.get(POPULATE_RESULTS) {
             data.search.results = Some(SearchResults {
                 recipes: data.recipes.search(|recipe| {
-                    if let Some(score) = sublime_fuzzy::best_match(recipe.name.borrow(), data.search.query.term.as_str())
-                        .or_else(|| sublime_fuzzy::best_match(recipe.body.borrow(), data.search.query.term.as_str())) {
+                    if let Some(score) = sublime_fuzzy::best_match(
+                        recipe.name.borrow(),
+                        data.search.query.term.as_str(),
+                    )
+                    .or_else(|| {
+                        sublime_fuzzy::best_match(
+                            recipe.body.borrow(),
+                            data.search.query.term.as_str(),
+                        )
+                    }) {
                         score.score()
                     } else {
                         isize::MIN

@@ -21,7 +21,6 @@ pub struct Database {
     dir: Arc<Path>,
 }
 
-
 impl Database {
     /// Get a recipe by UUID from this database, if the recipe is not currently loaded then it will be loaded
     pub fn get(&self, id: RecipeId) -> Option<Arc<Recipe>> {
@@ -47,8 +46,8 @@ impl Database {
         match items.get_mut(&id) {
             Some(entry) => {
                 *entry = recipe;
-            },
-            None => ()
+            }
+            None => (),
         }
     }
 
@@ -140,14 +139,11 @@ impl Database {
                             if let Some(name) = item.file_name().to_str() {
                                 match Uuid::parse_str(name) {
                                     Ok(id) => {
-                                        log::trace!(
-                                            "Adding recipe file {} to db...",
-                                            id
-                                        );
+                                        log::trace!("Adding recipe file {} to db...", id);
 
                                         match File::open(dir_path.join(id.to_string())) {
                                             Ok(file) => match serde_json::from_reader(file) {
-                                                Ok(recipe) => {                        
+                                                Ok(recipe) => {
                                                     let recipe: Arc<Recipe> = Arc::new(recipe);
                                                     this.items.write().insert(RecipeId(id), recipe);
                                                 }
@@ -156,7 +152,11 @@ impl Database {
                                                 }
                                             },
                                             Err(e) => {
-                                                log::error!("Failed to load recipe from file {}: {}", id, e);
+                                                log::error!(
+                                                    "Failed to load recipe from file {}: {}",
+                                                    id,
+                                                    e
+                                                );
                                             }
                                         }
                                     }

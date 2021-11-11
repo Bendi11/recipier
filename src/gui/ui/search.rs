@@ -1,8 +1,11 @@
 //! Search widget builders that modify the search term state data and dispatch commands to search
 
-use druid::{Data, Event, LensExt, Widget, WidgetExt, widget::{Controller, Flex, Label, List, Scroll, TextBox}};
+use druid::{
+    widget::{Controller, CrossAxisAlignment, Flex, FlexParams, Label, List, Scroll, TextBox},
+    Data, Event, LensExt, Widget, WidgetExt,
+};
 
-use crate::{gui::{
+use crate::gui::{
     data::{
         screen::AppScreen,
         search::{Query, SearchResults, SearchState},
@@ -16,7 +19,7 @@ use crate::{gui::{
         RecipierWidget,
     },
     CHANGE_SCREEN, POPULATE_RESULTS,
-}};
+};
 
 use super::recipe::recipe_brief_widget;
 
@@ -52,34 +55,32 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for EnterController {
 pub fn search_screen() -> impl Widget<AppState> {
     Flex::column()
         .with_default_spacer()
-        .with_flex_child(
-            search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))),
-            10.,
-        )
+        .with_child(search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))))
         .with_default_spacer()
         .with_child(Separator::new(1.0))
-        .with_child(
-            Maybe::or_empty(|| {
-                Flex::row()
-                    .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
-                    .with_child(
-                        Label::raw()
-                            .with_font(theme::SMALL_FONT)
-                            .lens(SearchResults::term),
-                    )
-                    .with_child(Separator::new(5.0))
-                    .with_default_spacer()
-                    .with_child(Scroll::new(List::new(||
-                        recipe_brief_widget()
-                    )))
-            })
-            .lens(AppState::search.then(SearchState::results))
-            .align_left(),
-        )
         .with_flex_child(
-            Maybe::or_empty(|| Scroll::new(Label::new("results")))
-                .lens(AppState::search.then(SearchState::results)),
-            100.,
+            Maybe::or_empty(|| {
+                Flex::column()
+                    .with_child(
+                        Flex::row()
+                            .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
+                            .with_child(
+                                Label::raw()
+                                    .with_font(theme::SMALL_FONT)
+                                    .lens(SearchResults::term),
+                            )
+                            .align_left(),
+                    )
+                    .with_default_spacer()
+                    .with_flex_child(
+                        Scroll::new(List::new(|| {
+                            recipe_brief_widget().border(theme::COLOR_2, 3.).rounded(5.)
+                        })),
+                        FlexParams::new(10., CrossAxisAlignment::Start),
+                    )
+            })
+            .lens(AppState::search.then(SearchState::results)),
+            FlexParams::new(10., CrossAxisAlignment::Start),
         )
 }
 
