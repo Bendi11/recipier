@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use druid::{im::Vector, Data, Lens};
+use druid::{Data, Lens, im::OrdMap};
 
 use crate::recipes::recipe::Recipe;
 
@@ -19,7 +19,9 @@ pub struct SearchState {
 #[derive(Clone, Debug, Data, Lens)]
 pub struct SearchResults {
     /// List of recipes matching the query
-    pub recipes: Vector<Arc<Recipe>>,
+    pub recipes: OrdMap<isize, Arc<Recipe>>,
+    /// The number of recipes that should be loaded onscreen
+    pub loaded_recipes: usize,
     /// The original search term
     pub term: Arc<str>,
 }

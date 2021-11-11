@@ -1,7 +1,8 @@
 //! A serializable database containing all recipes
 
-use std::{fmt, fs::File, ops::Index, path::Path, sync::{Arc, Weak}};
+use std::{borrow::Borrow, fmt, fs::File, path::Path, sync::Arc};
 
+use druid::im::OrdMap;
 use hashbrown::HashMap;
 use parking_lot::RwLock;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -15,50 +16,29 @@ use super::recipe::Recipe;
 #[derive(Clone, Debug)]
 pub struct Database {
     /// A map of recipe IDs to loaded or unloaded recipe data
-    items: Arc<RwLock<HashMap<RecipeId, DbEntry>>>,
+    items: Arc<RwLock<HashMap<RecipeId, Arc<Recipe>>>>,
     /// The directory that all recipe files are stored in
     dir: Arc<Path>,
 }
 
-/// An enum representing the stage that a recipe entry is in loading
-#[derive(Clone, Debug)]
-enum DbEntry {
-    /// There is no recipe present
-    Unloaded,
-    /// The recipe has been loaded
-    Loaded(Arc<Recipe>),
-}
 
 impl Database {
     /// Get a recipe by UUID from this database, if the recipe is not currently loaded then it will be loaded
     pub fn get(&self, id: RecipeId) -> Option<Arc<Recipe>> {
         let items = self.items.read();
-        match items.get(&id)? {
-            DbEntry::Unloaded => {
-                drop(items);
-                let mut items = self.items.write();
-                match File::open(self.dir.join(id.to_string())) {
-                    Ok(file) => match serde_json::from_reader(file) {
-                        Ok(recipe) => {
-                            log::trace!("Loaded recipe {} from file after get requested", id);
+        items.get(&id).map(|recipe| recipe.clone())
+    }
 
-                            let recipe: Arc<Recipe> = Arc::new(recipe);
-                            items.insert(id, DbEntry::Loaded(recipe.clone()));
-                            Some(recipe)
-                        }
-                        Err(e) => {
-                            log::error!("Failed to deserialize recipe from file {}: {}", id, e);
-                            None
-                        }
-                    },
-                    Err(e) => {
-                        log::error!("Failed to load recipe from file {}: {}", id, e);
-                        None
-                    }
-                }
-            }
-            DbEntry::Loaded(recipe) => Some(recipe.clone()),
+    /// Search this database, returning an ordered map of scores to recipe data
+    pub fn search(&self, searcher: impl Fn(&Recipe) -> isize) -> OrdMap<isize, Arc<Recipe>> {
+        let mut results = OrdMap::new();
+        let items = self.items.read();
+
+        for (_, recipe) in items.iter() {
+            results.insert(searcher(recipe.borrow()), recipe.clone());
         }
+
+        results
     }
 
     /// Update a recipe with new data
@@ -66,7 +46,7 @@ impl Database {
         let mut items = self.items.write();
         match items.get_mut(&id) {
             Some(entry) => {
-                *entry = DbEntry::Loaded(recipe);
+                *entry = recipe;
             },
             None => ()
         }
@@ -101,7 +81,7 @@ impl Database {
                     continue;
                 }
                 false => {
-                    data.insert(id, DbEntry::Loaded(Arc::new(recipe)));
+                    data.insert(id, Arc::new(recipe));
                     log::trace!("inserting recipe with ID {} into database...", id);
                 }
             }
@@ -122,26 +102,24 @@ impl Database {
 
         let items = self.items.read();
         for (id, recipe) in items.iter() {
-            if let DbEntry::Loaded(recipe) = recipe {
-                let path = self.dir.join(id.to_string());
-                match File::create(&path) {
-                    Ok(file) => {
-                        if let Err(e) = serde_json::to_writer_pretty(file, recipe) {
-                            log::error!(
-                                "Failed to serialize recipe {} to {}: {}",
-                                id,
-                                path.display(),
-                                e
-                            );
-                        }
-                    }
-                    Err(e) => {
+            let path = self.dir.join(id.to_string());
+            match File::create(&path) {
+                Ok(file) => {
+                    if let Err(e) = serde_json::to_writer_pretty(file, recipe) {
                         log::error!(
-                            "Failed to create / overwrite file {}: {}",
+                            "Failed to serialize recipe {} to {}: {}",
+                            id,
                             path.display(),
                             e
                         );
                     }
+                }
+                Err(e) => {
+                    log::error!(
+                        "Failed to create / overwrite file {}: {}",
+                        path.display(),
+                        e
+                    );
                 }
             }
         }
@@ -166,7 +144,23 @@ impl Database {
                                             "Adding recipe file {} to map as unloaded...",
                                             id
                                         );
-                                        this.items.write().insert(RecipeId(id), DbEntry::Unloaded);
+
+                                        match File::open(this.dir.join(id.to_string())) {
+                                            Ok(file) => match serde_json::from_reader(file) {
+                                                Ok(recipe) => {
+                                                    log::trace!("Loaded recipe {} from file after get requested", id);
+                        
+                                                    let recipe: Arc<Recipe> = Arc::new(recipe);
+                                                    this.items.write().insert(RecipeId(id), recipe);
+                                                }
+                                                Err(e) => {
+                                                    log::error!("Failed to deserialize recipe from file {}: {}", id, e);
+                                                }
+                                            },
+                                            Err(e) => {
+                                                log::error!("Failed to load recipe from file {}: {}", id, e);
+                                            }
+                                        }
                                     }
                                     Err(e) => {
                                         log::warn!("Failed to parse directory item {} as UUID, not adding as entry...", e);

@@ -1,6 +1,6 @@
 //! Application command handler
 
-use std::sync::Arc;
+use std::{borrow::Borrow, sync::Arc};
 
 use druid::{im::Vector, AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
@@ -55,10 +55,17 @@ impl AppDelegate<AppState> for RecipierDelegate {
             Handled::Yes
         } else if let Some(()) = cmd.get(POPULATE_RESULTS) {
             data.search.results = Some(SearchResults {
-                recipes: Vector::new(),
+                recipes: data.recipes.search(|recipe| {
+                    if let Some(score) = sublime_fuzzy::best_match(recipe.name.borrow(), data.search.query.term.as_str())
+                        .or_else(|| sublime_fuzzy::best_match(recipe.body.borrow(), data.search.query.term.as_str())) {
+                        score.score()
+                    } else {
+                        isize::MIN
+                    }
+                }),
+                loaded_recipes: 10,
                 term: Arc::from(data.search.query.term.as_str()),
             });
-
             Handled::Yes
         } else {
             Handled::No

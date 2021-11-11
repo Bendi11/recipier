@@ -1,8 +1,10 @@
 //! Search widget builders that modify the search term state data and dispatch commands to search
 
-use druid::{Data, Event, LensExt, Widget, WidgetExt, widget::{Controller, Flex, Label, List, Scroll, TextBox}};
+use std::sync::Arc;
 
-use crate::gui::{
+use druid::{Data, Event, LensExt, Widget, WidgetExt, lens, widget::{Controller, Flex, Label, List, Scroll, TextBox}};
+
+use crate::{gui::{
     data::{
         screen::AppScreen,
         search::{Query, SearchResults, SearchState},
@@ -16,7 +18,7 @@ use crate::gui::{
         RecipierWidget,
     },
     CHANGE_SCREEN, POPULATE_RESULTS,
-};
+}, recipes::recipe::Recipe};
 
 use super::recipe::recipe_brief_widget;
 
@@ -71,7 +73,7 @@ pub fn search_screen() -> impl Widget<AppState> {
                     .with_default_spacer()
                     .with_child(Scroll::new(List::new(||
                         recipe_brief_widget()
-                    ).lens(SearchResults::recipes)))
+                    )))
             })
             .lens(AppState::search.then(SearchState::results))
             .align_left(),
