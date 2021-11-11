@@ -1,6 +1,6 @@
 //! A serializable database containing all recipes
 
-use std::{fmt, fs::File, path::Path, sync::Arc};
+use std::{fmt, fs::File, ops::Index, path::Path, sync::{Arc, Weak}};
 
 use hashbrown::HashMap;
 use parking_lot::RwLock;
@@ -58,6 +58,17 @@ impl Database {
                 }
             }
             DbEntry::Loaded(recipe) => Some(recipe.clone()),
+        }
+    }
+
+    /// Update a recipe with new data
+    pub fn update(&self, id: RecipeId, recipe: Arc<Recipe>) {
+        let mut items = self.items.write();
+        match items.get_mut(&id) {
+            Some(entry) => {
+                *entry = DbEntry::Loaded(recipe);
+            },
+            None => ()
         }
     }
 

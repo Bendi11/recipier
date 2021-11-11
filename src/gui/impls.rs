@@ -2,7 +2,7 @@
 
 use druid::Data;
 
-use crate::recipes::db::{Database, RecipeId};
+use crate::recipes::{db::{Database, RecipeId}, recipe::Recipe};
 
 impl Data for Database {
     fn same(&self, other: &Self) -> bool {
@@ -11,6 +11,12 @@ impl Data for Database {
 }
 
 impl Data for RecipeId {
+    fn same(&self, other: &Self) -> bool {
+        self.eq(other)
+    }
+}
+
+impl Data for Recipe {
     fn same(&self, other: &Self) -> bool {
         self.eq(other)
     }
