@@ -2,7 +2,7 @@
 
 use std::{borrow::Borrow, sync::Arc};
 
-use druid::{im::Vector, AppDelegate, Command, DelegateCtx, Env, Handled, Target};
+use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::SAVE_FILE;
 
@@ -66,6 +66,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
                 loaded_recipes: 10,
                 term: Arc::from(data.search.query.term.as_str()),
             });
+            log::trace!("Search results are now: {:#?}", data.search.results);
             Handled::Yes
         } else {
             Handled::No

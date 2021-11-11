@@ -1,8 +1,6 @@
 //! Search widget builders that modify the search term state data and dispatch commands to search
 
-use std::sync::Arc;
-
-use druid::{Data, Event, LensExt, Widget, WidgetExt, lens, widget::{Controller, Flex, Label, List, Scroll, TextBox}};
+use druid::{Data, Event, LensExt, Widget, WidgetExt, widget::{Controller, Flex, Label, List, Scroll, TextBox}};
 
 use crate::{gui::{
     data::{
@@ -18,7 +16,7 @@ use crate::{gui::{
         RecipierWidget,
     },
     CHANGE_SCREEN, POPULATE_RESULTS,
-}, recipes::recipe::Recipe};
+}};
 
 use super::recipe::recipe_brief_widget;
 

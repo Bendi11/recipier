@@ -60,6 +60,7 @@ pub struct Recipe {
     /// The name of the recipe
     pub name: Arc<str>,
     /// When this recipe was created
+    #[serde(default = "chrono::Utc::now")]
     pub created_on: DateTime<Utc>,
     /// How many servings a recipe makes
     pub servings: f32,
