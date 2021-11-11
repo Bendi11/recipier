@@ -2,7 +2,7 @@ pub mod recipe;
 pub mod search;
 
 use druid::{
-    widget::{Button, Flex, Label, ViewSwitcher},
+    widget::{Flex, Label, ViewSwitcher},
     LensExt, Widget, WidgetExt,
 };
 
