@@ -126,4 +126,5 @@ pub fn search_bar() -> impl Widget<String> {
                 }),
             0.3,
         )
+        .fix_height(50.)
 }

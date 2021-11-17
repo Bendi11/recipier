@@ -42,7 +42,7 @@ pub fn root_widget() -> impl Widget<AppState> {
         .padding((5., 0., 0., 0.));
 
     let screen = Flex::row()
-        .with_flex_child(sidebar, 1.)
+        .with_child(sidebar.fix_width(200.))
         .with_default_spacer()
         .with_child(Separator::new(5.).vertical(true).with_color(theme::COLOR_2))
         .with_default_spacer()
@@ -54,7 +54,7 @@ pub fn root_widget() -> impl Widget<AppState> {
                     AppScreen::SearchResults => search::search_screen().boxed(),
                     AppScreen::View => recipe::view_screen().boxed(),
                 },
-            ),
+            ).expand(),
             GOLDEN_RATIO * 1.7, //Is it still the golden ratio, just... scaled?
         );
 

@@ -58,12 +58,10 @@ impl Database {
 
     /// Create a new empty database
     pub fn new(path: impl AsRef<Path>) -> Self {
-        let this = Self {
+        Self {
             items: Arc::new(RwLock::new(HashMap::new())),
             dir: Arc::from(path.as_ref()),
-        };
-        //this.insert(Recipe::top_ramen());
-        this
+        }
     }
 
     /// Insert a recipe into the database, automatically creating an ID and returning it
@@ -126,6 +124,7 @@ impl Database {
     pub fn load<'de, D: Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
         let dir_path = Arc::<Path>::deserialize(de)?; //Load the directory path
         let this = Self::new(&dir_path);
+        //this.insert(Recipe::top_ramen());
 
         match std::fs::read_dir(&dir_path) {
             Ok(dir) => {
@@ -182,7 +181,6 @@ impl Database {
             }
         }
         
-        this.insert(Recipe::top_ramen());
         Ok(this)
     }
 }
