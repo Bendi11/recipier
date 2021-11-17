@@ -5,9 +5,8 @@ pub mod theme;
 pub mod ui;
 pub mod widgets;
 
-use std::sync::Arc;
 
-use crate::recipes::recipe::Recipe;
+use crate::recipes::db::RecipeId;
 
 use self::data::screen::AppScreen;
 use druid::Selector;
@@ -23,4 +22,4 @@ pub const CHANGE_SCREEN: Selector<AppScreen> = Selector::new("recipier.change-sc
 pub const POPULATE_RESULTS: Selector = Selector::new("recipier.populate-search-results");
 
 /// View the specified recipe in the recipe view screen
-pub const VIEW_RECIPE: Selector<Arc<Recipe>> = Selector::new("recipier.view-recipe");
+pub const VIEW_RECIPE: Selector<RecipeId> = Selector::new("recipier.view-recipe");

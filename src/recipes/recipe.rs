@@ -4,7 +4,7 @@ use druid::im::{Vector, vector};
 use serde::{Deserialize, Serialize};
 use std::{fmt, sync::Arc, time};
 
-use super::measure::{Mass, Volume};
+use super::{db::RecipeId, measure::{Mass, Volume}};
 
 /// One ingredient in a recipe, with amount of the ingredient and ingredient name
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, druid::Lens, druid::Data)]
@@ -58,6 +58,8 @@ impl fmt::Display for IngredientAmount {
 /// Immutable struct containing all data a user can add to a recipe
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, druid::Lens)]
 pub struct Recipe {
+    /// The internal ID of this recipe
+    pub id: RecipeId,
     /// The name of the recipe
     pub name: Arc<str>,
     /// When this recipe was created
@@ -77,6 +79,7 @@ impl Recipe {
     /// Return a `Recipe` for top ramen
     pub fn top_ramen() -> Self {
         Self {
+            id: RecipeId::new(),
             name: "Top Ramen".into(),
             created_on: DateTime::from(Local.ymd(2021, 11, 10).and_hms(16, 7, 0)),
             servings: 2.,

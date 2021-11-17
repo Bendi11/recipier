@@ -44,10 +44,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
                 return Handled::Yes;
             }
 
-            match screen {
-                AppScreen::Home => data.screen = *screen,
-                &AppScreen::SearchResults => data.screen = *screen,
-            }
+            data.screen = *screen;
 
             Handled::Yes
         } else if let Some(()) = cmd.get(POPULATE_RESULTS) {
@@ -71,10 +68,9 @@ impl AppDelegate<AppState> for RecipierDelegate {
                 loaded_recipes: 10,
                 term: Arc::from(data.search.query.term.as_str()),
             });
-            log::trace!("Search results are now: {:#?}", data.search.results);
             Handled::Yes
         } else if let Some(recipe) = cmd.get(VIEW_RECIPE) {
-            
+            data.view.viewed = Some(*recipe);
             Handled::Yes
         } else {
             Handled::No

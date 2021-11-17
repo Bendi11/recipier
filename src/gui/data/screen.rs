@@ -10,4 +10,6 @@ pub enum AppScreen {
     Home,
     /// Search results screen with the results of a query
     SearchResults,
+    /// The screen displaying one recipe's data
+    View,
 }

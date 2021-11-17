@@ -4,10 +4,20 @@ use std::sync::Arc;
 
 use druid::{LensExt, Widget, WidgetExt, lens, widget::{Flex, Label, LineBreaking, List, Scroll}};
 
-use crate::{gui::{theme, widgets::separator::Separator}, recipes::recipe::{Ingredient, Recipe}};
+use crate::{gui::{data::AppState, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
 
 /// The string to use when formatting chrono datetimes
 pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
+
+/// Return a widget that displays one recipe in a maximized view
+pub fn view_screen() -> impl Widget<AppState> {
+    Maybe::or_empty(recipe_widget)
+        .lens(lens::Identity.map(
+        |state: &AppState| state.recipes.get(state.view.viewed?), 
+        |state, recipe| if let Some(recipe) = recipe {
+            state.recipes.update(recipe);
+        }))
+}
 
 /// Show a widget that displays all information about the recipe
 pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {

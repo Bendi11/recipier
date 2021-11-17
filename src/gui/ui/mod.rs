@@ -52,6 +52,7 @@ pub fn root_widget() -> impl Widget<AppState> {
                 |screen, _state, _env| match screen {
                     AppScreen::Home => Label::new("Home").boxed(),
                     AppScreen::SearchResults => search::search_screen().boxed(),
+                    AppScreen::View => recipe::view_screen().boxed(),
                 },
             ),
             GOLDEN_RATIO * 1.7, //Is it still the golden ratio, just... scaled?

@@ -41,9 +41,9 @@ impl Database {
     }
 
     /// Update a recipe with new data
-    pub fn update(&self, id: RecipeId, recipe: Arc<Recipe>) {
+    pub fn update(&self, recipe: Arc<Recipe>) {
         let mut items = self.items.write();
-        match items.get_mut(&id) {
+        match items.get_mut(&recipe.id) {
             Some(entry) => {
                 *entry = recipe;
             }
@@ -199,6 +199,13 @@ impl PartialEq for Database {
 /// A unique identifier for a recipe in a database
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct RecipeId(Uuid);
+
+impl RecipeId {
+    /// Create a new unique recipe ID
+    pub fn new() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
 
 impl fmt::Display for RecipeId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
