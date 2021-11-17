@@ -1,6 +1,7 @@
 //! Structures holding recipe data
 use chrono::{DateTime, Local, TimeZone, Utc};
-use serde::{Deserialize, Serialize};
+use druid::im::{Vector, vector};
+use serde::{Deserialize, Serialize, Serializer};
 use std::{fmt, sync::Arc, time};
 
 use super::measure::{Mass, Volume};
@@ -65,7 +66,7 @@ pub struct Recipe {
     /// How many servings a recipe makes
     pub servings: f32,
     /// A list of ingredients in the recipe
-    pub ingredients: Arc<[Ingredient]>,
+    pub ingredients: Vector<Ingredient>,
     /// The recipe's instructions
     pub body: Arc<str>,
     /// The time that the recipe takes to make
@@ -79,7 +80,7 @@ impl Recipe {
             name: "Top Ramen".into(),
             created_on: DateTime::from(Local.ymd(2021, 11, 10).and_hms(16, 7, 0)),
             servings: 2.,
-            ingredients: Arc::new([
+            ingredients: vector![
                 Ingredient {
                     name: "Top Ramen Packet".into(),
                     amount: IngredientAmount::Count(1),
@@ -91,7 +92,7 @@ impl Recipe {
                         2.,
                     )),
                 },
-            ]),
+            ],
             body: r#"- Add water to small / medium pot and bring to boil
 - Remove noodle brick from packet and add to water
 - Allow noodles to cook for around 3 minutes, stirring occasionally
