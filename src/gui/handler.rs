@@ -6,7 +6,10 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::SAVE_FILE;
 
-use super::{CHANGE_SCREEN, POPULATE_RESULTS, VIEW_RECIPE, data::{search::SearchResults, AppState}};
+use super::{
+    data::{search::SearchResults, AppState},
+    CHANGE_SCREEN, POPULATE_RESULTS, VIEW_RECIPE,
+};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;

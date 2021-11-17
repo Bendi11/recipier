@@ -1,8 +1,11 @@
 //! Druid trait implementations for various types
 
-use druid::{Data, widget::ListIter};
+use druid::{widget::ListIter, Data};
 
-use crate::recipes::{db::{Database, RecipeId}, recipe::{Ingredient, Recipe}};
+use crate::recipes::{
+    db::{Database, RecipeId},
+    recipe::{Ingredient, Recipe},
+};
 
 impl Data for Database {
     fn same(&self, other: &Self) -> bool {

@@ -1,10 +1,13 @@
 //! Structures holding recipe data
 use chrono::{DateTime, Local, TimeZone, Utc};
-use druid::im::{Vector, vector};
+use druid::im::{vector, Vector};
 use serde::{Deserialize, Serialize};
 use std::{fmt, sync::Arc, time};
 
-use super::{db::RecipeId, measure::{Mass, Volume}};
+use super::{
+    db::RecipeId,
+    measure::{Mass, Volume},
+};
 
 /// One ingredient in a recipe, with amount of the ingredient and ingredient name
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, druid::Lens, druid::Data)]

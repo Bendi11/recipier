@@ -2,67 +2,98 @@
 
 use std::sync::Arc;
 
-use druid::{FontWeight, KeyOrValue, LensExt, TextAlignment, Widget, WidgetExt, lens, widget::{Flex, Label, LineBreaking, List, Scroll}};
+use druid::{
+    lens,
+    widget::{Flex, Label, LineBreaking, List, Scroll},
+    FontWeight, KeyOrValue, LensExt, TextAlignment, Widget, WidgetExt,
+};
 
-use crate::{gui::{CHANGE_SCREEN, VIEW_RECIPE, data::{AppState, screen::AppScreen}, theme, widgets::{RecipierWidget, maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
+use crate::{
+    gui::{
+        data::{screen::AppScreen, AppState},
+        theme,
+        widgets::{maybe::Maybe, separator::Separator, RecipierWidget},
+        CHANGE_SCREEN, VIEW_RECIPE,
+    },
+    recipes::recipe::{Ingredient, Recipe},
+};
 
 /// The string to use when formatting chrono datetimes
 pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
 
 /// Return a widget that displays one recipe in a maximized view
 pub fn view_screen() -> impl Widget<AppState> {
-    Maybe::or_empty(recipe_widget)
-        .lens(lens::Identity.map(
-        |state: &AppState| state.recipes.get(state.view.viewed?), 
-        |state, recipe| if let Some(recipe) = recipe {
-            state.recipes.update(recipe);
-        }))
+    Maybe::or_empty(recipe_widget).lens(lens::Identity.map(
+        |state: &AppState| state.recipes.get(state.view.viewed?),
+        |state, recipe| {
+            if let Some(recipe) = recipe {
+                state.recipes.update(recipe);
+            }
+        },
+    ))
 }
 
 /// Show a widget that displays all information about the recipe
 pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
     Flex::column()
-        .with_child(Label::raw()
-            .with_font(theme::HEADER_FONT)
-            .with_line_break_mode(LineBreaking::WordWrap)
-            .align_left()
-            .lens(Recipe::name)
+        .with_child(
+            Label::raw()
+                .with_font(theme::HEADER_FONT)
+                .with_line_break_mode(LineBreaking::WordWrap)
+                .align_left()
+                .lens(Recipe::name),
         )
         .with_default_spacer()
-        .with_child(Label::new(|recipe: &Recipe, _env: &'_ _| {
+        .with_child(
+            Label::new(|recipe: &Recipe, _env: &'_ _| {
                 format!("Created {}", recipe.created_on.format(DATETIME_FORMAT))
             })
-            .align_left()
+            .align_left(),
         )
         .with_default_spacer()
         .with_child(Separator::new(2.))
         .with_default_spacer()
-        .with_child(Label::new("Ingredients").with_font(theme::LABEL_FONT).align_left())
+        .with_child(
+            Label::new("Ingredients")
+                .with_font(theme::LABEL_FONT)
+                .align_left(),
+        )
         .with_default_spacer()
-        .with_child(Scroll::new(List::new(|| {
-            Flex::column()
-                .with_child(Flex::row()
-                    .with_child(Label::raw().with_font(theme::SYSTEM_FONT).lens(Ingredient::name).align_left())
+        .with_child(
+            Scroll::new(List::new(|| {
+                Flex::column()
+                    .with_child(
+                        Flex::row()
+                            .with_child(
+                                Label::raw()
+                                    .with_font(theme::SYSTEM_FONT)
+                                    .lens(Ingredient::name)
+                                    .align_left(),
+                            )
+                            .with_default_spacer()
+                            .with_child(Label::new(|ingredient: &Ingredient, _env: &'_ _| {
+                                format!("{}", ingredient.amount)
+                            }))
+                            .expand_width()
+                            .border(theme::COLOR_2, 2.)
+                            .rounded(5.0),
+                    )
                     .with_default_spacer()
-                    .with_child(Label::new(|ingredient: &Ingredient, _env: &'_ _| format!("{}", ingredient.amount)))
-                    .expand_width()
-                    .border(theme::COLOR_2, 2.)
-                    .rounded(5.0)
-                )
-                .with_default_spacer()
-        })).vertical())
+            }))
+            .vertical(),
+        )
         .with_default_spacer()
-        .with_child(Label::raw()
-            .with_font(theme::SYSTEM_FONT)
-            .with_line_break_mode(LineBreaking::WordWrap)
-            .with_text_alignment(TextAlignment::Start)
-            .expand()
-            .padding((5., 5.))
-            .background(theme::COLOR_2)
-            .lens(Recipe::body)
+        .with_child(
+            Label::raw()
+                .with_font(theme::SYSTEM_FONT)
+                .with_line_break_mode(LineBreaking::WordWrap)
+                .with_text_alignment(TextAlignment::Start)
+                .expand()
+                .padding((5., 5.))
+                .background(theme::COLOR_2)
+                .lens(Recipe::body),
         )
         .expand()
-        
         .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
 }
 
@@ -74,17 +105,17 @@ pub fn recipe_brief_widget() -> impl Widget<Arc<Recipe>> {
                 .with_font(theme::LABEL_FONT)
                 .on_hover(
                     |ctx, _recipe, this, env| {
-                       let font: KeyOrValue<_> = theme::LABEL_FONT.into();
-                       let font = font.resolve(env);
-                       this.set_font(font.with_weight(FontWeight::EXTRA_BOLD));
-                       ctx.request_layout();
-                       ctx.request_paint()
-                    }, 
+                        let font: KeyOrValue<_> = theme::LABEL_FONT.into();
+                        let font = font.resolve(env);
+                        this.set_font(font.with_weight(FontWeight::EXTRA_BOLD));
+                        ctx.request_layout();
+                        ctx.request_paint()
+                    },
                     |ctx, _, this, _| {
                         this.set_font(theme::LABEL_FONT);
                         ctx.request_layout();
                         ctx.request_paint()
-                    }
+                    },
                 )
                 .lens(Recipe::name)
                 .align_left()

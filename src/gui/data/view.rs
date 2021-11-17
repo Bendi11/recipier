@@ -14,8 +14,6 @@ pub struct ViewState {
 
 impl Default for ViewState {
     fn default() -> Self {
-        Self {
-            viewed: None
-        }
+        Self { viewed: None }
     }
 }

@@ -30,7 +30,7 @@ pub fn root_widget() -> impl Widget<AppState> {
             Icon::svg(&icon::BOWL_ICON)
                 .with_scale(10.)
                 .with_color(theme::COLOR_4)
-                .fix_size(150., 150.)        
+                .fix_size(150., 150.),
         )
         .with_child(Separator::new(5.).with_ratio(1.))
         .with_default_spacer()
@@ -54,7 +54,8 @@ pub fn root_widget() -> impl Widget<AppState> {
                     AppScreen::SearchResults => search::search_screen().boxed(),
                     AppScreen::View => recipe::view_screen().boxed(),
                 },
-            ).expand(),
+            )
+            .expand(),
             GOLDEN_RATIO * 1.7, //Is it still the golden ratio, just... scaled?
         );
 

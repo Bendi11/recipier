@@ -180,7 +180,7 @@ impl Database {
                 return Ok(this);
             }
         }
-        
+
         Ok(this)
     }
 }
