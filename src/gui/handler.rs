@@ -6,10 +6,7 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::SAVE_FILE;
 
-use super::{
-    data::{screen::AppScreen, search::SearchResults, AppState},
-    CHANGE_SCREEN, POPULATE_RESULTS,
-};
+use super::{CHANGE_SCREEN, POPULATE_RESULTS, VIEW_RECIPE, data::{screen::AppScreen, search::SearchResults, AppState}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -75,6 +72,9 @@ impl AppDelegate<AppState> for RecipierDelegate {
                 term: Arc::from(data.search.query.term.as_str()),
             });
             log::trace!("Search results are now: {:#?}", data.search.results);
+            Handled::Yes
+        } else if let Some(recipe) = cmd.get(VIEW_RECIPE) {
+            
             Handled::Yes
         } else {
             Handled::No

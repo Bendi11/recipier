@@ -1,7 +1,7 @@
 //! Structures holding recipe data
 use chrono::{DateTime, Local, TimeZone, Utc};
 use druid::im::{Vector, vector};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use std::{fmt, sync::Arc, time};
 
 use super::measure::{Mass, Volume};

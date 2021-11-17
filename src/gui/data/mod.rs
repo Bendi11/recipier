@@ -1,6 +1,7 @@
 pub mod config;
 pub mod screen;
 pub mod search;
+pub mod view;
 
 use std::path::Path;
 
