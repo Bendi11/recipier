@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use druid::{LensExt, Widget, WidgetExt, lens, widget::{Flex, Label, LineBreaking, List, Scroll}};
 
-use crate::{gui::{data::AppState, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
+use crate::{gui::{CHANGE_SCREEN, VIEW_RECIPE, data::{AppState, screen::AppScreen}, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
 
 /// The string to use when formatting chrono datetimes
 pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
@@ -54,7 +54,11 @@ pub fn recipe_brief_widget() -> impl Widget<Arc<Recipe>> {
             Label::raw()
                 .with_font(theme::LABEL_FONT)
                 .lens(Recipe::name)
-                .align_left(),
+                .align_left()
+                .on_click(|ctx, recipe, _env| {
+                    ctx.submit_command(VIEW_RECIPE.with(recipe.id));
+                    ctx.submit_command(CHANGE_SCREEN.with(AppScreen::View));
+                }),
         )
         .with_spacer(0.1)
         .with_child(Label::new(|data: &Recipe, _env: &'_ _| {

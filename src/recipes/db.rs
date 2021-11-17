@@ -67,24 +67,20 @@ impl Database {
     }
 
     /// Insert a recipe into the database, automatically creating an ID and returning it
-    pub fn insert(&self, recipe: Recipe) -> RecipeId {
+    pub fn insert(&self, recipe: Recipe) {
         let mut data = self.items.write();
-        loop {
-            let id = RecipeId(Uuid::new_v4());
-            match data.contains_key(&id) {
-                true => {
-                    log::warn!(
-                        "Database already contains recipe with ID {}, re-generating...",
-                        id
-                    );
-                    continue;
-                }
-                false => {
-                    data.insert(id, Arc::new(recipe));
-                    log::trace!("inserting recipe with ID {} into database...", id);
-                }
+        match data.contains_key(&recipe.id) {
+            true => {
+                log::warn!(
+                    "Database already contains recipe with ID {}, updating instead...",
+                    recipe.id
+                );
+                data.insert(recipe.id, Arc::new(recipe));
             }
-            break id;
+            false => {
+                log::trace!("inserting recipe with ID {} into database...", recipe.id);
+                data.insert(recipe.id, Arc::new(recipe));
+            }
         }
     }
 
@@ -185,7 +181,8 @@ impl Database {
                 return Ok(this);
             }
         }
-
+        
+        this.insert(Recipe::top_ramen());
         Ok(this)
     }
 }
