@@ -2,9 +2,9 @@
 
 use std::sync::Arc;
 
-use druid::{LensExt, TextAlignment, Widget, WidgetExt, lens, widget::{Flex, Label, LineBreaking, List, Scroll}};
+use druid::{FontWeight, KeyOrValue, LensExt, TextAlignment, Widget, WidgetExt, lens, widget::{Flex, Label, LineBreaking, List, Scroll}};
 
-use crate::{gui::{CHANGE_SCREEN, VIEW_RECIPE, data::{AppState, screen::AppScreen}, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
+use crate::{gui::{CHANGE_SCREEN, VIEW_RECIPE, data::{AppState, screen::AppScreen}, theme, widgets::{RecipierWidget, maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
 
 /// The string to use when formatting chrono datetimes
 pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
@@ -72,6 +72,20 @@ pub fn recipe_brief_widget() -> impl Widget<Arc<Recipe>> {
         .with_child(
             Label::raw()
                 .with_font(theme::LABEL_FONT)
+                .on_hover(
+                    |ctx, _recipe, this, env| {
+                       let font: KeyOrValue<_> = theme::LABEL_FONT.into();
+                       let font = font.resolve(env);
+                       this.set_font(font.with_weight(FontWeight::EXTRA_BOLD));
+                       ctx.request_layout();
+                       ctx.request_paint()
+                    }, 
+                    |ctx, _, this, _| {
+                        this.set_font(theme::LABEL_FONT);
+                        ctx.request_layout();
+                        ctx.request_paint()
+                    }
+                )
                 .lens(Recipe::name)
                 .align_left()
                 .on_click(|ctx, recipe, _env| {

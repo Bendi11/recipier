@@ -26,11 +26,11 @@ use super::{
 pub fn root_widget() -> impl Widget<AppState> {
     let sidebar = Flex::column()
         .with_spacer(theme::SPACING)
-        .with_flex_child(
+        .with_child(
             Icon::svg(&icon::BOWL_ICON)
                 .with_scale(10.)
-                .with_color(theme::COLOR_4),
-            0.1,
+                .with_color(theme::COLOR_4)
+                .fix_size(150., 150.)        
         )
         .with_child(Separator::new(5.).with_ratio(1.))
         .with_default_spacer()
