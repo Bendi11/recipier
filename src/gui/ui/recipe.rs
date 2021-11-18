@@ -98,7 +98,7 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
 }
 
 /// Show a peek of a recipe with brief details
-pub fn recipe_brief_widget() -> impl Widget<Arc<Recipe>> {
+pub fn recipe_brief_widget() -> impl Widget<Recipe> {
     Flex::column()
         .with_child(
             Label::raw()
@@ -128,5 +128,4 @@ pub fn recipe_brief_widget() -> impl Widget<Arc<Recipe>> {
         .with_child(Label::new(|data: &Recipe, _env: &'_ _| {
             format!("Created {}", data.created_on.format(DATETIME_FORMAT))
         }))
-        .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
 }

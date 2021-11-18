@@ -1,6 +1,6 @@
 //! A serializable database containing all recipes
 
-use std::{borrow::Borrow, fmt, fs::File, path::Path, sync::Arc};
+use std::{borrow::Borrow, fmt, fs::File, ops::Deref, path::Path, sync::Arc};
 
 use druid::im::OrdMap;
 use hashbrown::HashMap;
@@ -182,6 +182,33 @@ impl Database {
         }
 
         Ok(this)
+    }
+
+    /// Get an iterator over all ids for recipes in this database
+    pub fn ids(&self) -> Arc<[RecipeId]> {
+        let items = self.items.read();
+        items.iter().map(|(id, _)| *id).collect()
+    }
+}
+
+impl druid::widget::ListIter<Recipe> for Database {
+    fn for_each(&self, mut cb: impl FnMut(&Recipe, usize)) {
+        let items = self.items.read();
+        for (i, (_, recipe)) in items.iter().enumerate() {
+            cb(recipe.deref(), i)
+        }
+    }
+
+    fn for_each_mut(&mut self, mut cb: impl FnMut(&mut Recipe, usize)) {
+        let mut items = self.items.write();
+        for (i, (_, recipe)) in items.iter_mut().enumerate() {
+            let recipe = Arc::make_mut(recipe);
+            cb(recipe, i)
+        }
+    }
+
+    fn data_len(&self) -> usize {
+        self.items.read().len()
     }
 }
 

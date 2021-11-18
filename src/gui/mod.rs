@@ -22,3 +22,6 @@ pub const POPULATE_RESULTS: Selector = Selector::new("recipier.populate-search-r
 
 /// View the specified recipe in the recipe view screen
 pub const VIEW_RECIPE: Selector<RecipeId> = Selector::new("recipier.view-recipe");
+
+/// Load more recipes into the recipes home screen
+pub const LOAD_MORE_RECIPES: Selector = Selector::new("recipeier.load-more-recipes");

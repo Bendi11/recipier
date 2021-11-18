@@ -6,10 +6,7 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::SAVE_FILE;
 
-use super::{
-    data::{search::SearchResults, AppState},
-    CHANGE_SCREEN, POPULATE_RESULTS, VIEW_RECIPE,
-};
+use super::{CHANGE_SCREEN, LOAD_MORE_RECIPES, POPULATE_RESULTS, VIEW_RECIPE, data::{search::SearchResults, AppState}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -74,6 +71,10 @@ impl AppDelegate<AppState> for RecipierDelegate {
             Handled::Yes
         } else if let Some(recipe) = cmd.get(VIEW_RECIPE) {
             data.view.viewed = Some(*recipe);
+            Handled::Yes
+        } else if let Some(()) = cmd.get(LOAD_MORE_RECIPES) {
+            let ids = data.recipes.ids();
+            data.home.loaded = druid::im::Vector::from(&ids[0..(if data.home.loaded.len() + 10 >= ids.len() { ids.len() } else { data.home.loaded.len() + 10 }) ]);
             Handled::Yes
         } else {
             Handled::No

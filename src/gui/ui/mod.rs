@@ -3,7 +3,7 @@ pub mod search;
 pub mod home;
 
 use druid::{
-    widget::{Flex, Label, ViewSwitcher},
+    widget::{Flex, ViewSwitcher},
     LensExt, Widget, WidgetExt,
 };
 

@@ -4,12 +4,12 @@ pub mod search;
 pub mod view;
 pub mod home;
 
-use std::path::Path;
+use std::{ops::Deref, path::Path, sync::Arc};
 
-use druid::{Data, Lens};
+use druid::{Data, Lens, widget::ListIter};
 use serde::{Deserialize, Serialize};
 
-use crate::recipes::db::Database;
+use crate::recipes::{db::Database, recipe::Recipe};
 
 use self::{config::Config, home::HomeState, screen::AppScreen, search::SearchState, view::ViewState};
 
@@ -62,6 +62,39 @@ impl AppState {
                 Self::default()
             }
         }
+    }
+}
+
+impl ListIter<Recipe> for AppState {
+    fn for_each(&self, mut cb: impl FnMut(&Recipe, usize)) {
+        for (i, id) in self.home.loaded.iter().enumerate() {
+            match self.recipes.get(*id) {
+                Some(recipe) => cb(recipe.deref(), i),
+                None => {
+                    log::warn!("Loaded recipes contains recipe ID that does not exist");
+                }
+            }
+        }
+    }
+
+    fn for_each_mut(&mut self, mut cb: impl FnMut(&mut Recipe, usize)) {
+        for (i, id) in self.home.loaded.iter().enumerate() {
+            match self.recipes.get(*id) {
+                Some(mut recipe) => {
+                    let recipe_ref = Arc::make_mut(&mut recipe);
+                    cb(recipe_ref, i);
+                    drop(recipe_ref);
+                    self.recipes.update(recipe);
+                },
+                None => {
+                    log::warn!("Loaded recipes contains recipe ID that does not exist");
+                }
+            }
+        }
+    }
+
+    fn data_len(&self) -> usize {
+        self.home.loaded.len()
     }
 }
 

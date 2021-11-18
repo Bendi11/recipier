@@ -25,6 +25,7 @@ impl Data for Recipe {
     }
 }
 
+
 impl ListIter<Ingredient> for Recipe {
     fn for_each(&self, mut cb: impl FnMut(&Ingredient, usize)) {
         for (i, ingredient) in self.ingredients.iter().enumerate() {
