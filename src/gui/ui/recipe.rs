@@ -5,7 +5,7 @@ use std::sync::Arc;
 use druid::{
     lens,
     widget::{Flex, Label, LineBreaking, List, Scroll},
-    FontWeight, KeyOrValue, LensExt, TextAlignment, Widget, WidgetExt,
+    LensExt, TextAlignment, Widget, WidgetExt,
 };
 
 use crate::{
@@ -103,29 +103,29 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
         .with_child(
             Label::raw()
                 .with_font(theme::LABEL_FONT)
-                .on_hover(
-                    |ctx, _recipe, this, env| {
-                        let font: KeyOrValue<_> = theme::LABEL_FONT.into();
-                        let font = font.resolve(env);
-                        this.set_font(font.with_weight(FontWeight::EXTRA_BOLD));
-                        ctx.request_layout();
-                        ctx.request_paint()
-                    },
-                    |ctx, _, this, _| {
-                        this.set_font(theme::LABEL_FONT);
-                        ctx.request_layout();
-                        ctx.request_paint()
-                    },
-                )
                 .lens(Recipe::name)
                 .align_left()
-                .on_click(|ctx, recipe, _env| {
-                    ctx.submit_command(VIEW_RECIPE.with(recipe.id));
-                    ctx.submit_command(CHANGE_SCREEN.with(AppScreen::View));
-                }),
         )
         .with_spacer(0.1)
         .with_child(Label::new(|data: &Recipe, _env: &'_ _| {
             format!("Created {}", data.created_on.format(DATETIME_FORMAT))
         }))
+        .on_click(|ctx, recipe, _env| {
+            ctx.submit_command(VIEW_RECIPE.with(recipe.id));
+            ctx.submit_command(CHANGE_SCREEN.with(AppScreen::View));
+        })
+        .padding((2.5, 5.))
+        .border(theme::COLOR_3, 2.)
+        .rounded(7.)
+        .on_hover(
+            |ctx, _, this, _env| {
+                this.set_background(theme::COLOR_2);
+                ctx.request_paint();
+            }, 
+            |ctx, _, this, _env| {
+                this.set_background(theme::COLOR_1);
+                ctx.request_paint();
+            }
+        )
+        .expand_width()
 }
