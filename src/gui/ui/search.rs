@@ -77,7 +77,6 @@ pub fn search_screen() -> impl Widget<AppState> {
                     Scroll::new(
                         List::new(|| {
                             recipe_brief_widget()
-                                
                                 .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
                         })
                         .with_spacing(10.),

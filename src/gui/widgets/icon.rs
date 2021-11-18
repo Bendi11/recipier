@@ -14,8 +14,14 @@ pub const SEARCH_ICON: IconData = IconData {
     size: Size::new(16., 16.),
 };
 
-/// A magnifying glass search icon
+/// A plus symbol icon
 pub const PLUS_ICON: IconData = IconData {
+    path: include_str!("../../../assets/icons/plus-path.txt"),
+    size: Size::new(16., 16.),
+};
+
+/// A right arrow icon
+pub const RIGHT_ARROW_ICON: IconData = IconData {
     path: include_str!("../../../assets/icons/plus-path.txt"),
     size: Size::new(16., 16.),
 };

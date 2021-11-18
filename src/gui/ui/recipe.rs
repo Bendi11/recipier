@@ -8,15 +8,7 @@ use druid::{
     LensExt, TextAlignment, Widget, WidgetExt,
 };
 
-use crate::{
-    gui::{
-        data::{screen::AppScreen, AppState},
-        theme,
-        widgets::{maybe::Maybe, separator::Separator, RecipierWidget},
-        CHANGE_SCREEN, VIEW_RECIPE,
-    },
-    recipes::recipe::{Ingredient, Recipe},
-};
+use crate::{gui::{CHANGE_SCREEN, VIEW_RECIPE, data::{screen::AppScreen, AppState}, theme, widgets::{RecipierWidget, icon::{Icon, RIGHT_ARROW_ICON}, maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
 
 /// The string to use when formatting chrono datetimes
 pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
@@ -59,11 +51,13 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
                 .align_left(),
         )
         .with_default_spacer()
-        .with_child(
+        .with_flex_child(
             Scroll::new(List::new(|| {
                 Flex::column()
                     .with_child(
                         Flex::row()
+                            .with_child(Icon::svg(&RIGHT_ARROW_ICON).flex(false))
+                            .with_spacer(3.)
                             .with_child(
                                 Label::raw()
                                     .with_font(theme::SYSTEM_FONT)
@@ -75,26 +69,29 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
                                 format!("{}", ingredient.amount)
                             }))
                             .expand_width()
-                            .border(theme::COLOR_2, 2.)
-                            .rounded(5.0),
+                            .padding((2.5, 5.))
                     )
                     .with_default_spacer()
-            }))
-            .vertical(),
+                }).with_spacing(2.)
+            )
+            .vertical()
+            .expand_width()
+            .border(theme::COLOR_2, 2.)
+            .rounded(5.0), 10.
         )
         .with_default_spacer()
-        .with_child(
+        .with_flex_child(
             Label::raw()
                 .with_font(theme::SYSTEM_FONT)
                 .with_line_break_mode(LineBreaking::WordWrap)
                 .with_text_alignment(TextAlignment::Start)
                 .expand()
                 .padding((5., 5.))
-                .background(theme::COLOR_2)
-                .lens(Recipe::body),
+                .lens(Recipe::body), 30.
         )
         .expand()
         .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+        .padding((5., 1.))
 }
 
 /// Show a peek of a recipe with brief details

@@ -34,7 +34,7 @@ pub fn home_widget() -> impl Widget<AppState> {
         .with_child(Separator::new(2.5).fix_width(130.).align_left())
         .with_default_spacer()
         .with_flex_child(Scroll::new(Flex::column()
-                .with_child(List::new(recipe_brief_widget))
+                .with_child(List::new(|| recipe_brief_widget().padding((2., 0.))).with_spacing(10.))
                 .with_default_spacer()
                 .with_child(Button::new("Load More")
                     .fix_size(100., 40.)
