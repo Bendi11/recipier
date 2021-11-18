@@ -2,6 +2,7 @@ pub mod config;
 pub mod screen;
 pub mod search;
 pub mod view;
+pub mod home;
 
 use std::path::Path;
 
@@ -10,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::recipes::db::Database;
 
-use self::{config::Config, screen::AppScreen, search::SearchState, view::ViewState};
+use self::{config::Config, home::HomeState, screen::AppScreen, search::SearchState, view::ViewState};
 
 /// Structure holding all state information, must be easily cloneable and comparable or performance will
 /// suffer
@@ -26,6 +27,9 @@ pub struct AppState {
     /// State for querying the database of recipes
     #[serde(skip)]
     pub search: SearchState,
+
+    /// The state needed to display the homescreen
+    pub home: HomeState,
 
     /// The screen that the application is currently displaying
     pub screen: AppScreen,
@@ -70,6 +74,7 @@ impl Default for AppState {
             recipes: Database::new("./recipes"),
             search: SearchState::default(),
             screen: AppScreen::Home,
+            home: HomeState::default(),
             view: ViewState::default(),
         }
     }
