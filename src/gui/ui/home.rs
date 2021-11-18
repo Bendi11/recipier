@@ -1,8 +1,8 @@
 //! Homescreen widgets displaying a view of all saved recipes
 
-use druid::{Widget, WidgetExt, widget::{Flex, Label, List, Scroll}};
+use druid::{Widget, WidgetExt, widget::{Button, Flex, Label, List, Scroll}};
 
-use crate::gui::{data::AppState, theme, widgets::separator::Separator};
+use crate::gui::{LOAD_MORE_RECIPES, data::AppState, theme, widgets::separator::Separator};
 
 use super::recipe::recipe_brief_widget;
 
@@ -17,7 +17,10 @@ pub fn home_widget() -> impl Widget<AppState> {
         .with_child(Separator::new(2.5).fix_width(130.).align_left())
         .with_default_spacer()
         .with_child(Scroll::new(Flex::column()
-                .with_child(List::new(recipe_brief_widget)
+                .with_child(List::new(|| recipe_brief_widget().border(theme::COLOR_2, 2.).expand_width()))
+                .with_default_spacer()
+                .with_child(Button::new("Load More")
+                    .on_click(|ctx, _data, _env| ctx.submit_command(LOAD_MORE_RECIPES))
                 )
             )
             .vertical()

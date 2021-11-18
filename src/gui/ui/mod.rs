@@ -15,14 +15,11 @@ use crate::gui::{
     },
 };
 
-use super::{
-    data::{
+use super::{CHANGE_SCREEN, GOLDEN_RATIO, data::{
         screen::AppScreen,
         search::{Query, SearchState},
         AppState,
-    },
-    GOLDEN_RATIO,
-};
+    }};
 
 pub fn root_widget() -> impl Widget<AppState> {
     let sidebar = Flex::column()
@@ -31,7 +28,8 @@ pub fn root_widget() -> impl Widget<AppState> {
             Icon::svg(&icon::BOWL_ICON)
                 .with_scale(10.)
                 .with_color(theme::COLOR_4)
-                .fix_size(150., 150.),
+                .fix_size(150., 150.)
+                .on_click(|ctx, _data, _env| ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))),
         )
         .with_child(Separator::new(5.).with_ratio(1.))
         .with_default_spacer()
