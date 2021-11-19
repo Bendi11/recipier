@@ -2,15 +2,18 @@
 
 use std::{ops::Deref, time::Duration};
 
-use druid::{Data, Lens, im::Vector};
+use druid::{im::Vector, Data, Lens};
 use serde::{Deserialize, Serialize};
 
-use crate::recipes::{db::RecipeId, recipe::{Ingredient, IngredientAmount, Recipe}};
+use crate::recipes::{
+    db::RecipeId,
+    recipe::{Ingredient, IngredientAmount, Recipe},
+};
 
 use super::screen::AppScreen;
 
 /// Data for the currently edited recipe
-#[derive(Clone, Debug, Data, Lens, Serialize, Deserialize, )]
+#[derive(Clone, Debug, Data, Lens, Serialize, Deserialize)]
 pub struct EditState {
     /// If we are modifying the recipe, this is the ID of the modified recipe
     pub id: Option<RecipeId>,
@@ -29,16 +32,15 @@ pub struct EditState {
 }
 
 /// Data for a user-edited time that destructures a [Duration](std::time::Duration)
-#[derive(Clone, Copy, Debug, Default, Data, Lens, Serialize, Deserialize, )]
+#[derive(Clone, Copy, Debug, Default, Data, Lens, Serialize, Deserialize)]
 pub struct EditedTime {
     /// Seconds component of the time
     pub secs: u8,
     /// Minutes of the time
     pub minutes: u8,
     /// Hours of the time
-    pub hours: u8
+    pub hours: u8,
 }
-
 
 impl From<Duration> for EditedTime {
     fn from(duration: Duration) -> Self {
@@ -46,11 +48,17 @@ impl From<Duration> for EditedTime {
         let hours = time / 360f32;
         let minutes = (time - (hours.trunc() * 360f32)) / 60.;
         let seconds = time - ((hours.trunc() * 360f32) - (hours.trunc() * 60f32));
-        log::trace!("Converted {}s to {} hours, {} mins, {} secs", time, hours, minutes, seconds);
+        log::trace!(
+            "Converted {}s to {} hours, {} mins, {} secs",
+            time,
+            hours,
+            minutes,
+            seconds
+        );
         Self {
             secs: seconds as u8,
             minutes: minutes as u8,
-            hours: hours as u8
+            hours: hours as u8,
         }
     }
 }
@@ -62,14 +70,14 @@ pub struct EditedIngredient {
     pub name: String,
     /// The amount of the ingredient needed
     #[data(same_fn = "PartialEq::eq")]
-    pub amount: IngredientAmount
+    pub amount: IngredientAmount,
 }
 
 impl From<&Ingredient> for EditedIngredient {
     fn from(ingredient: &Ingredient) -> Self {
         Self {
             name: ingredient.name.deref().to_owned(),
-            amount: ingredient.amount
+            amount: ingredient.amount,
         }
     }
 }
@@ -79,7 +87,11 @@ impl From<&Recipe> for EditState {
         Self {
             id: Some(recipe.id),
             title: recipe.name.deref().to_owned(),
-            ingredients: recipe.ingredients.iter().map(EditedIngredient::from).collect(),
+            ingredients: recipe
+                .ingredients
+                .iter()
+                .map(EditedIngredient::from)
+                .collect(),
             body: recipe.body.deref().to_owned(),
             servings: recipe.servings,
             time: recipe.time.map(From::from),
@@ -97,7 +109,7 @@ impl Default for EditState {
             body: String::new(),
             servings: None,
             time: None,
-            return_to: AppScreen::Home
+            return_to: AppScreen::Home,
         }
     }
 }

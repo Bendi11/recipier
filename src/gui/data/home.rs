@@ -1,6 +1,6 @@
 //! State for the home screen like number of displayed recipes
 
-use druid::{Data, Lens, im::Vector};
+use druid::{im::Vector, Data, Lens};
 use serde::{Deserialize, Serialize};
 
 use crate::recipes::db::RecipeId;
@@ -10,13 +10,13 @@ use crate::recipes::db::RecipeId;
 pub struct HomeState {
     /// How many recipes are currently loaded in view
     #[serde(skip)]
-    pub loaded: Vector<RecipeId>
+    pub loaded: Vector<RecipeId>,
 }
 
 impl Default for HomeState {
     fn default() -> Self {
         Self {
-            loaded: Vector::default()
+            loaded: Vector::default(),
         }
     }
 }

@@ -1,8 +1,8 @@
-pub mod recipe;
-pub mod search;
-pub mod home;
 pub mod edit;
+pub mod home;
+pub mod recipe;
 pub mod remove;
+pub mod search;
 
 use druid::{
     widget::{Flex, ViewSwitcher},
@@ -17,11 +17,15 @@ use crate::gui::{
     },
 };
 
-use super::{CHANGE_SCREEN, GOLDEN_RATIO, data::{
+use super::{
+    data::{
         screen::AppScreen,
         search::{Query, SearchState},
         AppState,
-    }, widgets::RecipierWidget};
+    },
+    widgets::RecipierWidget,
+    CHANGE_SCREEN, GOLDEN_RATIO,
+};
 
 pub fn root_widget() -> impl Widget<AppState> {
     let sidebar = Flex::column()
@@ -31,20 +35,24 @@ pub fn root_widget() -> impl Widget<AppState> {
                 .with_scale(10.)
                 .flex(false)
                 .with_color(theme::COLOR_4)
-                .on_hover(|ctx, _, this, _| {
-                    this.set_scale(10.5);
-                    this.set_color(theme::COLOR_3);
-                    ctx.request_layout();
-                    ctx.request_paint();
-                },
-                |ctx, _, this, _|{
-                    this.set_scale(10.);
-                    this.set_color(theme::COLOR_4);
-                    ctx.request_layout();
-                    ctx.request_paint();
-                })
+                .on_hover(
+                    |ctx, _, this, _| {
+                        this.set_scale(10.5);
+                        this.set_color(theme::COLOR_3);
+                        ctx.request_layout();
+                        ctx.request_paint();
+                    },
+                    |ctx, _, this, _| {
+                        this.set_scale(10.);
+                        this.set_color(theme::COLOR_4);
+                        ctx.request_layout();
+                        ctx.request_paint();
+                    },
+                )
                 //.fix_size(150., 150.)
-                .on_click(|ctx, _data, _env| ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))),
+                .on_click(|ctx, _data, _env| {
+                    ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))
+                }),
         )
         .with_child(Separator::new(5.).with_ratio(1.))
         .with_default_spacer()

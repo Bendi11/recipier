@@ -5,7 +5,6 @@ pub mod theme;
 pub mod ui;
 pub mod widgets;
 
-
 use crate::recipes::db::RecipeId;
 
 use self::data::screen::AppScreen;

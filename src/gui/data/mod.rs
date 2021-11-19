@@ -1,19 +1,22 @@
 pub mod config;
+pub mod edit;
+pub mod home;
+pub mod remove;
 pub mod screen;
 pub mod search;
 pub mod view;
-pub mod home;
-pub mod edit;
-pub mod remove;
 
 use std::{ops::Deref, path::Path, sync::Arc};
 
-use druid::{Data, Lens, widget::ListIter};
+use druid::{widget::ListIter, Data, Lens};
 use serde::{Deserialize, Serialize};
 
 use crate::recipes::{db::Database, recipe::Recipe};
 
-use self::{config::Config, edit::EditState, home::HomeState, remove::RemoveState, screen::AppScreen, search::SearchState, view::ViewState};
+use self::{
+    config::Config, edit::EditState, home::HomeState, remove::RemoveState, screen::AppScreen,
+    search::SearchState, view::ViewState,
+};
 
 /// Structure holding all state information, must be easily cloneable and comparable or performance will
 /// suffer
@@ -93,7 +96,7 @@ impl ListIter<Recipe> for AppState {
                     cb(recipe_ref, i);
                     drop(recipe_ref);
                     self.recipes.update(recipe);
-                },
+                }
                 None => {
                     log::warn!("Loaded recipes contains recipe ID that does not exist");
                 }

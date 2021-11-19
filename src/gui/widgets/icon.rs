@@ -90,11 +90,11 @@ impl Icon {
             |ctx, _, this, _env| {
                 this.set_color(theme::COLOR_3);
                 ctx.request_paint();
-            }, 
+            },
             |ctx, _, this, _env| {
                 this.set_color(theme::COLOR_4);
                 ctx.request_paint();
-            }
+            },
         )
     }
 

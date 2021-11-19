@@ -2,23 +2,30 @@
 
 use std::sync::Arc;
 
-use druid::{Data, Event, LensExt, Widget, WidgetExt, lens, widget::{Controller, Flex, Label, List, Scroll, SizedBox, TextBox}};
+use druid::{
+    lens,
+    widget::{Controller, Flex, Label, List, Scroll, SizedBox, TextBox},
+    Data, Event, LensExt, Widget, WidgetExt,
+};
 
-use crate::{gui::{
-    data::{
-        screen::AppScreen,
-        search::{Query, SearchResults, SearchState},
-        AppState,
+use crate::{
+    gui::{
+        data::{
+            screen::AppScreen,
+            search::{Query, SearchResults, SearchState},
+            AppState,
+        },
+        theme,
+        widgets::{
+            icon::{self, Icon},
+            maybe::Maybe,
+            separator::Separator,
+            RecipierWidget,
+        },
+        CHANGE_SCREEN, POPULATE_RESULTS,
     },
-    theme,
-    widgets::{
-        icon::{self, Icon},
-        maybe::Maybe,
-        separator::Separator,
-        RecipierWidget,
-    },
-    CHANGE_SCREEN, POPULATE_RESULTS,
-}, recipes::recipe::Recipe};
+    recipes::recipe::Recipe,
+};
 
 use super::recipe::recipe_brief_widget;
 

@@ -107,7 +107,7 @@ impl fmt::Display for Mass {
 /// A volume of a substance, like cups, liters, etc.
 ///
 /// The value of this enum as an f64 is the conversion factor from measurement to liters
-#[derive(Clone, Copy,Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum VolumeUnit {
     Cup,
     Liter,
