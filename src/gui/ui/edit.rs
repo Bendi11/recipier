@@ -41,16 +41,19 @@ pub fn edit_widget() -> impl Widget<AppState> {
                     .with_child(Maybe::or_empty(|| Flex::row()
                         .with_child(ValueTextBox::new(TextBox::new().with_text_alignment(TextAlignment::Center).with_placeholder("hours"), ParseFormatter::new())
                             .validate_while_editing(true)
+                            .fix_width(50.)
                             .lens(EditedTime::hours)
                         )
                         .with_spacer(5.0)
                         .with_child(ValueTextBox::new(TextBox::new().with_text_alignment(TextAlignment::Center).with_placeholder("minutes"), ParseFormatter::new())
                         .validate_while_editing(true)
+                            .fix_width(50.)
                             .lens(EditedTime::minutes)
                         )
                         .with_spacer(5.0)
                         .with_child(ValueTextBox::new(TextBox::new().with_text_alignment(TextAlignment::Center).with_placeholder("seconds"), ParseFormatter::new())
                         .validate_while_editing(true)
+                            .fix_width(50.)
                             .lens(EditedTime::secs)
                         )
                         .with_spacer(10.0)
@@ -63,6 +66,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                     data.time = None;
                     ctx.request_update();
                 })
+                .fix_size(35., 35.)
                 ).boxed(),
                 None => Icon::svg(&PLUS_ICON)
                     .highlight_on_hover()
@@ -70,9 +74,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         data.time = Some(EditedTime::default())
                     })
                     .boxed()
-            },
-            
-        )
+            }, 
+        ).expand_width().align_left().fix_height(50.)
         )
         .with_default_spacer()
 
