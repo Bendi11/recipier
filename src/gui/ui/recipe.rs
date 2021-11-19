@@ -1,6 +1,6 @@
 //! Widgets for displaying recipes
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use druid::{
     lens,
@@ -45,6 +45,27 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
         .with_default_spacer()
         .with_child(Separator::new(2.))
         .with_default_spacer()
+        .with_child(Maybe::or_empty(
+                || Flex::column()
+                    .with_child(Label::new(|servings: &f32, _env: &'_ _| format!("Makes {} serving{}", servings, if *servings == 1f32 { "" } else { "s" }))
+                        .with_font(theme::SYSTEM_FONT)
+                        .expand_width()
+                    )
+                    .with_default_spacer()
+            )
+            .lens(Recipe::servings)
+        )
+        .with_child(Maybe::or_empty(
+                || Flex::column()
+                    .with_child(Label::new(|time: &f32, _env: &'_ _| format!("Takes {} to cook", FormattedDuration(*time)) ))
+            ).lens(Recipe::time.map(
+                |duration| duration.map(|v| v.as_secs_f32()),
+                |duration, seconds| if let Some(seconds) = seconds {
+                    *duration = Some(Duration::from_secs_f32(seconds));
+                })
+            )
+            
+        )
         .with_child(
             Label::new("Ingredients")
                 .with_font(theme::LABEL_FONT)
@@ -93,6 +114,7 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
         .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
         .padding((5., 1.))
 }
+
 
 /// Show a peek of a recipe with brief details
 pub fn recipe_brief_widget() -> impl Widget<Recipe> {
@@ -150,4 +172,49 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
         )
         .with_spacer(5.0)
         .expand_width()
+}
+
+/// A newtype over [f32] used for a custom [Display](std::fmt::Display) impl that shows 
+/// the duration in a more readable way
+struct FormattedDuration(f32);
+
+impl std::fmt::Display for FormattedDuration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        const MILLIS_DAY: f32 = 86400f32;
+        const MILLIS_HOUR: f32 = 3600f32;
+        const MILLIS_MINUTE: f32 = 60f32;
+        const MILLIS_SECOND: f32 = 1f32;
+
+        let seconds = self.0;
+        if seconds >= MILLIS_DAY {
+            write!(f, "{} day", seconds / MILLIS_DAY)?;
+            if seconds >= (MILLIS_DAY * 2f32) {
+                write!(f, "s")?;
+            }
+        } else if seconds >= MILLIS_HOUR {
+            write!(f, "{} hour", seconds / MILLIS_HOUR)?;
+            if seconds >= (MILLIS_HOUR * 2f32) {
+                write!(f, "s")?;
+            }
+        } else if seconds >= MILLIS_HOUR {
+            write!(f, "{} hour", seconds / MILLIS_HOUR)?;
+            if seconds >= (MILLIS_HOUR * 2f32) {
+                write!(f, "s")?;
+            }
+        } else if seconds >= MILLIS_MINUTE {
+            write!(f, "{} min", seconds / MILLIS_MINUTE)?;
+            if seconds >= (MILLIS_MINUTE * 2f32) {
+                write!(f, "s")?;
+            }
+        } else if seconds >= MILLIS_SECOND {
+            write!(f, "{} sec", seconds / MILLIS_SECOND)?;
+            if seconds >= (MILLIS_SECOND * 2f32) {
+                write!(f, "s")?;
+            }
+        } else {
+            write!(f, "{} seconds", seconds)?;
+        }
+
+        Ok(())
+    }
 }
