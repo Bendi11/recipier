@@ -71,7 +71,7 @@ impl MassUnit {
 }
 
 /// A measurement of mass with unit of measurement
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Mass {
     pub unit: MassUnit,
     pub val: f32,
@@ -107,7 +107,7 @@ impl fmt::Display for Mass {
 /// A volume of a substance, like cups, liters, etc.
 ///
 /// The value of this enum as an f64 is the conversion factor from measurement to liters
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy,Debug, Serialize, Deserialize, PartialEq)]
 pub enum VolumeUnit {
     Cup,
     Liter,
@@ -164,7 +164,7 @@ impl fmt::Display for VolumeUnit {
 }
 
 /// An amount of a substance with a given unit of measurement
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Volume {
     /// The unit that this volume is measured in
     pub unit: VolumeUnit,

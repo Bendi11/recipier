@@ -3,6 +3,7 @@ pub mod screen;
 pub mod search;
 pub mod view;
 pub mod home;
+pub mod edit;
 
 use std::{ops::Deref, path::Path, sync::Arc};
 

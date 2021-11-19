@@ -24,7 +24,7 @@ impl fmt::Display for Ingredient {
 }
 
 /// Enumeration for how an ingredient's amount is displayed
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum IngredientAmount {
     /// A raw number, displayed as x{n}
     Count(usize),
@@ -69,7 +69,7 @@ pub struct Recipe {
     #[serde(default = "chrono::Utc::now")]
     pub created_on: DateTime<Utc>,
     /// How many servings a recipe makes
-    pub servings: f32,
+    pub servings: Option<f32>,
     /// A list of ingredients in the recipe
     pub ingredients: Vector<Ingredient>,
     /// The recipe's instructions
@@ -85,7 +85,7 @@ impl Recipe {
             id: RecipeId::new(),
             name: "Top Ramen".into(),
             created_on: DateTime::from(Local.ymd(2021, 11, 10).and_hms(16, 7, 0)),
-            servings: 2.,
+            servings: Some(2.),
             ingredients: vector![
                 Ingredient {
                     name: "Top Ramen Packet".into(),
@@ -105,7 +105,7 @@ impl Recipe {
 - Remove heat and add flavor packet to noodles, ensuring that flavor spreads to noodles by stirring
 - Leave for 5-10 minutes to cool and enjoy"#
                 .into(),
-            time: Some(std::time::Duration::from_secs(600)),
+            time: Some(time::Duration::from_secs(600)),
         }
     }
 }
