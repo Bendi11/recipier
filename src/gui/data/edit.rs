@@ -1,14 +1,12 @@
 //! State for the currently edited recipe
 
-use std::{ops::Deref, time::Duration};
+use std::{ops::Deref, sync::Arc, time::Duration};
 
-use druid::{im::Vector, Data, Lens};
+use druid::{Data, Lens, im::HashMap, widget::ListIter};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::recipes::{
-    db::RecipeId,
-    recipe::{Ingredient, IngredientAmount, Recipe},
-};
+use crate::recipes::{db::RecipeId, measure::AmountUnit, recipe::{Ingredient, IngredientAmount, Recipe}};
 
 use super::screen::AppScreen;
 
@@ -19,10 +17,10 @@ pub struct EditState {
     pub id: Option<RecipeId>,
     /// The name of the recipe
     pub title: String,
-    /// Ingredients list
-    pub ingredients: Vector<EditedIngredient>,
+    /// Ingredients list, hashmap to make removal of certain items more eficient
+    pub ingredients: HashMap<Uuid, EditedIngredient>,
     /// Body of the recipe
-    pub body: String,
+    pub body: Arc<String>,
     /// Number of servings the recipe makes
     pub servings: Option<f32>,
     /// The amount of time that the recipe is expected to take
@@ -66,18 +64,30 @@ impl From<Duration> for EditedTime {
 /// Ingredient data stored in a more efficiently mutable way
 #[derive(Clone, Debug, Data, Lens, Serialize, Deserialize)]
 pub struct EditedIngredient {
+    /// The id that this ingredient is associated with in the edit state
+    #[data(same_fn = "PartialEq::eq")]
+    pub id: Uuid,
     /// The name of the ingredient
-    pub name: String,
+    pub name: Arc<String>,
+    /// The number of the given unit for the ingredient
+    pub count: f32,
     /// The amount of the ingredient needed
     #[data(same_fn = "PartialEq::eq")]
-    pub amount: IngredientAmount,
+    pub amount: AmountUnit,
 }
 
-impl From<&Ingredient> for EditedIngredient {
-    fn from(ingredient: &Ingredient) -> Self {
+impl EditedIngredient {
+    fn from_ingredient(id: Uuid, ingredient: &Ingredient) -> Self {
         Self {
-            name: ingredient.name.deref().to_owned(),
-            amount: ingredient.amount,
+            id,
+            count: match ingredient.amount {
+                IngredientAmount::Count(n) => n as f32,
+                IngredientAmount::Mass(m) => m.val,
+                IngredientAmount::Volume(v) => v.val,
+                IngredientAmount::None => 0f32
+            },
+            name: Arc::new(ingredient.name.deref().to_owned()),
+            amount: ingredient.amount.into(),
         }
     }
 }
@@ -90,9 +100,12 @@ impl From<&Recipe> for EditState {
             ingredients: recipe
                 .ingredients
                 .iter()
-                .map(EditedIngredient::from)
+                .map(|v| {
+                    let id = Uuid::new_v4();
+                    (id, EditedIngredient::from_ingredient(id, v))
+                })
                 .collect(),
-            body: recipe.body.deref().to_owned(),
+            body: Arc::new(recipe.body.deref().to_owned()),
             servings: recipe.servings,
             time: recipe.time.map(From::from),
             return_to: AppScreen::Home,
@@ -105,11 +118,29 @@ impl Default for EditState {
         Self {
             id: None,
             title: String::new(),
-            ingredients: Vector::new(),
-            body: String::new(),
+            ingredients: HashMap::new(),
+            body: Arc::new(String::new()),
             servings: None,
             time: None,
             return_to: AppScreen::Home,
         }
+    }
+}
+
+impl ListIter<EditedIngredient> for EditState {
+    fn for_each(&self, mut cb: impl FnMut(&EditedIngredient, usize)) {
+        for (i, (_, val)) in self.ingredients.iter().enumerate() {
+            cb(val, i)
+        }
+    }
+
+    fn for_each_mut(&mut self, mut cb: impl FnMut(&mut EditedIngredient, usize)) {
+        for (i, (_, val)) in self.ingredients.iter_mut().enumerate() {
+            cb(val, i)
+        }
+    }
+
+    fn data_len(&self) -> usize {
+        self.ingredients.len()
     }
 }

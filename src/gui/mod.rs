@@ -5,11 +5,12 @@ pub mod theme;
 pub mod ui;
 pub mod widgets;
 
-use crate::recipes::db::RecipeId;
+use crate::recipes::{db::RecipeId, measure::AmountUnit};
 
 use self::data::screen::AppScreen;
 use druid::Selector;
 pub use ui::root_widget;
+use uuid::Uuid;
 
 /// The visually-appealing golden ratio
 pub const GOLDEN_RATIO: f64 = 1.61803;
@@ -35,3 +36,6 @@ pub const CREATE_RECIPE: Selector = Selector::new("recipier.create-recipe");
 /// Remove the recipe with the given ID and return to the given screen after displaying the
 /// delete prompt
 pub const REMOVE_RECIPE: Selector<(RecipeId, AppScreen)> = Selector::new("recipier.remove-recipe");
+
+/// Change the selected ingredient's unit to the given unit
+pub const CHANGE_INGREDIENT_UNIT: Selector<(Uuid, AmountUnit)> = Selector::new("recipier.change-ingredient-unit");

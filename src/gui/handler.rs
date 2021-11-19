@@ -6,11 +6,7 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::{gui::data::edit::EditState, SAVE_FILE};
 
-use super::{
-    data::{remove::RemoveState, search::SearchResults, AppState},
-    CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_RECIPE,
-    VIEW_RECIPE,
-};
+use super::{CHANGE_INGREDIENT_UNIT, CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_RECIPE, VIEW_RECIPE, data::{remove::RemoveState, search::SearchResults, AppState}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -115,6 +111,10 @@ impl AppDelegate<AppState> for RecipierDelegate {
             } else {
                 log::warn!("Remove recipe command received with invalid ID: {}", id);
             }
+            Handled::Yes
+        } else if let Some((id, unit)) = cmd.get(CHANGE_INGREDIENT_UNIT) {
+            data.edit.ingredients.entry(*id).and_modify(|v| v.amount = *unit);
+
             Handled::Yes
         } else {
             Handled::No

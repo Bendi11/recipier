@@ -7,6 +7,7 @@ pub mod icon;
 pub mod maybe;
 pub mod none;
 pub mod separator;
+pub mod unit;
 
 /// A controller that handles hover events using the provided callback
 pub struct HoverController<D, W> {

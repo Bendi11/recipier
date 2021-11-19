@@ -3,6 +3,8 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+use super::recipe::IngredientAmount;
+
 /// Units of time a user can pick
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum TimeUnit {
@@ -196,5 +198,40 @@ impl fmt::Display for Volume {
             self.unit,
             if self.val == 1.0 { "" } else { "s" }
         )
+    }
+}
+
+/// Enumeration for how an ingredient's amount's unit is stored
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+pub enum AmountUnit {
+    /// A raw number, displayed as x{n}
+    Count,
+    /// A measurement of volume in cups, liters, etc.
+    Volume(VolumeUnit),
+    /// A measurement in mass
+    Mass(MassUnit),
+    /// No amount given
+    None,
+}
+
+impl From<IngredientAmount> for AmountUnit {
+    fn from(amt: IngredientAmount) -> Self {
+        match amt {
+            IngredientAmount::Count(_) => Self::Count,
+            IngredientAmount::Volume(Volume { unit, val: _ }) => Self::Volume(unit),
+            IngredientAmount::Mass(Mass { unit, val: _ }) => Self::Mass(unit),
+            IngredientAmount::None => Self::None
+        }
+    }
+}
+
+impl fmt::Display for AmountUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Count => write!(f, "count"),
+            Self::Volume(vol) => vol.fmt(f),
+            Self::Mass(mass) => mass.fmt(f),
+            Self::None => write!(f, "none")
+        }
     }
 }

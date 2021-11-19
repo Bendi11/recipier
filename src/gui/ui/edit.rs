@@ -1,19 +1,8 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Flex, Label, TextBox, ValueTextBox, ViewSwitcher}};
+use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher}};
 
-use crate::gui::{
-    data::{
-        edit::{EditState, EditedTime},
-        AppState,
-    },
-    theme,
-    widgets::{
-        icon::{Icon, PLUS_ICON, RECYCLE_ICON},
-        maybe::Maybe,
-        separator::Separator,
-    },
-};
+use crate::gui::{data::{AppState, edit::{EditState, EditedIngredient, EditedTime}}, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}};
 
 /// Build the root edit screen widget
 pub fn edit_widget() -> impl Widget<AppState> {
@@ -55,9 +44,28 @@ pub fn edit_widget() -> impl Widget<AppState> {
         .with_spacer(2.0)
         .with_child(time_editor())
         .with_default_spacer()
+        .with_child(Label::new("Ingredients").with_font(theme::HEADER_FONT).align_left().expand_width())
+        .with_default_spacer()
+        .with_child(Scroll::new(List::new(ingredient_editor
+
+        )).vertical().fix_height(300.))
         .lens(AppState::edit)
         .expand()
 }
+
+
+
+/// Build an ingredient editor for 
+fn ingredient_editor() -> impl Widget<EditedIngredient> {
+    Flex::row()
+        .with_child(TextBox::new().with_placeholder("Ingredient name").align_left().lens(EditedIngredient::name))
+        .with_spacer(10.)
+        .with_child(ValueTextBox::new(TextBox::new().with_placeholder("Amount"), FloatEditorFormatter).lens(EditedIngredient::count))
+        .with_spacer(5.)
+        .with_child(Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.amount.to_string()).controller(UnitSelectorController) )
+        
+}
+
 
 /// Build the root widget for the recipe time editor 
 fn time_editor() -> impl Widget<EditState> {
@@ -75,7 +83,7 @@ fn time_editor() -> impl Widget<EditState> {
                                     TextBox::new()
                                         .with_text_alignment(TextAlignment::Center)
                                         .with_placeholder("hours"),
-                                        TimeEditorFormatter,
+                                        NumberEditorFormatter,
                                 )
                                 .fix_width(50.)
                                 .lens(EditedTime::hours),
@@ -88,7 +96,7 @@ fn time_editor() -> impl Widget<EditState> {
                                     TextBox::new()
                                         .with_text_alignment(TextAlignment::Center)
                                         .with_placeholder("minutes"),
-                                        TimeEditorFormatter,
+                                        NumberEditorFormatter,
                                 )
                                 .fix_width(50.)
                                 .lens(EditedTime::minutes),
@@ -101,7 +109,7 @@ fn time_editor() -> impl Widget<EditState> {
                                     TextBox::new()
                                         .with_text_alignment(TextAlignment::Center)
                                         .with_placeholder("seconds"),
-                                    TimeEditorFormatter,
+                                    NumberEditorFormatter,
                                 )
                                 
                                 .fix_width(50.)
@@ -136,9 +144,8 @@ fn time_editor() -> impl Widget<EditState> {
 
 /// A structure implementing [Formatter](druid::text::format::Formatter) to parse a `u8` from the input box
 #[derive(Clone, Copy, Debug)]
-struct TimeEditorFormatter;
-
-impl druid::text::format::Formatter<u8> for TimeEditorFormatter {
+struct NumberEditorFormatter;
+impl druid::text::format::Formatter<u8> for NumberEditorFormatter {
     fn format(&self, value: &u8) -> String {
         value.to_string()
     }
@@ -161,6 +168,37 @@ impl druid::text::format::Formatter<u8> for TimeEditorFormatter {
     fn value(&self, input: &str) -> Result<u8, druid::text::format::ValidationError> {
         if input.is_empty() {
             return Ok(0)
+        }
+        input.parse().map_err(|e| druid::text::format::ValidationError::new(e))
+    }
+}
+
+/// A structure implementing [Formatter](druid::text::format::Formatter) to parse a `f32` from the input box
+#[derive(Clone, Copy, Debug)]
+struct FloatEditorFormatter;
+impl druid::text::format::Formatter<f32> for FloatEditorFormatter {
+    fn format(&self, value: &f32) -> String {
+        value.to_string()
+    }
+
+    fn format_for_editing(&self, value: &f32) -> String {
+        value.to_string()
+    }
+
+    fn validate_partial_input(&self, input: &str, sel: &druid::text::Selection) -> Validation {
+        if input[sel.range()].is_empty() {
+            Validation::success()
+        } else {
+            match input[sel.range()].parse::<f32>() {
+                Ok(_) => Validation::success(),
+                Err(e) => Validation::failure(e)
+            }
+        }
+    }
+
+    fn value(&self, input: &str) -> Result<f32, druid::text::format::ValidationError> {
+        if input.is_empty() {
+            return Ok(0f32)
         }
         input.parse().map_err(|e| druid::text::format::ValidationError::new(e))
     }
