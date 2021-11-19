@@ -5,11 +5,13 @@ use std::{ops::Deref, time};
 use druid::{Data, Lens, im::Vector};
 use serde::{Deserialize, Serialize};
 
-use crate::recipes::recipe::{Ingredient, IngredientAmount, Recipe};
+use crate::recipes::{db::RecipeId, recipe::{Ingredient, IngredientAmount, Recipe}};
 
 /// Data for the currently edited recipe
 #[derive(Clone, Debug, Data, Lens, Serialize, Deserialize, Default)]
 pub struct EditState {
+    /// If we are modifying the recipe, this is the ID of the modified recipe
+    pub id: Option<RecipeId>,
     /// The name of the recipe
     pub title: String,
     /// Ingredients list
@@ -45,6 +47,7 @@ impl From<&Ingredient> for EditedIngredient {
 impl From<&Recipe> for EditState {
     fn from(recipe: &Recipe) -> Self {
         Self {
+            id: Some(recipe.id),
             title: recipe.name.deref().to_owned(),
             ingredients: recipe.ingredients.iter().map(EditedIngredient::from).collect(),
             body: recipe.body.deref().to_owned(),

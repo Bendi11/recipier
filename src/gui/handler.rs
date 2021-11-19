@@ -6,7 +6,7 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::{SAVE_FILE, gui::data::edit::EditState};
 
-use super::{CHANGE_SCREEN, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, VIEW_RECIPE, data::{search::SearchResults, AppState}};
+use super::{CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, VIEW_RECIPE, data::{search::SearchResults, AppState}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -48,6 +48,8 @@ impl AppDelegate<AppState> for RecipierDelegate {
 
             Handled::Yes
         } else if let Some(()) = cmd.get(POPULATE_RESULTS) {
+            log::trace!("Populating search results for query");
+
             data.search.results = Some(SearchResults {
                 recipes: data.recipes.search(|recipe| {
                     if let Some(score) = sublime_fuzzy::best_match(
@@ -70,17 +72,26 @@ impl AppDelegate<AppState> for RecipierDelegate {
             });
             Handled::Yes
         } else if let Some(recipe) = cmd.get(VIEW_RECIPE) {
+            log::trace!("Viewing recipe {}...", recipe);
+
             data.view.viewed = Some(*recipe);
             Handled::Yes
         } else if let Some(()) = cmd.get(LOAD_MORE_RECIPES) {
+            log::trace!("Loading more recipe results...");
+
             let ids = data.recipes.ids();
             data.home.loaded = druid::im::Vector::from(&ids[0..(if data.home.loaded.len() + 10 >= ids.len() { ids.len() } else { data.home.loaded.len() + 10 }) ]);
             Handled::Yes
         } else if let Some(id) = cmd.get(EDIT_RECIPE) {
+            log::trace!("Populating edit data with recipe {}", id);
+
             match data.recipes.get(*id) {
                 Some(recipe) => data.edit = EditState::from(recipe.deref()),
                 None => log::warn!("Edit recipe command received with ID {} that does not exist", id)
             }
+            Handled::Yes
+        } else if let Some(()) = cmd.get(CREATE_RECIPE) {
+            data.edit = EditState::default();
             Handled::Yes
         } else {
             Handled::No

@@ -29,3 +29,6 @@ pub const LOAD_MORE_RECIPES: Selector = Selector::new("recipeier.load-more-recip
 
 /// Copy the given recipe by ID to the edit state data
 pub const EDIT_RECIPE: Selector<RecipeId> = Selector::new("recipier.edit-recipe");
+
+/// Wipe existing edit data to start with a blank state
+pub const CREATE_RECIPE: Selector = Selector::new("recipier.create-recipe");

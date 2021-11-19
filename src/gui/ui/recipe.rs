@@ -96,32 +96,28 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
 
 /// Show a peek of a recipe with brief details
 pub fn recipe_brief_widget() -> impl Widget<Recipe> {
-    Flex::column()
-        .with_child(Flex::row()
-            .with_child(Label::raw()
-                .with_font(theme::LABEL_FONT)
-                .lens(Recipe::name)
-                .align_left()
-            )
-            .with_flex_spacer(1.)
-            .with_child(Icon::svg(&PEN_ICON)
-                .on_hover(
-                    |ctx, _data, this, _env| {
-                        this.set_color(theme::COLOR_3);
-                        ctx.request_paint();
-                    }, 
-                    |ctx, _data, this, _env| {
-                        this.set_color(theme::COLOR_4);
-                        ctx.request_paint();
-                    }
-                )
-                .on_click(|ctx, recipe: &mut Recipe, _env| {
-                    ctx.submit_command(EDIT_RECIPE.with(recipe.id));
-                    ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
-                })
-            )
-            .expand_width()
-            .fix_height(25.)
+    let edit = Icon::svg(&PEN_ICON)
+        .on_hover(
+            |ctx, _data, this, _env| {
+                this.set_color(theme::COLOR_3);
+                ctx.request_paint();
+            }, 
+            |ctx, _data, this, _env| {
+                this.set_color(theme::COLOR_4);
+                ctx.request_paint();
+            }
+        )
+        .on_click(|ctx, recipe: &mut Recipe, _env| {
+            ctx.submit_command(EDIT_RECIPE.with(recipe.id));
+            ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
+        })
+        .fix_size(20., 20.);
+    
+    let recipe = Flex::column()
+        .with_child(Label::raw()
+            .with_font(theme::LABEL_FONT)
+            .lens(Recipe::name)
+            .align_left()
         )
         .with_spacer(0.1)
         .with_child(Label::new(|data: &Recipe, _env: &'_ _| {
@@ -144,5 +140,14 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
                 ctx.request_paint();
             }
         )
+        .expand_width();
+    
+    Flex::row()
+        .with_flex_child(recipe, 10.)
+        .with_spacer(5.0)
+        .with_child(Flex::column()
+            .with_child(edit)
+        )
+        .with_spacer(5.0)
         .expand_width()
 }
