@@ -15,7 +15,7 @@ pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
 
 /// Return a widget that displays one recipe in a maximized view
 pub fn view_screen() -> impl Widget<AppState> {
-    Maybe::or_empty(recipe_widget).lens(lens::Identity.map(
+    Maybe::or_empty(|| recipe_widget().lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))).lens(lens::Identity.map(
         |state: &AppState| state.recipes.get(state.view.viewed?),
         |state, recipe| {
             if let Some(recipe) = recipe {
@@ -26,14 +26,23 @@ pub fn view_screen() -> impl Widget<AppState> {
 }
 
 /// Show a widget that displays all information about the recipe
-pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
+pub fn recipe_widget() -> impl Widget<Recipe> {
     Flex::column()
-        .with_child(
-            Label::raw()
+        .with_default_spacer()
+        .with_child(Flex::row()
+            .with_child(Label::raw()
                 .with_font(theme::HEADER_FONT)
                 .with_line_break_mode(LineBreaking::WordWrap)
                 .align_left()
-                .lens(Recipe::name),
+                .lens(Recipe::name)
+            )
+            .with_flex_spacer(1.)
+            .with_child(Flex::column()
+                .with_child(edit_button(AppScreen::View))
+                .with_flex_spacer(1.0)
+                .with_child(delete_button(AppScreen::View))
+            )
+            .fix_height(50.)
         )
         .with_default_spacer()
         .with_child(
@@ -112,14 +121,14 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
                 .lens(Recipe::body), 30.
         )
         .expand()
-        .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+        
         .padding((5., 1.))
 }
 
 
-/// Show a peek of a recipe with brief details
-pub fn recipe_brief_widget() -> impl Widget<Recipe> {
-    let edit = Icon::svg(&PEN_ICON)
+/// A remove recipe button that takes the user to a confirmation dialog
+fn delete_button(screen: AppScreen) -> impl Widget<Recipe> {
+    Icon::svg(&RECYCLE_ICON)
         .on_hover(
             |ctx, _data, this, _env| {
                 this.set_color(theme::COLOR_3);
@@ -130,29 +139,35 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
                 ctx.request_paint();
             }
         )
-        .on_click(|ctx, recipe: &mut Recipe, _env| {
-            ctx.submit_command(EDIT_RECIPE.with(recipe.id));
-            ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
-        })
-        .fix_size(20., 20.);
-
-    let remove = Icon::svg(&RECYCLE_ICON)
-        .on_hover(
-            |ctx, _data, this, _env| {
-                this.set_color(theme::COLOR_3);
-                ctx.request_paint();
-            }, 
-            |ctx, _data, this, _env| {
-                this.set_color(theme::COLOR_4);
-                ctx.request_paint();
-            }
-        )
-        .on_click(|ctx, recipe: &mut Recipe, _env| {
-            ctx.submit_command(REMOVE_RECIPE.with(recipe.id));
+        .on_click(move |ctx, recipe: &mut Recipe, _env| {
+            ctx.submit_command(REMOVE_RECIPE.with((recipe.id, screen)));
             ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Delete));
         })
-        .fix_size(20., 20.);
-    
+        .fix_size(20., 20.)
+}
+
+/// Edit icon button that takes the user to the edit screen populated with the current recipe's data
+fn edit_button(screen: AppScreen) -> impl Widget<Recipe> {
+    Icon::svg(&PEN_ICON)
+        .on_hover(
+            |ctx, _data, this, _env| {
+                this.set_color(theme::COLOR_3);
+                ctx.request_paint();
+            }, 
+            |ctx, _data, this, _env| {
+                this.set_color(theme::COLOR_4);
+                ctx.request_paint();
+            }
+        )
+        .on_click(move |ctx, recipe: &mut Recipe, _env| {
+            ctx.submit_command(EDIT_RECIPE.with((recipe.id, screen)));
+            ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
+        })
+        .fix_size(20., 20.)
+}
+
+/// Show a peek of a recipe with brief details
+pub fn recipe_brief_widget() -> impl Widget<Recipe> { 
     let recipe = Flex::column()
         .with_child(Label::raw()
             .with_font(theme::LABEL_FONT)
@@ -186,9 +201,9 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
         .with_flex_child(recipe, 10.)
         .with_spacer(5.0)
         .with_child(Flex::column()
-            .with_child(edit)
+            .with_child(edit_button(AppScreen::Home))
             .with_spacer(5.5)
-            .with_child(remove)
+            .with_child(delete_button(AppScreen::Home))
         )
         .with_spacer(5.0)
         .expand_width()

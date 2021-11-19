@@ -4,6 +4,7 @@ pub mod search;
 pub mod view;
 pub mod home;
 pub mod edit;
+pub mod remove;
 
 use std::{ops::Deref, path::Path, sync::Arc};
 
@@ -12,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::recipes::{db::Database, recipe::Recipe};
 
-use self::{config::Config, edit::EditState, home::HomeState, screen::AppScreen, search::SearchState, view::ViewState};
+use self::{config::Config, edit::EditState, home::HomeState, remove::RemoveState, screen::AppScreen, search::SearchState, view::ViewState};
 
 /// Structure holding all state information, must be easily cloneable and comparable or performance will
 /// suffer
@@ -41,8 +42,8 @@ pub struct AppState {
     /// The currently edited recipe state
     pub edit: EditState,
 
-    /// The recipe that the user is being prompted to delete
-    pub deleted: Option<Arc<Recipe>>,
+    /// The optional state for the delete recipe screen
+    pub remove: Option<RemoveState>,
 }
 
 impl AppState {
@@ -117,7 +118,7 @@ impl Default for AppState {
             home: HomeState::default(),
             view: ViewState::default(),
             edit: EditState::default(),
-            deleted: Option::None,
+            remove: Option::None,
         }
     }
 }

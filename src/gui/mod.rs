@@ -27,11 +27,12 @@ pub const VIEW_RECIPE: Selector<RecipeId> = Selector::new("recipier.view-recipe"
 /// Load more recipes into the recipes home screen
 pub const LOAD_MORE_RECIPES: Selector = Selector::new("recipeier.load-more-recipes");
 
-/// Copy the given recipe by ID to the edit state data
-pub const EDIT_RECIPE: Selector<RecipeId> = Selector::new("recipier.edit-recipe");
+/// Copy the given recipe by ID to the edit state data and return to the given screen when editing is finished
+pub const EDIT_RECIPE: Selector<(RecipeId, AppScreen)> = Selector::new("recipier.edit-recipe");
 
 /// Wipe existing edit data to start with a blank state
 pub const CREATE_RECIPE: Selector = Selector::new("recipier.create-recipe");
 
-/// Remove the recipe with the given ID
-pub const REMOVE_RECIPE: Selector<RecipeId> = Selector::new("recipier.remove-recipe");
+/// Remove the recipe with the given ID and return to the given screen after displaying the
+/// delete prompt
+pub const REMOVE_RECIPE: Selector<(RecipeId, AppScreen)> = Selector::new("recipier.remove-recipe");

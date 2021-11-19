@@ -7,8 +7,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::recipes::{db::RecipeId, recipe::{Ingredient, IngredientAmount, Recipe}};
 
+use super::screen::AppScreen;
+
 /// Data for the currently edited recipe
-#[derive(Clone, Debug, Data, Lens, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Data, Lens, Serialize, Deserialize, )]
 pub struct EditState {
     /// If we are modifying the recipe, this is the ID of the modified recipe
     pub id: Option<RecipeId>,
@@ -22,7 +24,9 @@ pub struct EditState {
     pub servings: Option<f32>,
     /// The amount of time that the recipe is expected to take
     #[data(same_fn = "PartialEq::eq")]
-    pub time: Option<time::Duration>
+    pub time: Option<time::Duration>,
+    /// The screen to return to after editing is over
+    pub return_to: AppScreen,
 }
 
 /// Ingredient data stored in a more efficiently mutable way
@@ -53,6 +57,21 @@ impl From<&Recipe> for EditState {
             body: recipe.body.deref().to_owned(),
             servings: recipe.servings,
             time: recipe.time,
+            return_to: AppScreen::Home,
+        }
+    }
+}
+
+impl Default for EditState {
+    fn default() -> Self {
+        Self {
+            id: None,
+            title: String::new(),
+            ingredients: Vector::new(),
+            body: String::new(),
+            servings: None,
+            time: None,
+            return_to: AppScreen::Home
         }
     }
 }

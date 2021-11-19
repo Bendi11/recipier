@@ -6,7 +6,7 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::{SAVE_FILE, gui::data::edit::EditState};
 
-use super::{CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_RECIPE, VIEW_RECIPE, data::{search::SearchResults, AppState}};
+use super::{CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_RECIPE, VIEW_RECIPE, data::{AppState, remove::RemoveState, search::SearchResults}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -82,9 +82,9 @@ impl AppDelegate<AppState> for RecipierDelegate {
             let ids = data.recipes.ids();
             data.home.loaded = druid::im::Vector::from(&ids[0..(if data.home.loaded.len() + 10 >= ids.len() { ids.len() } else { data.home.loaded.len() + 10 }) ]);
             Handled::Yes
-        } else if let Some(id) = cmd.get(EDIT_RECIPE) {
+        } else if let Some((id, return_to)) = cmd.get(EDIT_RECIPE) {
             log::trace!("Populating edit data with recipe {}", id);
-
+            data.edit.return_to = *return_to;
             match data.recipes.get(*id) {
                 Some(recipe) => data.edit = EditState::from(recipe.deref()),
                 None => log::warn!("Edit recipe command received with ID {} that does not exist", id)
@@ -93,8 +93,15 @@ impl AppDelegate<AppState> for RecipierDelegate {
         } else if let Some(()) = cmd.get(CREATE_RECIPE) {
             data.edit = EditState::default();
             Handled::Yes
-        } else if let Some(id) = cmd.get(REMOVE_RECIPE) {
-            data.deleted = data.recipes.get(*id);
+        } else if let Some((id, return_to)) = cmd.get(REMOVE_RECIPE) {
+            if let Some(recipe) = data.recipes.get(*id) {
+                data.remove = Some(RemoveState {
+                    deleted: recipe,
+                    return_to: *return_to
+                });
+            } else {
+                log::warn!("Remove recipe command received with invalid ID: {}", id);
+            }
             Handled::Yes
         } else {
             Handled::No
