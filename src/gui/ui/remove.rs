@@ -27,8 +27,10 @@ pub fn remove_widget() -> impl Widget<AppState> {
     .with_child(Flex::row()
         .with_child(Button::new("Cancel")
             .on_click(|ctx, data: &mut AppState, _env| {
+                if let Some(ref remove) = data.remove {
+                    ctx.submit_command(CHANGE_SCREEN.with(remove.return_to))
+                }
                 data.remove = None;
-                ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))
             })
         )
         .with_flex_spacer(1.0)
@@ -36,9 +38,9 @@ pub fn remove_widget() -> impl Widget<AppState> {
             .on_click(|ctx, data: &mut AppState, _env| {
                 if let Some(ref remove) = data.remove {
                     data.recipes.remove(remove.deleted.id);
+                    ctx.submit_command(CHANGE_SCREEN.with(remove.return_to))
                 }
                 data.remove = None;
-                ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))
             })
         )
         .padding((10., 0.))
