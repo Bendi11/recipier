@@ -45,7 +45,7 @@ impl From<Duration> for EditedTime {
         let time = duration.as_secs_f32();
         let hours = time / 360f32;
         let minutes = (time - (hours.trunc() * 360f32)) / 60.;
-        let seconds = time - ((hours.trunc() * 360f32) - (hours.trunc() * 60f32));
+        let seconds = time - (hours.trunc() * 360f32) - (hours.trunc() * 60f32);
         log::trace!(
             "Converted {}s to {} hours, {} mins, {} secs",
             time,

@@ -47,7 +47,6 @@ pub fn edit_widget() -> impl Widget<AppState> {
         .with_child(Label::new("Ingredients").with_font(theme::HEADER_FONT).align_left().expand_width())
         .with_default_spacer()
         .with_child(Scroll::new(List::new(ingredient_editor
-
         )).vertical().fix_height(300.))
         .lens(AppState::edit)
         .expand()

@@ -21,7 +21,9 @@ impl<W: Widget<EditedIngredient>> Controller<EditedIngredient, W> for UnitSelect
 
         
         if let Event::MouseDown(mouse) = event {
-            ctx.show_context_menu(ContextMenu::new(unit_selector, mouse.pos));
+            if ctx.is_hot() {
+                ctx.show_context_menu(ContextMenu::new(unit_selector, mouse.window_pos));
+            }
         }
         child.event(ctx, event, data, env)
     }
