@@ -38,4 +38,5 @@ pub const CREATE_RECIPE: Selector = Selector::new("recipier.create-recipe");
 pub const REMOVE_RECIPE: Selector<(RecipeId, AppScreen)> = Selector::new("recipier.remove-recipe");
 
 /// Change the selected ingredient's unit to the given unit
-pub const CHANGE_INGREDIENT_UNIT: Selector<(Uuid, AmountUnit)> = Selector::new("recipier.change-ingredient-unit");
+pub const CHANGE_INGREDIENT_UNIT: Selector<(Uuid, AmountUnit)> =
+    Selector::new("recipier.change-ingredient-unit");

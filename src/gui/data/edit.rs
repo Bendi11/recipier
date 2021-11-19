@@ -2,11 +2,15 @@
 
 use std::{ops::Deref, sync::Arc, time::Duration};
 
-use druid::{Data, Lens, im::HashMap, widget::ListIter};
+use druid::{im::HashMap, widget::ListIter, Data, Lens};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::recipes::{db::RecipeId, measure::AmountUnit, recipe::{Ingredient, IngredientAmount, Recipe}};
+use crate::recipes::{
+    db::RecipeId,
+    measure::AmountUnit,
+    recipe::{Ingredient, IngredientAmount, Recipe},
+};
 
 use super::screen::AppScreen;
 
@@ -84,7 +88,7 @@ impl EditedIngredient {
                 IngredientAmount::Count(n) => n as f32,
                 IngredientAmount::Mass(m) => m.val,
                 IngredientAmount::Volume(v) => v.val,
-                IngredientAmount::None => 0f32
+                IngredientAmount::None => 0f32,
             },
             name: Arc::new(ingredient.name.deref().to_owned()),
             amount: ingredient.amount.into(),

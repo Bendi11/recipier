@@ -1,8 +1,24 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher}};
+use druid::{
+    text::format::Validation,
+    widget::{Button, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher},
+    TextAlignment, Widget, WidgetExt,
+};
 
-use crate::gui::{data::{AppState, edit::{EditState, EditedIngredient, EditedTime}}, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}};
+use crate::gui::{
+    data::{
+        edit::{EditState, EditedIngredient, EditedTime},
+        AppState,
+    },
+    theme,
+    widgets::{
+        icon::{Icon, PLUS_ICON, RECYCLE_ICON},
+        maybe::Maybe,
+        separator::Separator,
+        unit::UnitSelectorController,
+    },
+};
 
 /// Build the root edit screen widget
 pub fn edit_widget() -> impl Widget<AppState> {
@@ -44,29 +60,47 @@ pub fn edit_widget() -> impl Widget<AppState> {
         .with_spacer(2.0)
         .with_child(time_editor())
         .with_default_spacer()
-        .with_child(Label::new("Ingredients").with_font(theme::HEADER_FONT).align_left().expand_width())
+        .with_child(
+            Label::new("Ingredients")
+                .with_font(theme::HEADER_FONT)
+                .align_left()
+                .expand_width(),
+        )
         .with_default_spacer()
-        .with_child(Scroll::new(List::new(ingredient_editor
-        )).vertical().fix_height(300.))
+        .with_child(
+            Scroll::new(List::new(ingredient_editor))
+                .vertical()
+                .fix_height(300.),
+        )
         .lens(AppState::edit)
         .expand()
 }
 
-
-
-/// Build an ingredient editor for 
+/// Build an ingredient editor for
 fn ingredient_editor() -> impl Widget<EditedIngredient> {
     Flex::row()
-        .with_child(TextBox::new().with_placeholder("Ingredient name").align_left().lens(EditedIngredient::name))
+        .with_child(
+            TextBox::new()
+                .with_placeholder("Ingredient name")
+                .align_left()
+                .lens(EditedIngredient::name),
+        )
         .with_spacer(10.)
-        .with_child(ValueTextBox::new(TextBox::new().with_placeholder("Amount"), FloatEditorFormatter).lens(EditedIngredient::count))
+        .with_child(
+            ValueTextBox::new(
+                TextBox::new().with_placeholder("Amount"),
+                FloatEditorFormatter,
+            )
+            .lens(EditedIngredient::count),
+        )
         .with_spacer(5.)
-        .with_child(Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.amount.to_string()).controller(UnitSelectorController) )
-        
+        .with_child(
+            Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.amount.to_string())
+                .controller(UnitSelectorController),
+        )
 }
 
-
-/// Build the root widget for the recipe time editor 
+/// Build the root widget for the recipe time editor
 fn time_editor() -> impl Widget<EditState> {
     ViewSwitcher::new(
         |data: &EditState, _env| data.time,
@@ -82,7 +116,7 @@ fn time_editor() -> impl Widget<EditState> {
                                     TextBox::new()
                                         .with_text_alignment(TextAlignment::Center)
                                         .with_placeholder("hours"),
-                                        NumberEditorFormatter,
+                                    NumberEditorFormatter,
                                 )
                                 .fix_width(50.)
                                 .lens(EditedTime::hours),
@@ -95,7 +129,7 @@ fn time_editor() -> impl Widget<EditState> {
                                     TextBox::new()
                                         .with_text_alignment(TextAlignment::Center)
                                         .with_placeholder("minutes"),
-                                        NumberEditorFormatter,
+                                    NumberEditorFormatter,
                                 )
                                 .fix_width(50.)
                                 .lens(EditedTime::minutes),
@@ -110,7 +144,6 @@ fn time_editor() -> impl Widget<EditState> {
                                         .with_placeholder("seconds"),
                                     NumberEditorFormatter,
                                 )
-                                
                                 .fix_width(50.)
                                 .lens(EditedTime::secs),
                             )
@@ -159,16 +192,18 @@ impl druid::text::format::Formatter<u8> for NumberEditorFormatter {
         } else {
             match input[sel.range()].parse::<u8>() {
                 Ok(_) => Validation::success(),
-                Err(e) => Validation::failure(e)
+                Err(e) => Validation::failure(e),
             }
         }
     }
 
     fn value(&self, input: &str) -> Result<u8, druid::text::format::ValidationError> {
         if input.is_empty() {
-            return Ok(0)
+            return Ok(0);
         }
-        input.parse().map_err(|e| druid::text::format::ValidationError::new(e))
+        input
+            .parse()
+            .map_err(|e| druid::text::format::ValidationError::new(e))
     }
 }
 
@@ -190,15 +225,17 @@ impl druid::text::format::Formatter<f32> for FloatEditorFormatter {
         } else {
             match input[sel.range()].parse::<f32>() {
                 Ok(_) => Validation::success(),
-                Err(e) => Validation::failure(e)
+                Err(e) => Validation::failure(e),
             }
         }
     }
 
     fn value(&self, input: &str) -> Result<f32, druid::text::format::ValidationError> {
         if input.is_empty() {
-            return Ok(0f32)
+            return Ok(0f32);
         }
-        input.parse().map_err(|e| druid::text::format::ValidationError::new(e))
+        input
+            .parse()
+            .map_err(|e| druid::text::format::ValidationError::new(e))
     }
 }

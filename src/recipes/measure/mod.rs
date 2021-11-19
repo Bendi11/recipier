@@ -220,7 +220,7 @@ impl From<IngredientAmount> for AmountUnit {
             IngredientAmount::Count(_) => Self::Count,
             IngredientAmount::Volume(Volume { unit, val: _ }) => Self::Volume(unit),
             IngredientAmount::Mass(Mass { unit, val: _ }) => Self::Mass(unit),
-            IngredientAmount::None => Self::None
+            IngredientAmount::None => Self::None,
         }
     }
 }
@@ -231,7 +231,7 @@ impl fmt::Display for AmountUnit {
             Self::Count => write!(f, "count"),
             Self::Volume(vol) => vol.fmt(f),
             Self::Mass(mass) => mass.fmt(f),
-            Self::None => write!(f, "none")
+            Self::None => write!(f, "none"),
         }
     }
 }
