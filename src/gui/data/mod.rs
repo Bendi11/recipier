@@ -40,6 +40,9 @@ pub struct AppState {
 
     /// The currently edited recipe state
     pub edit: EditState,
+
+    /// The recipe that the user is being prompted to delete
+    pub deleted: Option<Arc<Recipe>>,
 }
 
 impl AppState {
@@ -114,6 +117,7 @@ impl Default for AppState {
             home: HomeState::default(),
             view: ViewState::default(),
             edit: EditState::default(),
+            deleted: Option::None,
         }
     }
 }

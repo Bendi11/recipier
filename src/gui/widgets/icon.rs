@@ -32,6 +32,12 @@ pub const PEN_ICON: IconData = IconData {
     size: Size::new(16., 16.),
 };
 
+/// A recycle icon
+pub const RECYCLE_ICON: IconData = IconData {
+    path: include_str!("../../../assets/icons/recycle-path.txt"),
+    size: Size::new(16., 16.),
+};
+
 /// Structure with all data needed to render an icon: size and bezier path
 #[derive(Clone, Debug)]
 pub struct IconData {

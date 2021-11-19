@@ -8,7 +8,7 @@ use druid::{
     LensExt, TextAlignment, Widget, WidgetExt,
 };
 
-use crate::{gui::{CHANGE_SCREEN, EDIT_RECIPE, VIEW_RECIPE, data::{screen::AppScreen, AppState}, theme, widgets::{RecipierWidget, icon::{Icon, PEN_ICON, RIGHT_ARROW_ICON}, maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
+use crate::{gui::{CHANGE_SCREEN, EDIT_RECIPE, REMOVE_RECIPE, VIEW_RECIPE, data::{screen::AppScreen, AppState}, theme, widgets::{RecipierWidget, icon::{Icon, PEN_ICON, RECYCLE_ICON, RIGHT_ARROW_ICON}, maybe::Maybe, separator::Separator}}, recipes::recipe::{Ingredient, Recipe}};
 
 /// The string to use when formatting chrono datetimes
 pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
@@ -135,6 +135,23 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
             ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
         })
         .fix_size(20., 20.);
+
+    let remove = Icon::svg(&RECYCLE_ICON)
+        .on_hover(
+            |ctx, _data, this, _env| {
+                this.set_color(theme::COLOR_3);
+                ctx.request_paint();
+            }, 
+            |ctx, _data, this, _env| {
+                this.set_color(theme::COLOR_4);
+                ctx.request_paint();
+            }
+        )
+        .on_click(|ctx, recipe: &mut Recipe, _env| {
+            ctx.submit_command(REMOVE_RECIPE.with(recipe.id));
+            ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Delete));
+        })
+        .fix_size(20., 20.);
     
     let recipe = Flex::column()
         .with_child(Label::raw()
@@ -170,6 +187,8 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
         .with_spacer(5.0)
         .with_child(Flex::column()
             .with_child(edit)
+            .with_spacer(5.5)
+            .with_child(remove)
         )
         .with_spacer(5.0)
         .expand_width()

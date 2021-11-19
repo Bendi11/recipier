@@ -6,7 +6,7 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
 use crate::{SAVE_FILE, gui::data::edit::EditState};
 
-use super::{CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, VIEW_RECIPE, data::{search::SearchResults, AppState}};
+use super::{CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_RECIPE, VIEW_RECIPE, data::{search::SearchResults, AppState}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -92,6 +92,9 @@ impl AppDelegate<AppState> for RecipierDelegate {
             Handled::Yes
         } else if let Some(()) = cmd.get(CREATE_RECIPE) {
             data.edit = EditState::default();
+            Handled::Yes
+        } else if let Some(id) = cmd.get(REMOVE_RECIPE) {
+            data.recipes.remove(*id);
             Handled::Yes
         } else {
             Handled::No

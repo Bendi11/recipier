@@ -32,3 +32,6 @@ pub const EDIT_RECIPE: Selector<RecipeId> = Selector::new("recipier.edit-recipe"
 
 /// Wipe existing edit data to start with a blank state
 pub const CREATE_RECIPE: Selector = Selector::new("recipier.create-recipe");
+
+/// Remove the recipe with the given ID
+pub const REMOVE_RECIPE: Selector<RecipeId> = Selector::new("recipier.remove-recipe");

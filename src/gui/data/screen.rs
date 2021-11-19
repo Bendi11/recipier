@@ -14,4 +14,6 @@ pub enum AppScreen {
     View,
     /// Screen allowing the user to edit a recipe
     Edit,
+    /// Screen displaying a simple are you sure prompt
+    Delete,
 }

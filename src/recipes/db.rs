@@ -184,6 +184,18 @@ impl Database {
         Ok(this)
     }
 
+    /// Remove the recipe with the specified ID from the recipes database
+    pub fn remove(&self, id: RecipeId) {
+        self.items.write().remove(&id);
+        let file_path = self.dir.join(id.to_string());
+        //Remove the recipe file as well
+        if let Err(e) = std::fs::remove_file(self.dir.join(&file_path)) {
+            log::warn!("Failed to remove recipe {} save file: {}", id, file_path.display());
+        } else {
+            log::trace!("Removed save file and db entry for recipe {}", id);
+        }
+    }
+
     /// Get an iterator over all ids for recipes in this database
     pub fn ids(&self) -> Arc<[RecipeId]> {
         let items = self.items.read();

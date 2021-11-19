@@ -2,6 +2,7 @@ pub mod recipe;
 pub mod search;
 pub mod home;
 pub mod edit;
+pub mod remove;
 
 use druid::{
     widget::{Flex, ViewSwitcher},
@@ -63,6 +64,7 @@ pub fn root_widget() -> impl Widget<AppState> {
             ViewSwitcher::new(
                 |state: &AppState, _env| state.screen,
                 |screen, _state, _env| match screen {
+                    AppScreen::Delete => remove::remove_widget().boxed(),
                     AppScreen::Edit => edit::edit_widget().boxed(),
                     AppScreen::Home => home::home_widget().boxed(),
                     AppScreen::SearchResults => search::search_screen().boxed(),
