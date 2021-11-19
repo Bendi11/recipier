@@ -94,7 +94,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
             data.edit = EditState::default();
             Handled::Yes
         } else if let Some(id) = cmd.get(REMOVE_RECIPE) {
-            data.recipes.remove(*id);
+            data.deleted = data.recipes.get(*id);
             Handled::Yes
         } else {
             Handled::No
