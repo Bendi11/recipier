@@ -2,7 +2,7 @@
 
 use druid::{Widget, WidgetExt, widget::{Button, Flex, Label, List, Scroll}};
 
-use crate::gui::{LOAD_MORE_RECIPES, data::AppState, theme, widgets::{RecipierWidget, icon::{self, Icon}, separator::Separator}};
+use crate::gui::{CHANGE_SCREEN, CREATE_RECIPE, LOAD_MORE_RECIPES, data::{AppState, screen::AppScreen}, theme, widgets::{RecipierWidget, icon::{self, Icon}, separator::Separator}};
 
 use super::recipe::recipe_brief_widget;
 
@@ -24,6 +24,10 @@ pub fn home_widget() -> impl Widget<AppState> {
                     ctx.request_paint();
                 }
             )
+            .on_click(|ctx, _data, _env| {
+                ctx.submit_command(CREATE_RECIPE);
+                ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
+            })
         )
         .with_spacer(10.);
         

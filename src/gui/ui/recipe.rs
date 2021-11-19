@@ -57,7 +57,8 @@ pub fn recipe_widget() -> impl Widget<Arc<Recipe>> {
         )
         .with_child(Maybe::or_empty(
                 || Flex::column()
-                    .with_child(Label::new(|time: &f32, _env: &'_ _| format!("Takes {} to cook", FormattedDuration(*time)) ))
+                    .with_child(Label::new(|time: &f32, _env: &'_ _| format!("Takes {} to cook", FormattedDuration(*time)) ).align_left().expand_width())
+                    .with_default_spacer()
             ).lens(Recipe::time.map(
                 |duration| duration.map(|v| v.as_secs_f32()),
                 |duration, seconds| if let Some(seconds) = seconds {

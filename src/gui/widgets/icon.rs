@@ -22,7 +22,7 @@ pub const PLUS_ICON: IconData = IconData {
 
 /// A right arrow icon
 pub const RIGHT_ARROW_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icons/plus-path.txt"),
+    path: include_str!("../../../assets/icons/right-arrow-path.txt"),
     size: Size::new(16., 16.),
 };
 
