@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use druid::{Widget, WidgetExt, widget::{Button, Flex, Label}};
 
-use crate::{gui::{CHANGE_SCREEN, data::{AppState, remove::RemoveState, screen::AppScreen}, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::Recipe};
+use crate::{gui::{CHANGE_SCREEN, data::{AppState, remove::RemoveState}, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::Recipe};
 
 /// Build the root widget for the recipe removal confirmation screen
 pub fn remove_widget() -> impl Widget<AppState> {

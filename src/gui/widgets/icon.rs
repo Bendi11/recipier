@@ -2,6 +2,10 @@
 
 use druid::{kurbo::BezPath, Affine, Color, Data, KeyOrValue, RenderContext, Size, Widget};
 
+use crate::gui::theme;
+
+use super::RecipierWidget;
+
 /// Logo bowl icon SVG data
 pub const BOWL_ICON: IconData = IconData {
     path: include_str!("../../../assets/icon-path.txt"),
@@ -78,6 +82,20 @@ impl Icon {
     pub fn flex(mut self, flex: bool) -> Self {
         self.flex = flex;
         self
+    }
+
+    /// Make this widget highlight when the mouse cursor hovers over it
+    pub fn highlight_on_hover<D: Data>(self) -> impl Widget<D> {
+        self.on_hover(
+            |ctx, _, this, _env| {
+                this.set_color(theme::COLOR_3);
+                ctx.request_paint();
+            }, 
+            |ctx, _, this, _env| {
+                this.set_color(theme::COLOR_4);
+                ctx.request_paint();
+            }
+        )
     }
 
     /// Builder method to set the rendering color of this icon

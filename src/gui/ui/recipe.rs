@@ -129,16 +129,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
 /// A remove recipe button that takes the user to a confirmation dialog
 fn delete_button(screen: AppScreen) -> impl Widget<Recipe> {
     Icon::svg(&RECYCLE_ICON)
-        .on_hover(
-            |ctx, _data, this, _env| {
-                this.set_color(theme::COLOR_3);
-                ctx.request_paint();
-            }, 
-            |ctx, _data, this, _env| {
-                this.set_color(theme::COLOR_4);
-                ctx.request_paint();
-            }
-        )
+        .highlight_on_hover()
         .on_click(move |ctx, recipe: &mut Recipe, _env| {
             ctx.submit_command(REMOVE_RECIPE.with((recipe.id, screen)));
             ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Delete));
@@ -149,16 +140,7 @@ fn delete_button(screen: AppScreen) -> impl Widget<Recipe> {
 /// Edit icon button that takes the user to the edit screen populated with the current recipe's data
 fn edit_button(screen: AppScreen) -> impl Widget<Recipe> {
     Icon::svg(&PEN_ICON)
-        .on_hover(
-            |ctx, _data, this, _env| {
-                this.set_color(theme::COLOR_3);
-                ctx.request_paint();
-            }, 
-            |ctx, _data, this, _env| {
-                this.set_color(theme::COLOR_4);
-                ctx.request_paint();
-            }
-        )
+        .highlight_on_hover()
         .on_click(move |ctx, recipe: &mut Recipe, _env| {
             ctx.submit_command(EDIT_RECIPE.with((recipe.id, screen)));
             ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));

@@ -1,6 +1,6 @@
 //! State for the currently edited recipe
 
-use std::{ops::Deref, time};
+use std::{ops::Deref, time::Duration};
 
 use druid::{Data, Lens, im::Vector};
 use serde::{Deserialize, Serialize};
@@ -23,10 +23,36 @@ pub struct EditState {
     /// Number of servings the recipe makes
     pub servings: Option<f32>,
     /// The amount of time that the recipe is expected to take
-    #[data(same_fn = "PartialEq::eq")]
-    pub time: Option<time::Duration>,
+    pub time: Option<EditedTime>,
     /// The screen to return to after editing is over
     pub return_to: AppScreen,
+}
+
+/// Data for a user-edited time that destructures a [Duration](std::time::Duration)
+#[derive(Clone, Copy, Debug, Default, Data, Lens, Serialize, Deserialize, )]
+pub struct EditedTime {
+    /// Seconds component of the time
+    pub secs: u8,
+    /// Minutes of the time
+    pub minutes: u8,
+    /// Hours of the time
+    pub hours: u8
+}
+
+
+impl From<Duration> for EditedTime {
+    fn from(duration: Duration) -> Self {
+        let time = duration.as_secs_f32();
+        let hours = time / 360f32;
+        let minutes = (time - (hours.trunc() * 360f32)) / 60.;
+        let seconds = time - ((hours.trunc() * 360f32) - (hours.trunc() * 60f32));
+        log::trace!("Converted {}s to {} hours, {} mins, {} secs", time, hours, minutes, seconds);
+        Self {
+            secs: seconds as u8,
+            minutes: minutes as u8,
+            hours: hours as u8
+        }
+    }
 }
 
 /// Ingredient data stored in a more efficiently mutable way
@@ -56,7 +82,7 @@ impl From<&Recipe> for EditState {
             ingredients: recipe.ingredients.iter().map(EditedIngredient::from).collect(),
             body: recipe.body.deref().to_owned(),
             servings: recipe.servings,
-            time: recipe.time,
+            time: recipe.time.map(From::from),
             return_to: AppScreen::Home,
         }
     }
