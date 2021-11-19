@@ -12,4 +12,6 @@ pub enum AppScreen {
     SearchResults,
     /// The screen displaying one recipe's data
     View,
+    /// Screen allowing the user to edit a recipe
+    Edit,
 }

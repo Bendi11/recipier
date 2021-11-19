@@ -5,6 +5,7 @@ pub mod theme;
 pub mod ui;
 pub mod widgets;
 
+
 use crate::recipes::db::RecipeId;
 
 use self::data::screen::AppScreen;
@@ -25,3 +26,6 @@ pub const VIEW_RECIPE: Selector<RecipeId> = Selector::new("recipier.view-recipe"
 
 /// Load more recipes into the recipes home screen
 pub const LOAD_MORE_RECIPES: Selector = Selector::new("recipeier.load-more-recipes");
+
+/// Copy the given recipe by ID to the edit state data
+pub const EDIT_RECIPE: Selector<RecipeId> = Selector::new("recipier.edit-recipe");

@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::recipes::{db::Database, recipe::Recipe};
 
-use self::{config::Config, home::HomeState, screen::AppScreen, search::SearchState, view::ViewState};
+use self::{config::Config, edit::EditState, home::HomeState, screen::AppScreen, search::SearchState, view::ViewState};
 
 /// Structure holding all state information, must be easily cloneable and comparable or performance will
 /// suffer
@@ -37,6 +37,9 @@ pub struct AppState {
 
     /// The state for recipe viewing
     pub view: ViewState,
+
+    /// The currently edited recipe state
+    pub edit: EditState,
 }
 
 impl AppState {
@@ -110,6 +113,7 @@ impl Default for AppState {
             screen: AppScreen::Home,
             home: HomeState::default(),
             view: ViewState::default(),
+            edit: EditState::default(),
         }
     }
 }

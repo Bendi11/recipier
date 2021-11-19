@@ -1,14 +1,14 @@
 //! State for the currently edited recipe
 
-use std::time;
+use std::{ops::Deref, time};
 
 use druid::{Data, Lens, im::Vector};
 use serde::{Deserialize, Serialize};
 
-use crate::recipes::recipe::IngredientAmount;
+use crate::recipes::recipe::{Ingredient, IngredientAmount, Recipe};
 
 /// Data for the currently edited recipe
-#[derive(Clone, Debug, Data, Lens, Serialize, Deserialize)]
+#[derive(Clone, Debug, Data, Lens, Serialize, Deserialize, Default)]
 pub struct EditState {
     /// The name of the recipe
     pub title: String,
@@ -31,4 +31,25 @@ pub struct EditedIngredient {
     /// The amount of the ingredient needed
     #[data(same_fn = "PartialEq::eq")]
     pub amount: IngredientAmount
+}
+
+impl From<&Ingredient> for EditedIngredient {
+    fn from(ingredient: &Ingredient) -> Self {
+        Self {
+            name: ingredient.name.deref().to_owned(),
+            amount: ingredient.amount
+        }
+    }
+}
+
+impl From<&Recipe> for EditState {
+    fn from(recipe: &Recipe) -> Self {
+        Self {
+            title: recipe.name.deref().to_owned(),
+            ingredients: recipe.ingredients.iter().map(EditedIngredient::from).collect(),
+            body: recipe.body.deref().to_owned(),
+            servings: recipe.servings,
+            time: recipe.time,
+        }
+    }
 }

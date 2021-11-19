@@ -1,12 +1,12 @@
 //! Application command handler
 
-use std::{borrow::Borrow, sync::Arc};
+use std::{borrow::Borrow, ops::Deref, sync::Arc};
 
 use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
-use crate::SAVE_FILE;
+use crate::{SAVE_FILE, gui::data::edit::EditState};
 
-use super::{CHANGE_SCREEN, LOAD_MORE_RECIPES, POPULATE_RESULTS, VIEW_RECIPE, data::{search::SearchResults, AppState}};
+use super::{CHANGE_SCREEN, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, VIEW_RECIPE, data::{search::SearchResults, AppState}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -75,6 +75,12 @@ impl AppDelegate<AppState> for RecipierDelegate {
         } else if let Some(()) = cmd.get(LOAD_MORE_RECIPES) {
             let ids = data.recipes.ids();
             data.home.loaded = druid::im::Vector::from(&ids[0..(if data.home.loaded.len() + 10 >= ids.len() { ids.len() } else { data.home.loaded.len() + 10 }) ]);
+            Handled::Yes
+        } else if let Some(id) = cmd.get(EDIT_RECIPE) {
+            match data.recipes.get(*id) {
+                Some(recipe) => data.edit = EditState::from(recipe.deref()),
+                None => log::warn!("Edit recipe command received with ID {} that does not exist", id)
+            }
             Handled::Yes
         } else {
             Handled::No
