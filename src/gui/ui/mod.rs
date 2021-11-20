@@ -67,7 +67,6 @@ pub fn sidebar() -> impl Widget<AppState> {
                             ctx.request_paint();
                         },
                     )
-                    //.fix_size(150., 150.)
                     .on_click(|ctx, _data, _env| {
                         ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))
                     }),

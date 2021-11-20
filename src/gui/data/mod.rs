@@ -82,7 +82,7 @@ impl ListIter<Recipe> for AppState {
             match self.recipes.get(*id) {
                 Some(recipe) => cb(recipe.deref(), i),
                 None => {
-                    log::warn!("Loaded recipes contains recipe ID that does not exist");
+                    log::trace!("Loaded recipes contains recipe ID that does not exist");
                 }
             }
         }
@@ -98,7 +98,7 @@ impl ListIter<Recipe> for AppState {
                     self.recipes.update(recipe);
                 }
                 None => {
-                    log::warn!("Loaded recipes contains recipe ID that does not exist");
+                    log::trace!("Loaded recipes contains recipe ID that does not exist");
                 }
             }
         }

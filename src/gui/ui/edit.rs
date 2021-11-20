@@ -1,12 +1,13 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Checkbox, Flex, Label, List, Scroll, SizedBox, TextBox, ValueTextBox, ViewSwitcher}};
+use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Checkbox, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher}};
 use uuid::Uuid;
 
 use crate::{gui::{CHANGE_SCREEN, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, data::{
         edit::{EditState, EditedIngredient, EditedTime},
         AppState,
-    }, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}}, recipes::measure::AmountUnit};
+    }, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}}
+};
 
 /// Build the root edit screen widget
 pub fn edit_widget() -> impl Widget<AppState> {
@@ -82,18 +83,28 @@ pub fn edit_widget() -> impl Widget<AppState> {
         .with_child(ViewSwitcher::new(
             |data: &EditState, _env| data.servings,
             |servings, _, _env| match servings {
-                Some(_) => Maybe::or_empty(
-                    || ValueTextBox::new(
-                        TextBox::new()
-                            .with_placeholder('0'),
-                            FloatEditorFormatter
+                Some(_) => Flex::row()
+                    .with_child(Maybe::or_empty(|| ValueTextBox::new(
+                            TextBox::new()
+                                .with_placeholder('0'),
+                                FloatEditorFormatter
+                            )
+                        )
+                        .lens(EditState::servings)
+                    )
+                    .with_child(Icon::svg(&RECYCLE_ICON)
+                        .highlight_on_hover()
+                        .on_click(|_ctx, data: &mut EditState, _env| data.servings = None)
+                        .fix_size(35., 35.)
                     )
                     .align_left()
-                ).lens(EditState::servings).boxed(),
+                    .boxed(),
                 None => Icon::svg(&PLUS_ICON)
                     .highlight_on_hover()
                     .on_click(|_ctx, data: &mut EditState, _env| data.servings = Some(0f32))
-                    .fix_size(35., 35.).boxed()
+                    .fix_size(35., 35.)
+                    .align_left()
+                    .boxed()
             }
         ))
         .with_default_spacer()
@@ -256,6 +267,7 @@ fn time_editor() -> impl Widget<EditState> {
                 .on_click(|_ctx, data: &mut EditState, _env| {
                     data.time = Some(EditedTime::default())
                 })
+                .fix_size(35., 35.)
                 .boxed(),
         },
     )

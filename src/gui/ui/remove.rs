@@ -7,15 +7,7 @@ use druid::{
     Widget, WidgetExt,
 };
 
-use crate::{
-    gui::{
-        data::{remove::RemoveState, AppState},
-        theme,
-        widgets::{maybe::Maybe, separator::Separator},
-        CHANGE_SCREEN,
-    },
-    recipes::recipe::Recipe,
-};
+use crate::{gui::{CHANGE_SCREEN, data::{AppState, remove::RemoveState, screen::AppScreen}, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::Recipe};
 
 /// Build the root widget for the recipe removal confirmation screen
 pub fn remove_widget() -> impl Widget<AppState> {
@@ -49,7 +41,7 @@ pub fn remove_widget() -> impl Widget<AppState> {
             .on_click(|ctx, data: &mut AppState, _env| {
                 if let Some(ref remove) = data.remove {
                     data.recipes.remove(remove.deleted.id);
-                    ctx.submit_command(CHANGE_SCREEN.with(remove.return_to))
+                    ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home)) //Ignore the return to option because we deleted the recipe
                 }
                 data.remove = None;
             })
