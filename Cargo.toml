@@ -26,6 +26,8 @@ lazy_static = "1.4" # Lazily evaluated statics used for icons and semver
 log = { version = "0.4", features = ["release_max_level_warn"] } # Logging facade macros
 simplelog = "0.10" # Logging backend
 
+thiserror = "1.0" # Error type creation
+
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1" # Adding icon to window build
 
