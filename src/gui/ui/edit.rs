@@ -36,7 +36,6 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .with_child(Icon::svg(&RECYCLE_ICON)
                             .highlight_on_hover()
                             .on_click(|ctx, data: &mut EditState, _env| {
-                                log::trace!("Cancelling!");
                                 ctx.submit_command(CHANGE_SCREEN.with(data.return_to));
                             })
                             .fix_size(20., 20.),
@@ -72,6 +71,30 @@ pub fn edit_widget() -> impl Widget<AppState> {
         )
         .with_spacer(2.0)
         .with_child(time_editor())
+        .with_default_spacer()
+        .with_child(
+            Label::new("Servings")
+                .with_font(theme::LABEL_FONT)
+                .align_left()
+                .expand_width(),
+        )
+        .with_spacer(2.0)
+        .with_child(ViewSwitcher::new(
+            |data: &EditState, _env| data.servings,
+            |servings, _, _env| match servings {
+                Some(_) => Maybe::or_empty(
+                    || ValueTextBox::new(
+                        TextBox::new()
+                            .with_placeholder('0'),
+                            FloatEditorFormatter
+                    )
+                    .align_left()
+                ).lens(EditState::servings).boxed(),
+                None => Icon::svg(&PLUS_ICON)
+                    .highlight_on_hover()
+                    .on_click(|_ctx, data: &mut EditState, _env| data.servings = Some(0f32)).boxed()
+            }
+        ))
         .with_default_spacer()
         .with_child(
             Label::new("Ingredients")
