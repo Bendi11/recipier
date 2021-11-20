@@ -7,26 +7,43 @@ use druid::{
 };
 use uuid::Uuid;
 
-use crate::gui::{REMOVE_EDITED_INGREDIENT, data::{
+use crate::gui::{CHANGE_SCREEN, CREATE_RECIPE, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, data::{
         edit::{EditState, EditedIngredient, EditedTime},
         AppState,
-    }, theme, widgets::{
-        icon::{Icon, PLUS_ICON, RECYCLE_ICON},
-        maybe::Maybe,
-        separator::Separator,
-        unit::UnitSelectorController,
-    }};
+    }, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}};
 
 /// Build the root edit screen widget
 pub fn edit_widget() -> impl Widget<AppState> {
     Flex::column()
         .with_default_spacer()
         .with_child(
-            Label::new("Edit")
-                .with_font(theme::HEADER_FONT)
-                .align_left()
-                .expand_width()
+            Flex::row()
+                .with_child(Label::new("Edit")
+                    .with_font(theme::HEADER_FONT)
+                    .align_left()
+                    .fix_height(50.),
+                )
+                .with_flex_spacer(1.)
+                .with_child(
+                    Flex::column()
+                        .with_child(Label::new("Save").with_font(theme::SMALL_FONT))
+                            .with_child(Icon::svg(&SAVE_ICON)
+                                .highlight_on_hover()
+                                .on_click(|ctx, _data, _env| {
+                                    ctx.submit_command(SAVE_EDITED_RECIPE)
+                                })
+                        )   
+                        .with_flex_spacer(1.0)
+                        .with_child(Label::new("Cancel").with_font(theme::SMALL_FONT))
+                        .with_child(Icon::svg(&RECYCLE_ICON)
+                        .highlight_on_hover()
+                        .on_click(|ctx, data: &mut EditState, _env| {
+                            ctx.submit_command(CREATE_RECIPE);
+                            ctx.submit_command(CHANGE_SCREEN.with(data.return_to))
+                        }),
+                )
                 .fix_height(50.),
+            )
         )
         .with_spacer(1.)
         .with_child(Separator::new(2.5).fix_width(130.).align_left())
@@ -79,8 +96,26 @@ pub fn edit_widget() -> impl Widget<AppState> {
             .vertical()
             .border(theme::COLOR_2, 2.)
             .rounded(5.)
-            .fix_height(300.)
+            .expand_width()
+            .fix_height(200.)
             .padding((0., 0., 10., 0.))
+        )
+        .with_default_spacer()
+        .with_child(
+            Label::new("Instructions")
+                .with_font(theme::LABEL_FONT)
+                .align_left()
+                .expand_width(),
+        )
+        .with_default_spacer()
+        .with_flex_child(TextBox::multiline()
+            .with_text_color(theme::COLOR_4)
+            .with_font(theme::SYSTEM_FONT)
+            .with_text_size(17.)
+            .with_text_alignment(TextAlignment::Start)
+            .expand()
+            .padding((2.5, 0., 10., 10.))
+            .lens(EditState::body), 5.0
         )
         .lens(AppState::edit)
         .expand()

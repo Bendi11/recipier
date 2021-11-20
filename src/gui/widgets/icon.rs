@@ -42,6 +42,12 @@ pub const RECYCLE_ICON: IconData = IconData {
     size: Size::new(16., 16.),
 };
 
+/// A save icon
+pub const SAVE_ICON: IconData = IconData {
+    path: include_str!("../../../assets/icons/save-path.txt"),
+    size: Size::new(16., 16.),
+};
+
 /// Structure with all data needed to render an icon: size and bezier path
 #[derive(Clone, Debug)]
 pub struct IconData {

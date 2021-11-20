@@ -69,7 +69,7 @@ impl Database {
         let mut data = self.items.write();
         match data.contains_key(&recipe.id) {
             true => {
-                log::warn!(
+                log::trace!(
                     "Database already contains recipe with ID {}, updating instead...",
                     recipe.id
                 );
