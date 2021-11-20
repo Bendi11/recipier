@@ -116,7 +116,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
             data.edit
                 .ingredients
                 .entry(*id)
-                .and_modify(|v| v.amount = *unit);
+                .and_modify(|v| v.unit = *unit);
 
             Handled::Yes
         } else if let Some(id) = cmd.get(REMOVE_EDITED_INGREDIENT) {

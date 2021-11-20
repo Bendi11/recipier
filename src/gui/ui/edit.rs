@@ -108,7 +108,7 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
         )
         .with_spacer(5.)
         .with_child(
-            Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.amount.to_string())
+            Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.unit.to_string())
                 .controller(UnitSelectorController)
                 .fix_width(75.),
         )

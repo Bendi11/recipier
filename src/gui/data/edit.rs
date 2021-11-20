@@ -6,11 +6,7 @@ use druid::{im::HashMap, widget::ListIter, Data, Lens};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::recipes::{
-    db::RecipeId,
-    measure::AmountUnit,
-    recipe::{Ingredient, IngredientAmount, Recipe},
-};
+use crate::recipes::{db::RecipeId, measure::{AmountUnit, Mass, Volume}, recipe::{Ingredient, IngredientAmount, Recipe}};
 
 use super::screen::AppScreen;
 
@@ -78,7 +74,7 @@ pub struct EditedIngredient {
     pub count: f32,
     /// The amount of the ingredient needed
     #[data(same_fn = "PartialEq::eq")]
-    pub amount: AmountUnit,
+    pub unit: AmountUnit,
 }
 
 impl EditedIngredient {
@@ -88,12 +84,30 @@ impl EditedIngredient {
             id,
             name: Arc::from("".to_owned()),
             count: 0.,
-            amount: AmountUnit::None
+            unit: AmountUnit::Count
         }
     }
-}
 
-impl EditedIngredient {
+    /// Create a new immutable ingredient from this edited ingredient
+    pub fn to_ingredient(&self) -> Ingredient {
+        Ingredient { 
+            name: Arc::from(self.name.deref().as_str()), 
+            amount: match self.unit {
+                AmountUnit::None => IngredientAmount::None,
+                AmountUnit::Count => IngredientAmount::Count(self.count),
+                AmountUnit::Mass(unit) => IngredientAmount::Mass(Mass {
+                    val: self.count,
+                    unit
+                }),
+                AmountUnit::Volume(unit) => IngredientAmount::Volume(Volume {
+                    val: self.count,
+                    unit
+                }),
+            } 
+        }
+    }
+
+    /// Create a new edited ingredient using data from an existing ingredient, used for editing
     fn from_ingredient(id: Uuid, ingredient: &Ingredient) -> Self {
         Self {
             id,
@@ -104,7 +118,7 @@ impl EditedIngredient {
                 IngredientAmount::None => 0f32,
             },
             name: Arc::new(ingredient.name.deref().to_owned()),
-            amount: ingredient.amount.into(),
+            unit: ingredient.amount.into(),
         }
     }
 }

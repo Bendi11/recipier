@@ -27,7 +27,7 @@ impl fmt::Display for Ingredient {
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum IngredientAmount {
     /// A raw number, displayed as x{n}
-    Count(usize),
+    Count(f32),
     /// A measurement of volume in cups, liters, etc.
     Volume(Volume),
     /// A measurement in mass
@@ -89,7 +89,7 @@ impl Recipe {
             ingredients: vector![
                 Ingredient {
                     name: "Top Ramen Packet".into(),
-                    amount: IngredientAmount::Count(1),
+                    amount: IngredientAmount::Count(1.),
                 },
                 Ingredient {
                     name: "Water".into(),
