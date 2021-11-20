@@ -82,6 +82,18 @@ pub struct EditedIngredient {
 }
 
 impl EditedIngredient {
+    /// Create a new edited ingredient with the given ID
+    pub fn new(id: Uuid) -> Self {
+        Self {
+            id,
+            name: Arc::from("".to_owned()),
+            count: 0.,
+            amount: AmountUnit::None
+        }
+    }
+}
+
+impl EditedIngredient {
     fn from_ingredient(id: Uuid, ingredient: &Ingredient) -> Self {
         Self {
             id,

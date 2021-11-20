@@ -5,6 +5,7 @@ use druid::{
     widget::{Button, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher},
     TextAlignment, Widget, WidgetExt,
 };
+use uuid::Uuid;
 
 use crate::gui::{REMOVE_EDITED_INGREDIENT, data::{
         edit::{EditState, EditedIngredient, EditedTime},
@@ -64,12 +65,22 @@ pub fn edit_widget() -> impl Widget<AppState> {
         )
         .with_default_spacer()
         .with_child(
-            Scroll::new(List::new(ingredient_editor))
-                .vertical()
-                .border(theme::COLOR_2, 2.)
-                .rounded(5.)
-                .fix_height(300.)
-                .padding((0., 0., 10., 0.))
+            Scroll::new(Flex::column()
+                .with_child(List::new(ingredient_editor))
+                .with_child(Icon::svg(&PLUS_ICON)
+                    .highlight_on_hover()
+                    .on_click(|_ctx, state: &mut EditState, _env| {
+                        let id = Uuid::new_v4();
+                        state.ingredients.insert(id, EditedIngredient::new(id));
+                    })
+                    .fix_size(50., 40.)
+                )
+            )
+            .vertical()
+            .border(theme::COLOR_2, 2.)
+            .rounded(5.)
+            .fix_height(300.)
+            .padding((0., 0., 10., 0.))
         )
         .lens(AppState::edit)
         .expand()
@@ -101,6 +112,7 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
                 .controller(UnitSelectorController)
                 .fix_width(75.),
         )
+        .with_spacer(5.)
         .with_child(Icon::svg(&RECYCLE_ICON)
             .highlight_on_hover()
             .on_click(|ctx, ingredient: &mut EditedIngredient, _env| {
