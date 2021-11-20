@@ -8,11 +8,17 @@ pub mod update;
 use druid::{AppLauncher, WindowDesc, WindowState};
 use gui::{data::AppState, root_widget};
 use log::LevelFilter;
+use semver::Version;
 use simplelog::ConfigBuilder;
+use lazy_static::lazy_static;
 
 /// The file name to save and load application data from
 pub const SAVE_FILE: &str = "./save.json";
 
+lazy_static! {
+    /// The current crate version
+    pub static ref VERSION: Version = Version::parse(env!("CARGO_PKG_VERSION")).unwrap();
+}
 
 fn main() {
     //Add panic handler for better error messages
