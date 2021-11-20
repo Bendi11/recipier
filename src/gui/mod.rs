@@ -42,7 +42,8 @@ pub const CHANGE_INGREDIENT_UNIT: Selector<(Uuid, AmountUnit)> =
     Selector::new("recipier.change-ingredient-unit");
 
 /// Remove the ingredient with the specified ID from the currently edited ingredients
-pub const REMOVE_EDITED_INGREDIENT: Selector<Uuid> = Selector::new("recipier.remove-edited-ingredient");
+pub const REMOVE_EDITED_INGREDIENT: Selector<Uuid> =
+    Selector::new("recipier.remove-edited-ingredient");
 
 /// Save the currently edited recipe, either updating the original recipe or creating a new one
 pub const SAVE_EDITED_RECIPE: Selector = Selector::new("recipier.save-edited-recipe");

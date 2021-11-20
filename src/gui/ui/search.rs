@@ -59,11 +59,12 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for EnterController {
 
 /// Generate the root search results widget
 pub fn search_screen() -> impl Widget<AppState> {
-    Flex::row()
-        .with_child(sidebar())
-        .with_flex_child(Flex::column()
+    Flex::row().with_child(sidebar()).with_flex_child(
+        Flex::column()
             .with_default_spacer()
-            .with_child(search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))))
+            .with_child(
+                search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))),
+            )
             .with_default_spacer()
             .with_child(
                 Maybe::or_empty(|| {
@@ -85,8 +86,9 @@ pub fn search_screen() -> impl Widget<AppState> {
                     || {
                         Scroll::new(
                             List::new(|| {
-                                recipe_brief_widget()
-                                    .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+                                recipe_brief_widget().lens(
+                                    LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity),
+                                )
                             })
                             .with_spacing(10.),
                         )
@@ -98,8 +100,9 @@ pub fn search_screen() -> impl Widget<AppState> {
                 .lens(AppState::search.then(SearchState::results)),
                 10.,
             )
-            .padding((2., 0.)), 1.0
-        )
+            .padding((2., 0.)),
+        1.0,
+    )
 }
 
 /// Return a search bar that modifies a search term string and sends the change screen

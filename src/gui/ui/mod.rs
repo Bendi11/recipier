@@ -46,40 +46,42 @@ pub fn root_widget() -> impl Widget<AppState> {
 /// Build the sidebar with search and home icon
 pub fn sidebar() -> impl Widget<AppState> {
     Flex::row()
-        .with_child(Flex::column()
-            .with_spacer(theme::SPACING)
-            .with_child(
-                Icon::svg(&icon::BOWL_ICON)
-                    .with_scale(10.)
-                    .flex(false)
-                    .with_color(theme::COLOR_4)
-                    .on_hover(
-                        |ctx, _, this, _| {
-                            this.set_scale(10.5);
-                            this.set_color(theme::COLOR_3);
-                            ctx.request_layout();
-                            ctx.request_paint();
-                        },
-                        |ctx, _, this, _| {
-                            this.set_scale(10.);
-                            this.set_color(theme::COLOR_4);
-                            ctx.request_layout();
-                            ctx.request_paint();
-                        },
-                    )
-                    .on_click(|ctx, _data, _env| {
-                        ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))
-                    }),
-            )
-            .with_child(Separator::new(5.).with_ratio(1.))
-            .with_default_spacer()
-            .with_child(
-                search::search_bar().lens(AppState::search.then(SearchState::query).then(Query::term)),
-            )
-            .with_default_spacer()
-            .with_flex_spacer(0.5)
-            .padding((5., 0., 0., 0.))
-            .fix_width(200.)
+        .with_child(
+            Flex::column()
+                .with_spacer(theme::SPACING)
+                .with_child(
+                    Icon::svg(&icon::BOWL_ICON)
+                        .with_scale(10.)
+                        .flex(false)
+                        .with_color(theme::COLOR_4)
+                        .on_hover(
+                            |ctx, _, this, _| {
+                                this.set_scale(10.5);
+                                this.set_color(theme::COLOR_3);
+                                ctx.request_layout();
+                                ctx.request_paint();
+                            },
+                            |ctx, _, this, _| {
+                                this.set_scale(10.);
+                                this.set_color(theme::COLOR_4);
+                                ctx.request_layout();
+                                ctx.request_paint();
+                            },
+                        )
+                        .on_click(|ctx, _data, _env| {
+                            ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Home))
+                        }),
+                )
+                .with_child(Separator::new(5.).with_ratio(1.))
+                .with_default_spacer()
+                .with_child(
+                    search::search_bar()
+                        .lens(AppState::search.then(SearchState::query).then(Query::term)),
+                )
+                .with_default_spacer()
+                .with_flex_spacer(0.5)
+                .padding((5., 0., 0., 0.))
+                .fix_width(200.),
         )
         .with_default_spacer()
         .with_child(Separator::new(5.).vertical(true).with_color(theme::COLOR_2))

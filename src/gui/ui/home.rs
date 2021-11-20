@@ -34,9 +34,8 @@ pub fn home_widget() -> impl Widget<AppState> {
         ))
         .with_spacer(10.);
 
-    Flex::row()
-        .with_child(sidebar())
-        .with_flex_child(Flex::column()
+    Flex::row().with_child(sidebar()).with_flex_child(
+        Flex::column()
             .with_child(title_bar.fix_height(50.).expand_width())
             .with_spacer(1.)
             .with_child(Separator::new(2.5).fix_width(130.).align_left())
@@ -58,6 +57,7 @@ pub fn home_widget() -> impl Widget<AppState> {
                 .vertical(),
                 10.,
             )
-            .expand(), 1.0
-        )
+            .expand(),
+        1.0,
+    )
 }

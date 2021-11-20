@@ -7,7 +7,15 @@ use druid::{
     Widget, WidgetExt,
 };
 
-use crate::{gui::{CHANGE_SCREEN, data::{AppState, remove::RemoveState, screen::AppScreen}, theme, widgets::{maybe::Maybe, separator::Separator}}, recipes::recipe::Recipe};
+use crate::{
+    gui::{
+        data::{remove::RemoveState, screen::AppScreen, AppState},
+        theme,
+        widgets::{maybe::Maybe, separator::Separator},
+        CHANGE_SCREEN,
+    },
+    recipes::recipe::Recipe,
+};
 
 /// Build the root widget for the recipe removal confirmation screen
 pub fn remove_widget() -> impl Widget<AppState> {

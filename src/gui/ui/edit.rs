@@ -1,12 +1,25 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Checkbox, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher}};
+use druid::{
+    text::format::Validation,
+    widget::{Button, Checkbox, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher},
+    TextAlignment, Widget, WidgetExt,
+};
 use uuid::Uuid;
 
-use crate::{gui::{CHANGE_SCREEN, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, data::{
+use crate::gui::{
+    data::{
         edit::{EditState, EditedIngredient, EditedTime},
         AppState,
-    }, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}}
+    },
+    theme,
+    widgets::{
+        icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON},
+        maybe::Maybe,
+        separator::Separator,
+        unit::UnitSelectorController,
+    },
+    CHANGE_SCREEN, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE,
 };
 
 /// Build the root edit screen widget
@@ -15,34 +28,37 @@ pub fn edit_widget() -> impl Widget<AppState> {
         .with_default_spacer()
         .with_child(
             Flex::row()
-                .with_child(Label::new("Edit")
-                    .with_font(theme::HEADER_FONT)
-                    .align_left()
-                    .fix_height(50.),
+                .with_child(
+                    Label::new("Edit")
+                        .with_font(theme::HEADER_FONT)
+                        .align_left()
+                        .fix_height(50.),
                 )
                 .with_flex_spacer(1.)
                 .with_child(
                     Flex::column()
                         .with_child(Label::new("Save").with_font(theme::SMALL_FONT))
-                            .with_child(Icon::svg(&SAVE_ICON)
+                        .with_child(
+                            Icon::svg(&SAVE_ICON)
                                 .highlight_on_hover()
                                 .on_click(|ctx, data: &mut EditState, _env| {
                                     ctx.submit_command(SAVE_EDITED_RECIPE);
                                     ctx.submit_command(CHANGE_SCREEN.with(data.return_to))
                                 })
-                                .fix_size(20., 20.)
-                        )   
+                                .fix_size(20., 20.),
+                        )
                         .with_flex_spacer(1.0)
                         .with_child(Label::new("Cancel").with_font(theme::SMALL_FONT))
-                        .with_child(Icon::svg(&RECYCLE_ICON)
-                            .highlight_on_hover()
-                            .on_click(|ctx, data: &mut EditState, _env| {
-                                ctx.submit_command(CHANGE_SCREEN.with(data.return_to));
-                            })
-                            .fix_size(20., 20.),
-                )
-                .fix_height(75.),
-            )
+                        .with_child(
+                            Icon::svg(&RECYCLE_ICON)
+                                .highlight_on_hover()
+                                .on_click(|ctx, data: &mut EditState, _env| {
+                                    ctx.submit_command(CHANGE_SCREEN.with(data.return_to));
+                                })
+                                .fix_size(20., 20.),
+                        )
+                        .fix_height(75.),
+                ),
         )
         .with_spacer(1.)
         .with_child(Separator::new(2.5).fix_width(130.).align_left())
@@ -84,18 +100,20 @@ pub fn edit_widget() -> impl Widget<AppState> {
             |data: &EditState, _env| data.servings,
             |servings, _, _env| match servings {
                 Some(_) => Flex::row()
-                    .with_child(Maybe::or_empty(|| ValueTextBox::new(
-                            TextBox::new()
-                                .with_placeholder('0'),
-                                FloatEditorFormatter
+                    .with_child(
+                        Maybe::or_empty(|| {
+                            ValueTextBox::new(
+                                TextBox::new().with_placeholder('0'),
+                                FloatEditorFormatter,
                             )
-                        )
-                        .lens(EditState::servings)
+                        })
+                        .lens(EditState::servings),
                     )
-                    .with_child(Icon::svg(&RECYCLE_ICON)
-                        .highlight_on_hover()
-                        .on_click(|_ctx, data: &mut EditState, _env| data.servings = None)
-                        .fix_size(35., 35.)
+                    .with_child(
+                        Icon::svg(&RECYCLE_ICON)
+                            .highlight_on_hover()
+                            .on_click(|_ctx, data: &mut EditState, _env| data.servings = None)
+                            .fix_size(35., 35.),
                     )
                     .align_left()
                     .boxed(),
@@ -104,8 +122,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
                     .on_click(|_ctx, data: &mut EditState, _env| data.servings = Some(0f32))
                     .fix_size(35., 35.)
                     .align_left()
-                    .boxed()
-            }
+                    .boxed(),
+            },
         ))
         .with_default_spacer()
         .with_child(
@@ -115,22 +133,23 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .expand_width(),
         )
         .with_default_spacer()
-        .with_child(Flex::column()
+        .with_child(
+            Flex::column()
                 .with_child(List::new(ingredient_editor))
-                .with_child(Icon::svg(&PLUS_ICON)
-                    .highlight_on_hover()
-                    .on_click(|_ctx, state: &mut EditState, _env| {
-                        let id = Uuid::new_v4();
-                        state.ingredients.insert(id, EditedIngredient::new(id));
-                    })
-                    .fix_size(50., 40.)
+                .with_child(
+                    Icon::svg(&PLUS_ICON)
+                        .highlight_on_hover()
+                        .on_click(|_ctx, state: &mut EditState, _env| {
+                            let id = Uuid::new_v4();
+                            state.ingredients.insert(id, EditedIngredient::new(id));
+                        })
+                        .fix_size(50., 40.),
                 )
                 .border(theme::COLOR_2, 2.)
                 .rounded(5.)
                 .expand_width()
                 //.fix_height(200.)
-                .padding((0., 0., 10., 0.)
-            )
+                .padding((0., 0., 10., 0.)),
         )
         .with_default_spacer()
         .with_child(
@@ -140,43 +159,43 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .expand_width(),
         )
         .with_default_spacer()
-        .with_child(TextBox::multiline()
-            .with_text_color(theme::COLOR_4)
-            .with_font(theme::SYSTEM_FONT)
-            .with_text_size(17.)
-            .with_text_alignment(TextAlignment::Start)
-            .expand_width()
-            .padding((2.5, 0., 10., 10.))
-            .lens(EditState::body)
+        .with_child(
+            TextBox::multiline()
+                .with_text_color(theme::COLOR_4)
+                .with_font(theme::SYSTEM_FONT)
+                .with_text_size(17.)
+                .with_text_alignment(TextAlignment::Start)
+                .expand_width()
+                .padding((2.5, 0., 10., 10.))
+                .lens(EditState::body),
         )
         .lens(AppState::edit)
         .padding((15., 0.))
         .expand_width();
-    Scroll::new(screen)
-        .vertical()
+    Scroll::new(screen).vertical()
 }
 
 /// Build an ingredient editor for
 fn ingredient_editor() -> impl Widget<EditedIngredient> {
     Flex::row()
-        .with_child(Checkbox::new("Required")
-            .lens(EditedIngredient::required)    
-        )
+        .with_child(Checkbox::new("Required").lens(EditedIngredient::required))
         .with_flex_child(
             TextBox::new()
                 .with_placeholder("Ingredient name")
                 .with_font(theme::SYSTEM_FONT)
                 .expand_width()
                 .align_left()
-                .lens(EditedIngredient::name), 1.0
+                .lens(EditedIngredient::name),
+            1.0,
         )
         .with_spacer(10.)
-        .with_child(ValueTextBox::new(
-                    TextBox::new().with_placeholder("Amount"),
-                    FloatEditorFormatter,
-                )
-                .lens(EditedIngredient::count)
-                .fix_width(50.)
+        .with_child(
+            ValueTextBox::new(
+                TextBox::new().with_placeholder("Amount"),
+                FloatEditorFormatter,
+            )
+            .lens(EditedIngredient::count)
+            .fix_width(50.),
         )
         .with_spacer(5.)
         .with_child(
@@ -189,12 +208,13 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
                 .fix_width(90.),
         )
         .with_spacer(5.)
-        .with_child(Icon::svg(&RECYCLE_ICON)
-            .highlight_on_hover()
-            .on_click(|ctx, ingredient: &mut EditedIngredient, _env| {
-                ctx.submit_command(REMOVE_EDITED_INGREDIENT.with(ingredient.id));
-            })
-            .fix_size(30., 30.),
+        .with_child(
+            Icon::svg(&RECYCLE_ICON)
+                .highlight_on_hover()
+                .on_click(|ctx, ingredient: &mut EditedIngredient, _env| {
+                    ctx.submit_command(REMOVE_EDITED_INGREDIENT.with(ingredient.id));
+                })
+                .fix_size(30., 30.),
         )
         .expand_width()
         .fix_height(50.)

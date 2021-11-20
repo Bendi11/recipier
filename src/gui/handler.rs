@@ -3,11 +3,19 @@
 use std::{borrow::Borrow, ops::Deref, sync::Arc, time::Duration};
 
 use chrono::Utc;
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, piet::TextStorage};
+use druid::{piet::TextStorage, AppDelegate, Command, DelegateCtx, Env, Handled, Target};
 
-use crate::{SAVE_FILE, gui::data::edit::EditState, recipes::{db::RecipeId, recipe::Recipe}};
+use crate::{
+    gui::data::edit::EditState,
+    recipes::{db::RecipeId, recipe::Recipe},
+    SAVE_FILE,
+};
 
-use super::{CHANGE_INGREDIENT_UNIT, CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_EDITED_INGREDIENT, REMOVE_RECIPE, SAVE_EDITED_RECIPE, VIEW_RECIPE, data::{remove::RemoveState, search::SearchResults, AppState}};
+use super::{
+    data::{remove::RemoveState, search::SearchResults, AppState},
+    CHANGE_INGREDIENT_UNIT, CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES,
+    POPULATE_RESULTS, REMOVE_EDITED_INGREDIENT, REMOVE_RECIPE, SAVE_EDITED_RECIPE, VIEW_RECIPE,
+};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -123,22 +131,32 @@ impl AppDelegate<AppState> for RecipierDelegate {
             Handled::Yes
         } else if let Some(id) = cmd.get(REMOVE_EDITED_INGREDIENT) {
             if data.edit.ingredients.remove(id).is_none() {
-                log::warn!("Remove ingredient command received with invalid ingredient id {}", id);
+                log::warn!(
+                    "Remove ingredient command received with invalid ingredient id {}",
+                    id
+                );
             }
             Handled::Yes
         } else if let Some(()) = cmd.get(SAVE_EDITED_RECIPE) {
             let recipe = Recipe {
                 name: Arc::from(data.edit.title.as_str()),
                 created_on: Utc::now(),
-                ingredients: data.edit.ingredients.iter().map(|(_, edited)| edited.to_ingredient()).collect(),
+                ingredients: data
+                    .edit
+                    .ingredients
+                    .iter()
+                    .map(|(_, edited)| edited.to_ingredient())
+                    .collect(),
                 servings: data.edit.servings,
                 body: Arc::from(data.edit.body.as_str()),
-                time: data.edit.time.map(|edited| Duration::from_secs(
-                    edited.hours as u64 * 3600 + 
-                    edited.minutes as u64 * 60 +
-                    edited.secs as u64
-                )),
-                id: data.edit.id.unwrap_or_else(RecipeId::new)
+                time: data.edit.time.map(|edited| {
+                    Duration::from_secs(
+                        edited.hours as u64 * 3600
+                            + edited.minutes as u64 * 60
+                            + edited.secs as u64,
+                    )
+                }),
+                id: data.edit.id.unwrap_or_else(RecipeId::new),
             };
             data.recipes.insert(recipe);
 

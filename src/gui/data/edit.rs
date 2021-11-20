@@ -6,7 +6,11 @@ use druid::{im::HashMap, widget::ListIter, Data, Lens};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::recipes::{db::RecipeId, measure::{AmountUnit, Mass, Volume}, recipe::{Ingredient, IngredientAmount, Recipe}};
+use crate::recipes::{
+    db::RecipeId,
+    measure::{AmountUnit, Mass, Volume},
+    recipe::{Ingredient, IngredientAmount, Recipe},
+};
 
 use super::screen::AppScreen;
 
@@ -83,24 +87,24 @@ impl EditedIngredient {
             name: Arc::from("".to_owned()),
             count: 0.,
             unit: AmountUnit::None,
-            required: true
+            required: true,
         }
     }
 
     /// Create a new immutable ingredient from this edited ingredient
     pub fn to_ingredient(&self) -> Ingredient {
-        Ingredient { 
-            name: Arc::from(self.name.deref().as_str()), 
+        Ingredient {
+            name: Arc::from(self.name.deref().as_str()),
             amount: match self.unit {
                 AmountUnit::None => IngredientAmount::None,
                 AmountUnit::Count => IngredientAmount::Count(self.count),
                 AmountUnit::Mass(unit) => IngredientAmount::Mass(Mass {
                     val: self.count,
-                    unit
+                    unit,
                 }),
                 AmountUnit::Volume(unit) => IngredientAmount::Volume(Volume {
                     val: self.count,
-                    unit
+                    unit,
                 }),
             },
             optional: !self.required,
@@ -119,7 +123,7 @@ impl EditedIngredient {
             },
             name: Arc::new(ingredient.name.deref().to_owned()),
             unit: ingredient.amount.into(),
-            required: !ingredient.optional
+            required: !ingredient.optional,
         }
     }
 }

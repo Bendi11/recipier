@@ -30,10 +30,12 @@ pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
 
 /// Return a widget that displays one recipe in a maximized view
 pub fn view_screen() -> impl Widget<AppState> {
-    Flex::row()
-        .with_child(sidebar())
-        .with_flex_child(Maybe::or_empty(|| {
-            Scroll::new(recipe_widget()).vertical().lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity)).expand_height()
+    Flex::row().with_child(sidebar()).with_flex_child(
+        Maybe::or_empty(|| {
+            Scroll::new(recipe_widget())
+                .vertical()
+                .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+                .expand_height()
         })
         .lens(lens::Identity.map(
             |state: &AppState| state.recipes.get(state.view.viewed?),
@@ -43,7 +45,7 @@ pub fn view_screen() -> impl Widget<AppState> {
                 }
             },
         )),
-        1.0
+        1.0,
     )
 }
 
@@ -124,41 +126,43 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
                 .align_left(),
         )
         .with_default_spacer()
-        .with_child(List::new(|| 
-                    Flex::column()
-                        .with_child(
-                            Flex::row()
-                                .with_child(Icon::svg(&RIGHT_ARROW_ICON).flex(false))
-                                .with_spacer(3.)
-                                .with_child(
-                                    Label::raw()
-                                        .with_font(theme::SYSTEM_FONT)
-                                        .lens(Ingredient::name)
-                                        .align_left(),
-                                )
-                                .with_default_spacer()
-                                .with_child(Label::new(|ingredient: &Ingredient, _env: &'_ _| {
-                                    format!("{}", ingredient.amount)
-                                }))
-                                .expand_width()
-                                .padding((2.5, 5.)),
-                        )
-                        .with_default_spacer()
-            )
+        .with_child(
+            List::new(|| {
+                Flex::column()
+                    .with_child(
+                        Flex::row()
+                            .with_child(Icon::svg(&RIGHT_ARROW_ICON).flex(false))
+                            .with_spacer(3.)
+                            .with_child(
+                                Label::raw()
+                                    .with_font(theme::SYSTEM_FONT)
+                                    .lens(Ingredient::name)
+                                    .align_left(),
+                            )
+                            .with_default_spacer()
+                            .with_child(Label::new(|ingredient: &Ingredient, _env: &'_ _| {
+                                format!("{}", ingredient.amount)
+                            }))
+                            .expand_width()
+                            .padding((2.5, 5.)),
+                    )
+                    .with_default_spacer()
+            })
             .with_spacing(2.)
             .expand_width()
             .border(theme::COLOR_2, 2.)
-            .rounded(5.0)
+            .rounded(5.0),
         )
         .with_default_spacer()
-        .with_child(Label::raw()
+        .with_child(
+            Label::raw()
                 .with_font(theme::SYSTEM_FONT)
                 .with_text_size(16.)
                 .with_line_break_mode(LineBreaking::WordWrap)
                 .with_text_alignment(TextAlignment::Start)
                 .expand_width()
                 .padding((5., 5.))
-                .lens(Recipe::body)
+                .lens(Recipe::body),
         )
         .expand_width()
         .padding((15., 0.))

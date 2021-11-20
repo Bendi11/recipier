@@ -73,7 +73,7 @@ impl MassUnit {
 }
 
 /// A measurement of mass with unit of measurement
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq,)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Mass {
     pub unit: MassUnit,
     pub val: f32,
