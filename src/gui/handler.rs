@@ -114,6 +114,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
             }
             Handled::Yes
         } else if let Some((id, unit)) = cmd.get(CHANGE_INGREDIENT_UNIT) {
+            log::trace!("Changing ingredient {} unit to {}", id, unit);
             data.edit
                 .ingredients
                 .entry(*id)

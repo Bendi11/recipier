@@ -140,6 +140,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
             .lens(EditState::body), 5.0
         )
         .lens(AppState::edit)
+        .padding((10., 0.))
         .expand()
 }
 
@@ -160,7 +161,7 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
         .with_spacer(10.)
         .with_child(ViewSwitcher::new(
             |data: &EditedIngredient, _env| data.unit,
-            |unit, _data, _env| if let AmountUnit::None = unit {
+            |unit, _data, _env| if *unit == AmountUnit::None {
                 SizedBox::empty().boxed()
             } else {
                 ValueTextBox::new(
@@ -176,7 +177,11 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
         .with_child(
             Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.unit.to_string())
                 .controller(UnitSelectorController)
-                .fix_width(85.),
+                .on_click(|ctx, _, _env| {
+                    ctx.request_layout();
+                    ctx.request_paint()
+                })
+                .fix_width(90.),
         )
         .with_spacer(5.)
         .with_child(Icon::svg(&RECYCLE_ICON)

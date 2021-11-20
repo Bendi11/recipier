@@ -23,22 +23,27 @@ use crate::{
     recipes::recipe::{Ingredient, Recipe},
 };
 
+use super::sidebar;
+
 /// The string to use when formatting chrono datetimes
 pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
 
 /// Return a widget that displays one recipe in a maximized view
 pub fn view_screen() -> impl Widget<AppState> {
-    Maybe::or_empty(|| {
-        recipe_widget().lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
-    })
-    .lens(lens::Identity.map(
-        |state: &AppState| state.recipes.get(state.view.viewed?),
-        |state, recipe| {
-            if let Some(recipe) = recipe {
-                state.recipes.update(recipe);
-            }
-        },
-    ))
+    Flex::row()
+        .with_child(sidebar())
+        .with_flex_child(Maybe::or_empty(|| {
+            recipe_widget().lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+        })
+        .lens(lens::Identity.map(
+            |state: &AppState| state.recipes.get(state.view.viewed?),
+            |state, recipe| {
+                if let Some(recipe) = recipe {
+                    state.recipes.update(recipe);
+                }
+            },
+        )), 1.0
+    )
 }
 
 /// Show a widget that displays all information about the recipe
