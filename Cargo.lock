@@ -479,7 +479,6 @@ dependencies = [
  "glib-sys",
  "gtk",
  "gtk-sys",
- "image",
  "instant",
  "js-sys",
  "keyboard-types",

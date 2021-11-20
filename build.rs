@@ -1,7 +1,7 @@
 #[cfg(windows)]
 extern crate winres;
 
-#[cfg(windows)]
+#[cfg(all(debug_assertions, windows))]
 fn main() {
     println!("cargo:rerun-if-changed=assets/icon.ico,assets/icon.png");
     if let Err(e) = winres::WindowsResource::new()
