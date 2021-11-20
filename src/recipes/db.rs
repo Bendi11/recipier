@@ -136,7 +136,7 @@ impl Database {
                                     Ok(id) => {
                                         log::trace!("Adding recipe file {} to db...", id);
 
-                                        match File::open(dir_path.join(id.to_string())) {
+                                        match File::open(item.path()) {
                                             Ok(file) => match serde_json::from_reader(file) {
                                                 Ok(recipe) => {
                                                     let recipe: Arc<Recipe> = Arc::new(recipe);
