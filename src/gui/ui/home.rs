@@ -52,7 +52,8 @@ pub fn home_widget() -> impl Widget<AppState> {
                             Button::new("Load More")
                                 .fix_size(100., 40.)
                                 .on_click(|ctx, _data, _env| ctx.submit_command(LOAD_MORE_RECIPES)),
-                        ),
+                        )
+                        .padding((15., 0.)),
                 )
                 .vertical(),
                 10.,
