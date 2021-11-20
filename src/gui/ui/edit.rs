@@ -6,19 +6,15 @@ use druid::{
     TextAlignment, Widget, WidgetExt,
 };
 
-use crate::gui::{
-    data::{
+use crate::gui::{REMOVE_EDITED_INGREDIENT, data::{
         edit::{EditState, EditedIngredient, EditedTime},
         AppState,
-    },
-    theme,
-    widgets::{
+    }, theme, widgets::{
         icon::{Icon, PLUS_ICON, RECYCLE_ICON},
         maybe::Maybe,
         separator::Separator,
         unit::UnitSelectorController,
-    },
-};
+    }};
 
 /// Build the root edit screen widget
 pub fn edit_widget() -> impl Widget<AppState> {
@@ -47,7 +43,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .with_text_color(theme::COLOR_3)
                 .with_text_size(17.)
                 .expand_width()
-                .padding((2.5, 0.))
+                .padding((2.5, 0., 10., 0.))
                 .lens(EditState::title),
         )
         .with_default_spacer()
@@ -70,7 +66,10 @@ pub fn edit_widget() -> impl Widget<AppState> {
         .with_child(
             Scroll::new(List::new(ingredient_editor))
                 .vertical()
-                .fix_height(300.),
+                .border(theme::COLOR_2, 2.)
+                .rounded(5.)
+                .fix_height(300.)
+                .padding((0., 0., 10., 0.))
         )
         .lens(AppState::edit)
         .expand()
@@ -82,6 +81,7 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
         .with_flex_child(
             TextBox::new()
                 .with_placeholder("Ingredient name")
+                .with_font(theme::SYSTEM_FONT)
                 .expand_width()
                 .align_left()
                 .lens(EditedIngredient::name), 1.0
@@ -92,12 +92,21 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
                 TextBox::new().with_placeholder("Amount"),
                 FloatEditorFormatter,
             )
-            .lens(EditedIngredient::count),
+            .lens(EditedIngredient::count)
+            .fix_width(50.),
         )
         .with_spacer(5.)
         .with_child(
             Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.amount.to_string())
-                .controller(UnitSelectorController),
+                .controller(UnitSelectorController)
+                .fix_width(75.),
+        )
+        .with_child(Icon::svg(&RECYCLE_ICON)
+            .highlight_on_hover()
+            .on_click(|ctx, ingredient: &mut EditedIngredient, _env| {
+                ctx.submit_command(REMOVE_EDITED_INGREDIENT.with(ingredient.id));
+            })
+            .fix_size(30., 30.),
         )
         .expand_width()
         .fix_height(50.)

@@ -40,3 +40,6 @@ pub const REMOVE_RECIPE: Selector<(RecipeId, AppScreen)> = Selector::new("recipi
 /// Change the selected ingredient's unit to the given unit
 pub const CHANGE_INGREDIENT_UNIT: Selector<(Uuid, AmountUnit)> =
     Selector::new("recipier.change-ingredient-unit");
+
+/// Remove the ingredient with the specified ID from the currently edited ingredients
+pub const REMOVE_EDITED_INGREDIENT: Selector<Uuid> = Selector::new("recipier.remove-edited-ingredient");
