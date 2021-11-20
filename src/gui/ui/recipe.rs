@@ -158,6 +158,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
         .with_flex_child(
             Label::raw()
                 .with_font(theme::SYSTEM_FONT)
+                .with_text_size(16.)
                 .with_line_break_mode(LineBreaking::WordWrap)
                 .with_text_alignment(TextAlignment::Start)
                 .expand()

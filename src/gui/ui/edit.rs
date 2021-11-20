@@ -92,7 +92,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 ).lens(EditState::servings).boxed(),
                 None => Icon::svg(&PLUS_ICON)
                     .highlight_on_hover()
-                    .on_click(|_ctx, data: &mut EditState, _env| data.servings = Some(0f32)).boxed()
+                    .on_click(|_ctx, data: &mut EditState, _env| data.servings = Some(0f32))
+                    .fix_size(35., 35.).boxed()
             }
         ))
         .with_default_spacer()
@@ -159,20 +160,13 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
                 .lens(EditedIngredient::name), 1.0
         )
         .with_spacer(10.)
-        .with_child(ViewSwitcher::new(
-            |data: &EditedIngredient, _env| data.unit,
-            |unit, _data, _env| if *unit == AmountUnit::None {
-                SizedBox::empty().boxed()
-            } else {
-                ValueTextBox::new(
+        .with_child(ValueTextBox::new(
                     TextBox::new().with_placeholder("Amount"),
                     FloatEditorFormatter,
                 )
                 .lens(EditedIngredient::count)
                 .fix_width(50.)
-                .boxed()
-            }
-        ))
+        )
         .with_spacer(5.)
         .with_child(
             Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.unit.to_string())
