@@ -47,13 +47,6 @@ impl From<Duration> for EditedTime {
         let minutes = (time - (hours.trunc() * 3600f32)) / 60.;
         let seconds = time - (hours.trunc() * 3600f32) - (minutes.trunc() * 60f32);
 
-        log::trace!(
-            "Converted {}s to {} hours, {} mins, {} secs",
-            time,
-            hours,
-            minutes,
-            seconds
-        );
         Self {
             secs: seconds as u8,
             minutes: minutes as u8,

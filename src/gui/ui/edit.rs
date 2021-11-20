@@ -32,6 +32,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                                 .on_click(|ctx, _data, _env| {
                                     ctx.submit_command(SAVE_EDITED_RECIPE)
                                 })
+                                .fix_size(20., 20.)
                         )   
                         .with_flex_spacer(1.0)
                         .with_child(Label::new("Cancel").with_font(theme::SMALL_FONT))
@@ -40,7 +41,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .on_click(|ctx, data: &mut EditState, _env| {
                             ctx.submit_command(CREATE_RECIPE);
                             ctx.submit_command(CHANGE_SCREEN.with(data.return_to))
-                        }),
+                        })
+                        .fix_size(20., 20.),
                 )
                 .fix_height(50.),
             )

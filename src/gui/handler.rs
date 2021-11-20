@@ -139,6 +139,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
                 )),
                 id: data.edit.id.unwrap_or_else(RecipeId::new)
             };
+            data.recipes.insert(recipe);
 
             Handled::Yes
         } else {
