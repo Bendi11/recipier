@@ -33,7 +33,7 @@ pub fn view_screen() -> impl Widget<AppState> {
     Flex::row()
         .with_child(sidebar())
         .with_flex_child(Maybe::or_empty(|| {
-            recipe_widget().lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+            Scroll::new(recipe_widget()).vertical().lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity)).expand_height()
         })
         .lens(lens::Identity.map(
             |state: &AppState| state.recipes.get(state.view.viewed?),
@@ -42,13 +42,14 @@ pub fn view_screen() -> impl Widget<AppState> {
                     state.recipes.update(recipe);
                 }
             },
-        )), 1.0
+        )),
+        1.0
     )
 }
 
 /// Show a widget that displays all information about the recipe
 pub fn recipe_widget() -> impl Widget<Recipe> {
-    let screen = Flex::column()
+    Flex::column()
         .with_default_spacer()
         .with_child(
             Flex::row()
@@ -123,7 +124,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
                 .align_left(),
         )
         .with_default_spacer()
-        .with_child(List::new(|| {
+        .with_child(List::new(|| 
                     Flex::column()
                         .with_child(
                             Flex::row()
@@ -143,7 +144,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
                                 .padding((2.5, 5.)),
                         )
                         .with_default_spacer()
-                })
+            )
             .with_spacing(2.)
             .expand_width()
             .border(theme::COLOR_2, 2.)
@@ -160,9 +161,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
                 .lens(Recipe::body)
         )
         .expand_width()
-        .padding((5., 1.));
-    Scroll::new(screen)
-        .vertical()
+        .padding((15., 0.))
 }
 
 /// A remove recipe button that takes the user to a confirmation dialog

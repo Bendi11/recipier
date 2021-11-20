@@ -150,7 +150,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
             .lens(EditState::body)
         )
         .lens(AppState::edit)
-        .padding((10., 0.))
+        .padding((15., 0.))
         .expand_width();
     Scroll::new(screen)
         .vertical()

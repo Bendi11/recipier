@@ -71,6 +71,11 @@ pub fn set(env: &mut Env) {
     env.set(PRIMARY_LIGHT, env.get(COLOR_2));
     env.set(PRIMARY_DARK, env.get(COLOR_3));
 
+    env.set(SCROLLBAR_BORDER_COLOR, env.get(COLOR_4));
+    env.set(SCROLLBAR_COLOR, env.get(COLOR_3));
+    env.set(SCROLLBAR_WIDTH, 10.);
+    env.set(SCROLLBAR_PAD, 5.0);
+
     env.set(SELECTION_COLOR, env.get(COLOR_2));
     env.set(SELECTION_TEXT_COLOR, env.get(COLOR_4));
 
