@@ -32,9 +32,18 @@ impl<W: Widget<EditedIngredient>> Controller<EditedIngredient, W> for UnitSelect
 
         let unit_selector = MenuDesc::<AppState>::new(LocalizedString::new("Unit"))
             .append(unit_item!(AmountUnit::Mass(MassUnit::Pound), "pound"))
-            .append(AmountUnit::Mass(MassUnit::Gram), "pound"))
-            .append(unit_item!(AmountUnit::Mass(MassUnit::Pound), "pound"))
-            .append(unit_item!(AmountUnit::Mass(MassUnit::Pound), "pound"));
+            .append(unit_item!(AmountUnit::Mass(MassUnit::Gram), "gram"))
+            .append(unit_item!(AmountUnit::Mass(MassUnit::Ounce), "ounce"))
+            .append(unit_item!(AmountUnit::Mass(MassUnit::Milligram), "milligram"))
+            
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::Cup), "cup"))
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::Teaspoon), "tsp"))
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::Tablespoon), "tbsp"))
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::FluidOz), "fluiz oz"))
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::Pint), "pint"))
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::Liter), "liter"))
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::Quart), "quart"))
+            .append(unit_item!(AmountUnit::Volume(VolumeUnit::Milliliter), "milliliter"));
 
         if let Event::MouseDown(mouse) = event {
             if ctx.is_hot() {
