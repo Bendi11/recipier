@@ -253,11 +253,6 @@ impl std::fmt::Display for FormattedDuration {
             if seconds >= (MILLIS_HOUR * 2f32) {
                 write!(f, "s")?;
             }
-        } else if seconds >= MILLIS_HOUR {
-            write!(f, "{} hour", seconds / MILLIS_HOUR)?;
-            if seconds >= (MILLIS_HOUR * 2f32) {
-                write!(f, "s")?;
-            }
         } else if seconds >= MILLIS_MINUTE {
             write!(f, "{} min", seconds / MILLIS_MINUTE)?;
             if seconds >= (MILLIS_MINUTE * 2f32) {

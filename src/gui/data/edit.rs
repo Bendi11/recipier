@@ -47,9 +47,10 @@ pub struct EditedTime {
 impl From<Duration> for EditedTime {
     fn from(duration: Duration) -> Self {
         let time = duration.as_secs_f32();
-        let hours = time / 360f32;
-        let minutes = (time - (hours.trunc() * 360f32)) / 60.;
-        let seconds = time - (hours.trunc() * 360f32) - (hours.trunc() * 60f32);
+        let hours = time / 3600f32;
+        let minutes = (time - (hours.trunc() * 3600f32)) / 60.;
+        let seconds = time - (hours.trunc() * 3600f32) - (minutes.trunc() * 60f32);
+
         log::trace!(
             "Converted {}s to {} hours, {} mins, {} secs",
             time,

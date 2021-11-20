@@ -79,11 +79,12 @@ pub fn edit_widget() -> impl Widget<AppState> {
 /// Build an ingredient editor for
 fn ingredient_editor() -> impl Widget<EditedIngredient> {
     Flex::row()
-        .with_child(
+        .with_flex_child(
             TextBox::new()
                 .with_placeholder("Ingredient name")
+                .expand_width()
                 .align_left()
-                .lens(EditedIngredient::name),
+                .lens(EditedIngredient::name), 1.0
         )
         .with_spacer(10.)
         .with_child(
@@ -98,6 +99,9 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
             Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.amount.to_string())
                 .controller(UnitSelectorController),
         )
+        .expand_width()
+        .fix_height(50.)
+        .padding((10., 0.))
 }
 
 /// Build the root widget for the recipe time editor
