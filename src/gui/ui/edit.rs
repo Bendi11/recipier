@@ -1,12 +1,12 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Checkbox, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher}};
+use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Checkbox, Flex, Label, List, Scroll, SizedBox, TextBox, ValueTextBox, ViewSwitcher}};
 use uuid::Uuid;
 
-use crate::gui::{CHANGE_SCREEN, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, data::{
+use crate::{gui::{CHANGE_SCREEN, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, data::{
         edit::{EditState, EditedIngredient, EditedTime},
         AppState,
-    }, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}};
+    }, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}}, recipes::measure::AmountUnit};
 
 /// Build the root edit screen widget
 pub fn edit_widget() -> impl Widget<AppState> {
@@ -158,19 +158,25 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
                 .lens(EditedIngredient::name), 1.0
         )
         .with_spacer(10.)
-        .with_child(
-            ValueTextBox::new(
-                TextBox::new().with_placeholder("Amount"),
-                FloatEditorFormatter,
-            )
-            .lens(EditedIngredient::count)
-            .fix_width(50.),
-        )
+        .with_child(ViewSwitcher::new(
+            |data: &EditedIngredient, _env| data.unit,
+            |unit, _data, _env| if let AmountUnit::None = unit {
+                SizedBox::empty().boxed()
+            } else {
+                ValueTextBox::new(
+                    TextBox::new().with_placeholder("Amount"),
+                    FloatEditorFormatter,
+                )
+                .lens(EditedIngredient::count)
+                .fix_width(50.)
+                .boxed()
+            }
+        ))
         .with_spacer(5.)
         .with_child(
             Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.unit.to_string())
                 .controller(UnitSelectorController)
-                .fix_width(75.),
+                .fix_width(85.),
         )
         .with_spacer(5.)
         .with_child(Icon::svg(&RECYCLE_ICON)

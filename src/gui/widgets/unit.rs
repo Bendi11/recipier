@@ -32,6 +32,7 @@ impl<W: Widget<EditedIngredient>> Controller<EditedIngredient, W> for UnitSelect
 
         let unit_selector = MenuDesc::<AppState>::new(LocalizedString::new("Unit"))
             .append(unit_item!(AmountUnit::Count, "count"))
+            .append(unit_item!(AmountUnit::None, "no measure"))
 
             .append(unit_item!(AmountUnit::Mass(MassUnit::Pound), "pound"))
             .append(unit_item!(AmountUnit::Mass(MassUnit::Gram), "gram"))

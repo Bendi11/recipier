@@ -82,7 +82,7 @@ impl EditedIngredient {
             id,
             name: Arc::from("".to_owned()),
             count: 0.,
-            unit: AmountUnit::Count,
+            unit: AmountUnit::None,
             required: true
         }
     }

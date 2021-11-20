@@ -28,7 +28,7 @@ impl fmt::Display for TimeUnit {
 /// A unit of mass like kg, pound, ounce, etc.
 ///
 /// The value of the enum variant is the conversion factor to grams
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, druid::Data)]
 pub enum MassUnit {
     Gram,
     Kilogram,
@@ -73,7 +73,7 @@ impl MassUnit {
 }
 
 /// A measurement of mass with unit of measurement
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq,)]
 pub struct Mass {
     pub unit: MassUnit,
     pub val: f32,
@@ -109,7 +109,7 @@ impl fmt::Display for Mass {
 /// A volume of a substance, like cups, liters, etc.
 ///
 /// The value of this enum as an f64 is the conversion factor from measurement to liters
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, druid::Data)]
 pub enum VolumeUnit {
     Cup,
     Liter,
@@ -202,7 +202,7 @@ impl fmt::Display for Volume {
 }
 
 /// Enumeration for how an ingredient's amount's unit is stored
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, druid::Data)]
 pub enum AmountUnit {
     /// A raw number, displayed as x{n}
     Count,
@@ -231,7 +231,7 @@ impl fmt::Display for AmountUnit {
             Self::Count => write!(f, "count"),
             Self::Volume(vol) => vol.fmt(f),
             Self::Mass(mass) => mass.fmt(f),
-            Self::None => write!(f, "none"),
+            Self::None => write!(f, "no measure"),
         }
     }
 }
