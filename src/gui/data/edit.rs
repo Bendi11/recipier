@@ -62,12 +62,17 @@ pub struct EditedIngredient {
     #[data(same_fn = "PartialEq::eq")]
     pub id: Uuid,
     /// The name of the ingredient
+    #[data(ignore)]
     pub name: Arc<String>,
     /// The number of the given unit for the ingredient
+    #[data(ignore)]
     pub count: f32,
     /// The amount of the ingredient needed
-    #[data(same_fn = "PartialEq::eq")]
+    #[data(ignore)]
     pub unit: AmountUnit,
+    /// Opposite of if the ingredient is optional
+    #[data(ignore)]
+    pub required: bool,
 }
 
 impl EditedIngredient {
@@ -77,7 +82,8 @@ impl EditedIngredient {
             id,
             name: Arc::from("".to_owned()),
             count: 0.,
-            unit: AmountUnit::Count
+            unit: AmountUnit::Count,
+            required: true
         }
     }
 
@@ -96,7 +102,8 @@ impl EditedIngredient {
                     val: self.count,
                     unit
                 }),
-            } 
+            },
+            optional: !self.required,
         }
     }
 
@@ -112,6 +119,7 @@ impl EditedIngredient {
             },
             name: Arc::new(ingredient.name.deref().to_owned()),
             unit: ingredient.amount.into(),
+            required: !ingredient.optional
         }
     }
 }

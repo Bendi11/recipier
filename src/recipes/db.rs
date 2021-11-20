@@ -189,7 +189,7 @@ impl Database {
         self.items.write().remove(&id);
         let file_path = self.dir.join(id.to_string());
         //Remove the recipe file as well
-        if let Err(e) = std::fs::remove_file(self.dir.join(&file_path)) {
+        if let Err(e) = std::fs::remove_file(&file_path) {
             log::warn!(
                 "Failed to remove recipe {} save file {}: {}",
                 id,

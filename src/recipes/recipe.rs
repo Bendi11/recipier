@@ -12,9 +12,14 @@ use super::{
 /// One ingredient in a recipe, with amount of the ingredient and ingredient name
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, druid::Lens, druid::Data)]
 pub struct Ingredient {
+    /// User-given name of the recipe
     pub name: Arc<str>,
+    /// The amount of the ingredient that is required
     #[data(ignore)]
     pub amount: IngredientAmount,
+    /// If the ingredient is optional
+    #[serde(default)]
+    pub optional: bool,
 }
 
 impl fmt::Display for Ingredient {
@@ -90,6 +95,7 @@ impl Recipe {
                 Ingredient {
                     name: "Top Ramen Packet".into(),
                     amount: IngredientAmount::Count(1.),
+                    optional: false,
                 },
                 Ingredient {
                     name: "Water".into(),
@@ -97,6 +103,7 @@ impl Recipe {
                         super::measure::VolumeUnit::Cup,
                         2.,
                     )),
+                    optional: false,
                 },
             ],
             body: r#"- Add water to small / medium pot and bring to boil

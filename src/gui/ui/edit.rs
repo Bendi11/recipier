@@ -1,13 +1,9 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{
-    text::format::Validation,
-    widget::{Button, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher},
-    TextAlignment, Widget, WidgetExt,
-};
+use druid::{TextAlignment, Widget, WidgetExt, text::format::Validation, widget::{Button, Checkbox, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher}};
 use uuid::Uuid;
 
-use crate::gui::{CHANGE_SCREEN, CREATE_RECIPE, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, data::{
+use crate::gui::{CHANGE_SCREEN, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, data::{
         edit::{EditState, EditedIngredient, EditedTime},
         AppState,
     }, theme, widgets::{icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON}, maybe::Maybe, separator::Separator, unit::UnitSelectorController}};
@@ -29,22 +25,23 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .with_child(Label::new("Save").with_font(theme::SMALL_FONT))
                             .with_child(Icon::svg(&SAVE_ICON)
                                 .highlight_on_hover()
-                                .on_click(|ctx, _data, _env| {
-                                    ctx.submit_command(SAVE_EDITED_RECIPE)
+                                .on_click(|ctx, data: &mut EditState, _env| {
+                                    ctx.submit_command(SAVE_EDITED_RECIPE);
+                                    ctx.submit_command(CHANGE_SCREEN.with(data.return_to))
                                 })
                                 .fix_size(20., 20.)
                         )   
                         .with_flex_spacer(1.0)
                         .with_child(Label::new("Cancel").with_font(theme::SMALL_FONT))
                         .with_child(Icon::svg(&RECYCLE_ICON)
-                        .highlight_on_hover()
-                        .on_click(|ctx, data: &mut EditState, _env| {
-                            ctx.submit_command(CREATE_RECIPE);
-                            ctx.submit_command(CHANGE_SCREEN.with(data.return_to))
-                        })
-                        .fix_size(20., 20.),
+                            .highlight_on_hover()
+                            .on_click(|ctx, data: &mut EditState, _env| {
+                                log::trace!("Cancelling!");
+                                ctx.submit_command(CHANGE_SCREEN.with(data.return_to));
+                            })
+                            .fix_size(20., 20.),
                 )
-                .fix_height(50.),
+                .fix_height(75.),
             )
         )
         .with_spacer(1.)
@@ -126,6 +123,9 @@ pub fn edit_widget() -> impl Widget<AppState> {
 /// Build an ingredient editor for
 fn ingredient_editor() -> impl Widget<EditedIngredient> {
     Flex::row()
+        .with_child(Checkbox::new("Required")
+            .lens(EditedIngredient::required)    
+        )
         .with_flex_child(
             TextBox::new()
                 .with_placeholder("Ingredient name")
