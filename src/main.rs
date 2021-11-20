@@ -1,15 +1,18 @@
 // Disable console on windows
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+pub mod gui;
+pub mod recipes;
+pub mod update;
+
 use druid::{AppLauncher, WindowDesc, WindowState};
 use gui::{data::AppState, root_widget};
 use log::LevelFilter;
 use simplelog::ConfigBuilder;
-pub mod gui;
-pub mod recipes;
 
 /// The file name to save and load application data from
 pub const SAVE_FILE: &str = "./save.json";
+
 
 fn main() {
     //Add panic handler for better error messages

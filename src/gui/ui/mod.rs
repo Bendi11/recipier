@@ -12,7 +12,7 @@ use druid::{
 use crate::gui::{
     theme,
     widgets::{
-        icon::{self, Icon},
+        icon,
         separator::Separator,
     },
 };
@@ -50,7 +50,7 @@ pub fn sidebar() -> impl Widget<AppState> {
             Flex::column()
                 .with_spacer(theme::SPACING)
                 .with_child(
-                    Icon::svg(&icon::BOWL_ICON)
+                    icon::BOWL_ICON.clone()
                         .with_scale(10.)
                         .flex(false)
                         .with_color(theme::COLOR_4)

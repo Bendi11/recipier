@@ -17,8 +17,11 @@ chrono = { version = "0.4", features = ["serde"] } # Datetime handling
 
 serde = { version = "1.0", features = ["derive", "rc"] } # Saving all recipes
 serde_json = "1.0" # Saving recipes and eventually github API responses
+ureq = { version = "2.3", features = ["json"] } # Small HTTP(S) client for autoupdates
 
-image = "0.23" # For decoding image formats
+lazy_static = "1.4" # Lazily evaluated statics used for icons and semver
+
+# image = "0.23" # For decoding image formats
 
 log = { version = "0.4", features = ["release_max_level_warn"] } # Logging facade macros
 simplelog = "0.10" # Logging backend

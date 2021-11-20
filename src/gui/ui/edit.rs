@@ -14,7 +14,7 @@ use crate::gui::{
     },
     theme,
     widgets::{
-        icon::{Icon, PLUS_ICON, RECYCLE_ICON, SAVE_ICON},
+        icon::{PLUS_ICON, RECYCLE_ICON, SAVE_ICON},
         maybe::Maybe,
         separator::Separator,
         unit::UnitSelectorController,
@@ -39,7 +39,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                     Flex::column()
                         .with_child(Label::new("Save").with_font(theme::SMALL_FONT))
                         .with_child(
-                            Icon::svg(&SAVE_ICON)
+                            SAVE_ICON.clone()
                                 .highlight_on_hover()
                                 .on_click(|ctx, data: &mut EditState, _env| {
                                     ctx.submit_command(SAVE_EDITED_RECIPE);
@@ -50,7 +50,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .with_flex_spacer(1.0)
                         .with_child(Label::new("Cancel").with_font(theme::SMALL_FONT))
                         .with_child(
-                            Icon::svg(&RECYCLE_ICON)
+                            RECYCLE_ICON.clone()
                                 .highlight_on_hover()
                                 .on_click(|ctx, data: &mut EditState, _env| {
                                     ctx.submit_command(CHANGE_SCREEN.with(data.return_to));
@@ -110,14 +110,14 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .lens(EditState::servings),
                     )
                     .with_child(
-                        Icon::svg(&RECYCLE_ICON)
+                        RECYCLE_ICON.clone()
                             .highlight_on_hover()
                             .on_click(|_ctx, data: &mut EditState, _env| data.servings = None)
                             .fix_size(35., 35.),
                     )
                     .align_left()
                     .boxed(),
-                None => Icon::svg(&PLUS_ICON)
+                None => PLUS_ICON.clone()
                     .highlight_on_hover()
                     .on_click(|_ctx, data: &mut EditState, _env| data.servings = Some(0f32))
                     .fix_size(35., 35.)
@@ -137,7 +137,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
             Flex::column()
                 .with_child(List::new(ingredient_editor))
                 .with_child(
-                    Icon::svg(&PLUS_ICON)
+                    PLUS_ICON.clone()
                         .highlight_on_hover()
                         .on_click(|_ctx, state: &mut EditState, _env| {
                             let id = Uuid::new_v4();
@@ -201,15 +201,11 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
         .with_child(
             Button::dynamic(|ingredient: &EditedIngredient, _env| ingredient.unit.to_string())
                 .controller(UnitSelectorController)
-                .on_click(|ctx, _, _env| {
-                    ctx.request_layout();
-                    ctx.request_paint()
-                })
                 .fix_width(90.),
         )
         .with_spacer(5.)
         .with_child(
-            Icon::svg(&RECYCLE_ICON)
+            RECYCLE_ICON.clone()
                 .highlight_on_hover()
                 .on_click(|ctx, ingredient: &mut EditedIngredient, _env| {
                     ctx.submit_command(REMOVE_EDITED_INGREDIENT.with(ingredient.id));
@@ -273,16 +269,16 @@ fn time_editor() -> impl Widget<EditState> {
                     .lens(EditState::time),
                 )
                 .with_child(
-                    Icon::svg(&RECYCLE_ICON)
+                    RECYCLE_ICON.clone()
                         .highlight_on_hover()
                         .on_click(|ctx, data: &mut EditState, _env| {
                             data.time = None;
                             ctx.request_update();
                         })
-                        .fix_size(35., 35.),
+                        .fix_size(30., 30.),
                 )
                 .boxed(),
-            None => Icon::svg(&PLUS_ICON)
+            None => PLUS_ICON.clone()
                 .highlight_on_hover()
                 .on_click(|_ctx, data: &mut EditState, _env| {
                     data.time = Some(EditedTime::default())

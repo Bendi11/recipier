@@ -3,58 +3,66 @@
 use druid::{kurbo::BezPath, Affine, Color, Data, KeyOrValue, RenderContext, Size, Widget};
 
 use crate::gui::theme;
+use lazy_static::lazy_static;
 
 use super::RecipierWidget;
 
-/// Logo bowl icon SVG data
-pub const BOWL_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icon-path.txt"),
-    size: Size::new(16., 16.),
-};
+lazy_static! {
+    pub static ref SAVE_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icons/save-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 
-/// A magnifying glass search icon
-pub const SEARCH_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icons/search-path.txt"),
-    size: Size::new(16., 16.),
-};
+    pub static ref RECYCLE_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icons/recycle-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 
-/// A plus symbol icon
-pub const PLUS_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icons/plus-path.txt"),
-    size: Size::new(16., 16.),
-};
+    pub static ref PEN_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icons/pen-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 
-/// A right arrow icon
-pub const RIGHT_ARROW_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icons/right-arrow-path.txt"),
-    size: Size::new(16., 16.),
-};
+    pub static ref RIGHT_ARROW_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icons/right-arrow-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 
-/// A pen icon
-pub const PEN_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icons/pen-path.txt"),
-    size: Size::new(16., 16.),
-};
+    pub static ref PLUS_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icons/plus-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 
-/// A recycle icon
-pub const RECYCLE_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icons/recycle-path.txt"),
-    size: Size::new(16., 16.),
-};
+    pub static ref SEARCH_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icons/search-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 
-/// A save icon
-pub const SAVE_ICON: IconData = IconData {
-    path: include_str!("../../../assets/icons/save-path.txt"),
-    size: Size::new(16., 16.),
-};
-
-/// Structure with all data needed to render an icon: size and bezier path
-#[derive(Clone, Debug)]
-pub struct IconData {
-    /// The path to draw
-    pub path: &'static str,
-    /// The size of the svg
-    pub size: Size,
+    pub static ref BOWL_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icon-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 }
 
 /// Icon that holds a bezier path, color, and size to render
@@ -73,17 +81,6 @@ pub struct Icon {
 }
 
 impl Icon {
-    /// Create a new icon from the specified icon data
-    pub fn svg(data: &IconData) -> Self {
-        Self {
-            path: BezPath::from_svg(data.path).unwrap(),
-            scale: 1.,
-            size: data.size,
-            flex: true,
-            color: Color::BLACK.into(),
-        }
-    }
-
     /// Builder method to enable / disable flexible sizing
     pub fn flex(mut self, flex: bool) -> Self {
         self.flex = flex;

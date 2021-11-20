@@ -17,7 +17,7 @@ use crate::{
         },
         theme,
         widgets::{
-            icon::{self, Icon},
+            icon,
             maybe::Maybe,
             separator::Separator,
             RecipierWidget,
@@ -119,7 +119,7 @@ pub fn search_bar() -> impl Widget<String> {
         )
         .with_flex_spacer(0.1)
         .with_flex_child(
-            Icon::svg(&icon::SEARCH_ICON)
+            icon::SEARCH_ICON.clone()
                 .with_color(theme::COLOR_3)
                 .on_hover(
                     |ctx, _d, this, _env| {

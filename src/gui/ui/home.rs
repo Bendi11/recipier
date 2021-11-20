@@ -9,7 +9,7 @@ use crate::gui::{
     data::{screen::AppScreen, AppState},
     theme,
     widgets::{
-        icon::{self, Icon},
+        icon,
         separator::Separator,
     },
     CHANGE_SCREEN, CREATE_RECIPE, LOAD_MORE_RECIPES,
@@ -26,7 +26,7 @@ pub fn home_widget() -> impl Widget<AppState> {
                 .align_left(),
         )
         .with_flex_spacer(5.)
-        .with_child(Icon::svg(&icon::PLUS_ICON).highlight_on_hover().on_click(
+        .with_child(icon::PLUS_ICON.clone().highlight_on_hover().on_click(
             |ctx, _data, _env| {
                 ctx.submit_command(CREATE_RECIPE);
                 ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));

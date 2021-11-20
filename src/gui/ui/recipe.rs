@@ -13,7 +13,7 @@ use crate::{
         data::{screen::AppScreen, AppState},
         theme,
         widgets::{
-            icon::{Icon, PEN_ICON, RECYCLE_ICON, RIGHT_ARROW_ICON},
+            icon::{PEN_ICON, RECYCLE_ICON, RIGHT_ARROW_ICON},
             maybe::Maybe,
             separator::Separator,
             RecipierWidget,
@@ -131,7 +131,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
                 Flex::column()
                     .with_child(
                         Flex::row()
-                            .with_child(Icon::svg(&RIGHT_ARROW_ICON).flex(false))
+                            .with_child(RIGHT_ARROW_ICON.clone().flex(false))
                             .with_spacer(3.)
                             .with_child(
                                 Label::raw()
@@ -170,7 +170,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
 
 /// A remove recipe button that takes the user to a confirmation dialog
 fn delete_button(screen: AppScreen) -> impl Widget<Recipe> {
-    Icon::svg(&RECYCLE_ICON)
+    RECYCLE_ICON.clone()
         .highlight_on_hover()
         .on_click(move |ctx, recipe: &mut Recipe, _env| {
             ctx.submit_command(REMOVE_RECIPE.with((recipe.id, screen)));
@@ -181,7 +181,7 @@ fn delete_button(screen: AppScreen) -> impl Widget<Recipe> {
 
 /// Edit icon button that takes the user to the edit screen populated with the current recipe's data
 fn edit_button(screen: AppScreen) -> impl Widget<Recipe> {
-    Icon::svg(&PEN_ICON)
+    PEN_ICON.clone()
         .highlight_on_hover()
         .on_click(move |ctx, recipe: &mut Recipe, _env| {
             ctx.submit_command(EDIT_RECIPE.with((recipe.id, screen)));
