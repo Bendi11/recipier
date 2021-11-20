@@ -27,7 +27,7 @@ use crate::{
     recipes::recipe::Recipe,
 };
 
-use super::recipe::recipe_brief_widget;
+use super::{recipe::recipe_brief_widget, sidebar};
 
 /// Widget controller that sends a navigate to search results command when the enter key is pressed
 struct EnterController;
@@ -59,44 +59,47 @@ impl<D: Data, W: Widget<D>> Controller<D, W> for EnterController {
 
 /// Generate the root search results widget
 pub fn search_screen() -> impl Widget<AppState> {
-    Flex::column()
-        .with_default_spacer()
-        .with_child(search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))))
-        .with_default_spacer()
-        .with_child(
-            Maybe::or_empty(|| {
-                Flex::row()
-                    .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
-                    .with_child(
-                        Label::raw()
-                            .with_font(theme::SMALL_FONT)
-                            .lens(SearchResults::term),
-                    )
-                    .align_left()
-            })
-            .lens(AppState::search.then(SearchState::results)),
-        )
-        .with_child(Separator::new(1.0))
-        .with_default_spacer()
-        .with_flex_child(
-            Maybe::new(
-                || {
-                    Scroll::new(
-                        List::new(|| {
-                            recipe_brief_widget()
-                                .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
-                        })
-                        .with_spacing(10.),
-                    )
-                    .vertical()
-                },
-                || SizedBox::empty().expand_height(),
+    Flex::row()
+        .with_child(sidebar())
+        .with_flex_child(Flex::column()
+            .with_default_spacer()
+            .with_child(search_bar().lens(AppState::search.then(SearchState::query.then(Query::term))))
+            .with_default_spacer()
+            .with_child(
+                Maybe::or_empty(|| {
+                    Flex::row()
+                        .with_child(Label::new("Results for").with_font(theme::SMALL_FONT))
+                        .with_child(
+                            Label::raw()
+                                .with_font(theme::SMALL_FONT)
+                                .lens(SearchResults::term),
+                        )
+                        .align_left()
+                })
+                .lens(AppState::search.then(SearchState::results)),
             )
-            .expand_width()
-            .lens(AppState::search.then(SearchState::results)),
-            10.,
+            .with_child(Separator::new(1.0))
+            .with_default_spacer()
+            .with_flex_child(
+                Maybe::new(
+                    || {
+                        Scroll::new(
+                            List::new(|| {
+                                recipe_brief_widget()
+                                    .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+                            })
+                            .with_spacing(10.),
+                        )
+                        .vertical()
+                    },
+                    || SizedBox::empty().expand_height(),
+                )
+                .expand_width()
+                .lens(AppState::search.then(SearchState::results)),
+                10.,
+            )
+            .padding((2., 0.)), 1.0
         )
-        .padding((2., 0.))
 }
 
 /// Return a search bar that modifies a search term string and sends the change screen

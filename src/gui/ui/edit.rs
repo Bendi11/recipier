@@ -11,7 +11,7 @@ use crate::{gui::{CHANGE_SCREEN, REMOVE_EDITED_INGREDIENT, SAVE_EDITED_RECIPE, d
 
 /// Build the root edit screen widget
 pub fn edit_widget() -> impl Widget<AppState> {
-    Flex::column()
+    let screen = Flex::column()
         .with_default_spacer()
         .with_child(
             Flex::row()
@@ -115,8 +115,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .expand_width(),
         )
         .with_default_spacer()
-        .with_child(
-            Scroll::new(Flex::column()
+        .with_child(Flex::column()
                 .with_child(List::new(ingredient_editor))
                 .with_child(Icon::svg(&PLUS_ICON)
                     .highlight_on_hover()
@@ -126,13 +125,12 @@ pub fn edit_widget() -> impl Widget<AppState> {
                     })
                     .fix_size(50., 40.)
                 )
+                .border(theme::COLOR_2, 2.)
+                .rounded(5.)
+                .expand_width()
+                //.fix_height(200.)
+                .padding((0., 0., 10., 0.)
             )
-            .vertical()
-            .border(theme::COLOR_2, 2.)
-            .rounded(5.)
-            .expand_width()
-            .fix_height(200.)
-            .padding((0., 0., 10., 0.))
         )
         .with_default_spacer()
         .with_child(
@@ -142,18 +140,20 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .expand_width(),
         )
         .with_default_spacer()
-        .with_flex_child(TextBox::multiline()
+        .with_child(TextBox::multiline()
             .with_text_color(theme::COLOR_4)
             .with_font(theme::SYSTEM_FONT)
             .with_text_size(17.)
             .with_text_alignment(TextAlignment::Start)
-            .expand()
+            .expand_width()
             .padding((2.5, 0., 10., 10.))
-            .lens(EditState::body), 5.0
+            .lens(EditState::body)
         )
         .lens(AppState::edit)
         .padding((10., 0.))
-        .expand()
+        .expand_width();
+    Scroll::new(screen)
+        .vertical()
 }
 
 /// Build an ingredient editor for

@@ -48,7 +48,7 @@ pub fn view_screen() -> impl Widget<AppState> {
 
 /// Show a widget that displays all information about the recipe
 pub fn recipe_widget() -> impl Widget<Recipe> {
-    Flex::column()
+    let screen = Flex::column()
         .with_default_spacer()
         .with_child(
             Flex::row()
@@ -123,9 +123,7 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
                 .align_left(),
         )
         .with_default_spacer()
-        .with_flex_child(
-            Scroll::new(
-                List::new(|| {
+        .with_child(List::new(|| {
                     Flex::column()
                         .with_child(
                             Flex::row()
@@ -146,28 +144,25 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
                         )
                         .with_default_spacer()
                 })
-                .with_spacing(2.),
-            )
-            .vertical()
+            .with_spacing(2.)
             .expand_width()
             .border(theme::COLOR_2, 2.)
-            .rounded(5.0),
-            10.,
+            .rounded(5.0)
         )
         .with_default_spacer()
-        .with_flex_child(
-            Label::raw()
+        .with_child(Label::raw()
                 .with_font(theme::SYSTEM_FONT)
                 .with_text_size(16.)
                 .with_line_break_mode(LineBreaking::WordWrap)
                 .with_text_alignment(TextAlignment::Start)
-                .expand()
+                .expand_width()
                 .padding((5., 5.))
-                .lens(Recipe::body),
-            30.,
+                .lens(Recipe::body)
         )
-        .expand()
-        .padding((5., 1.))
+        .expand_width()
+        .padding((5., 1.));
+    Scroll::new(screen)
+        .vertical()
 }
 
 /// A remove recipe button that takes the user to a confirmation dialog
