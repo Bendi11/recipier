@@ -22,5 +22,5 @@ fn main() {
     std::fs::copy("assets/icon.icns", "./recipier.app/Contents/Resources/icon.icns").expect("failed to copy icon.icns file");
 }
 
-#[cfg(not(windows))]
+#[cfg(all(not(windows), not(target_os="macos")))]
 fn main() {}
