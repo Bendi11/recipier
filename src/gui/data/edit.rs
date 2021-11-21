@@ -1,6 +1,6 @@
 //! State for the currently edited recipe
 
-use std::{ops::Deref, sync::Arc, time::Duration};
+use std::{ops::Deref, path::Path, sync::Arc, time::Duration};
 
 use druid::{im::HashMap, widget::ListIter, Data, Lens};
 use serde::{Deserialize, Serialize};
@@ -29,6 +29,8 @@ pub struct EditState {
     pub servings: Option<f32>,
     /// The amount of time that the recipe is expected to take
     pub time: Option<EditedTime>,
+    /// Optional file path to an image file
+    pub image: Option<Arc<Path>>,
     /// The screen to return to after editing is over
     pub return_to: AppScreen,
 }
@@ -145,6 +147,7 @@ impl From<&Recipe> for EditState {
             servings: recipe.servings,
             time: recipe.time.map(From::from),
             return_to: AppScreen::Home,
+            image: recipe.image.clone(),
         }
     }
 }
@@ -159,6 +162,7 @@ impl Default for EditState {
             servings: None,
             time: None,
             return_to: AppScreen::Home,
+            image: None,
         }
     }
 }

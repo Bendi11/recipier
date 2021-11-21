@@ -3,7 +3,7 @@
 use std::{borrow::Borrow, ops::Deref, sync::Arc, time::Duration};
 
 use chrono::Utc;
-use druid::{piet::TextStorage, AppDelegate, Command, DelegateCtx, Env, Handled, Target};
+use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, commands::OPEN_FILE, piet::TextStorage};
 
 use crate::{
     gui::data::edit::EditState,
@@ -157,8 +157,13 @@ impl AppDelegate<AppState> for RecipierDelegate {
                     )
                 }),
                 id: data.edit.id.unwrap_or_else(RecipeId::new),
+                image: data.edit.image.clone(),
             };
             data.recipes.insert(recipe);
+
+            Handled::Yes
+        } else if let Some(info) = cmd.get(OPEN_FILE) {
+            data.edit.image = Some(Arc::from(info.path()));
 
             Handled::Yes
         } else {
