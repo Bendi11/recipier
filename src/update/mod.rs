@@ -34,7 +34,7 @@ impl<'a> ReleaseAsset<'a> {
     pub fn parse(asset: &'a Value) -> Option<Self> {
         let file = asset.get("name")?.as_str()?;
         let name = path::Path::new(file).file_name()?.to_str()?;
-        let mut parts = file.split('-');
+        let mut parts = name.split('-');
         let os = parts.next()?;
         let width = match parts.next()?.trim_start_matches('x').parse::<u8>().ok()? {
             86 => 32,
