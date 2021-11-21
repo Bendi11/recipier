@@ -2,8 +2,9 @@
 
 use std::{borrow::Borrow, fmt, fs::File, ops::Deref, path::Path, sync::Arc};
 
-use druid::im::OrdMap;
+use druid::{ImageBuf, im::OrdMap};
 use hashbrown::HashMap;
+use lru::LruCache;
 use parking_lot::RwLock;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use uuid::Uuid;
@@ -17,6 +18,8 @@ use super::recipe::Recipe;
 pub struct Database {
     /// A map of recipe IDs to loaded or unloaded recipe data
     items: Arc<RwLock<HashMap<RecipeId, Arc<Recipe>>>>,
+    /// A cache of recipe IDs to their loaded images
+    images: Arc<RwLock<LruCache<RecipeId, ImageBuf>>>,
     /// The directory that all recipe files are stored in
     dir: Arc<Path>,
 }
@@ -60,6 +63,7 @@ impl Database {
     pub fn new(path: impl AsRef<Path>) -> Self {
         Self {
             items: Arc::new(RwLock::new(HashMap::new())),
+            images: Arc::new(RwLock::new(LruCache::new(50))),
             dir: Arc::from(path.as_ref()),
         }
     }

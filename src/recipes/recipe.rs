@@ -74,14 +74,18 @@ pub struct Recipe {
     #[serde(default = "chrono::Utc::now")]
     pub created_on: DateTime<Utc>,
     /// How many servings a recipe makes
+    #[serde(default)]
     pub servings: Option<f32>,
     /// A list of ingredients in the recipe
+    #[serde(default)]
     pub ingredients: Vector<Ingredient>,
     /// The recipe's instructions
     pub body: Arc<str>,
     /// The time that the recipe takes to make
+    #[serde(default)]
     pub time: Option<time::Duration>,
     /// Optional path to a image file for this recipe
+    #[serde(default)]
     pub image: Option<Arc<Path>>
 }
 
