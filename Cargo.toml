@@ -18,6 +18,8 @@ chrono = { version = "0.4", features = ["serde"] } # Datetime handling
 serde = { version = "1.0", features = ["derive", "rc"] } # Saving all recipes
 serde_json = "1.0" # Saving recipes and eventually github API responses
 ureq = { version = "2.3", features = ["json"] } # Small HTTP(S) client for autoupdates
+zip = "0.5" # Decompressing update files
+tempfile = "3.2" # Temporary files to download updates to
 
 lazy_static = "1.4" # Lazily evaluated statics used for icons and semver
 
