@@ -70,7 +70,6 @@ fn main() {
 
     let state = AppState::init(SAVE_FILE);
     
-
     let window = WindowDesc::new(root_widget)
         .resizable(true)
         .title("Recipier")
