@@ -11,6 +11,7 @@ use log::LevelFilter;
 use semver::Version;
 use simplelog::ConfigBuilder;
 use lazy_static::lazy_static;
+use update::autoupdate;
 
 /// The file name to save and load application data from
 pub const SAVE_FILE: &str = "./save.json";
@@ -68,6 +69,7 @@ fn main() {
     }
 
     let state = AppState::init(SAVE_FILE);
+    let no_update_check = state.config.no_update_check;
 
     let window = WindowDesc::new(root_widget)
         .resizable(true)
@@ -75,12 +77,18 @@ fn main() {
         .set_window_state(WindowState::RESTORED)
         .window_size(state.config.window_size);
 
-    //let icon = image::load_from_memory_with_format(ICON, image::ImageFormat::Png).unwrap();
-    if let Err(e) = AppLauncher::with_window(window)
+    let launcher = AppLauncher::with_window(window)
         .configure_env(|env, _state| gui::theme::set(env))
-        .delegate(gui::handler::RecipierDelegate)
-        .launch(state)
-    {
+        .delegate(gui::handler::RecipierDelegate);
+    let event_sink = launcher.get_external_handle();
+
+    if let Err(e) = launcher.launch(state) {
         panic!("Failed to launch app: {}", e);
+    }
+
+    if !no_update_check {
+        std::thread::spawn(move || if let Err(e) = autoupdate(event_sink) {
+            log::warn!("Failed to check for updates: {}", e);
+        });
     }
 }

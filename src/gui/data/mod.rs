@@ -114,6 +114,7 @@ impl Default for AppState {
         Self {
             config: Config {
                 window_size: (480., 700.),
+                no_update_check: false,
             },
             recipes: Database::new("./recipes"),
             search: SearchState::default(),

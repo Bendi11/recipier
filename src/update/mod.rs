@@ -127,6 +127,9 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
             let main_hardlink = format!("./reciper{}", EXE_SUFFIX); //The path to the main application hardlink
             fs::remove_file(&main_hardlink)?; //Remove the old hard link
             fs::hard_link(format!("./{}/recipier{}", release_version, EXE_SUFFIX), &main_hardlink)?;
+
+            log::trace!("Created all links, restarting...");
+            std::process::Command::new(main_hardlink).spawn()?;
         }
     }
 

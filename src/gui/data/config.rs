@@ -8,4 +8,6 @@ use serde::{Deserialize, Serialize};
 pub struct Config {
     /// Size of the application window in druid display points
     pub window_size: (f64, f64),
+    /// If we should periodically check for application updates
+    pub no_update_check: bool,
 }
