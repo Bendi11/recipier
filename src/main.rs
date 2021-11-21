@@ -69,7 +69,7 @@ fn main() {
     }
 
     let state = AppState::init(SAVE_FILE);
-    let no_update_check = state.config.no_update_check;
+    
 
     let window = WindowDesc::new(root_widget)
         .resizable(true)
@@ -81,14 +81,13 @@ fn main() {
         .configure_env(|env, _state| gui::theme::set(env))
         .delegate(gui::handler::RecipierDelegate);
     let event_sink = launcher.get_external_handle();
-
-    if let Err(e) = launcher.launch(state) {
-        panic!("Failed to launch app: {}", e);
-    }
-
-    if !no_update_check {
+    if !state.config.no_update_check {
         std::thread::spawn(move || if let Err(e) = autoupdate(event_sink) {
             log::warn!("Failed to check for updates: {}", e);
         });
+    }
+
+    if let Err(e) = launcher.launch(state) {
+        panic!("Failed to launch app: {}", e);
     }
 }
