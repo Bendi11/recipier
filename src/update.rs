@@ -43,6 +43,7 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
         .ok_or(UpdateError::InvalidJsonResponse(
             "'name' field of release object is not a string",
         ))?
+        .trim_start_matches('v')
         .parse::<Version>()
         .map_err(|_| {
             UpdateError::InvalidJsonResponse("Latest release's name is not a valid semver version!")
