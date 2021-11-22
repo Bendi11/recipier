@@ -53,8 +53,12 @@ impl AppState {
     /// Initialize an appstate from a file or the default state if the file was not found
     pub fn init(path: impl AsRef<Path>) -> Self {
         match std::fs::File::open(&path) {
-            Ok(file) => match serde_json::from_reader(file) {
-                Ok(me) => me,
+            Ok(file) => match serde_json::from_reader::<_, Self>(file) {
+                Ok(mut me) => {
+                    let ids = me.recipes.ids();
+                    me.home.loaded = druid::im::Vector::from(&ids[0..ids.len().min(10)]);
+                    me
+                }
                 Err(e) => {
                     log::error!(
                         "Failed to deserialize app state from {}: {}, returning default...",
