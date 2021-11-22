@@ -116,7 +116,7 @@ impl Default for AppState {
                 window_size: (480., 700.),
                 no_update_check: false,
             },
-            recipes: Database::new("./recipes"),
+            recipes: Database::new("recipes"),
             search: SearchState::default(),
             screen: AppScreen::Home,
             home: HomeState::default(),

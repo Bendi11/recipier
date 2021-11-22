@@ -1,6 +1,8 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{Data, FileDialogOptions, LifeCycle, TextAlignment, Widget, WidgetExt, commands::SHOW_OPEN_PANEL, text::format::Validation, widget::{Button, Checkbox, FillStrat, Flex, Image, Label, List, Scroll, SizedBox, TextBox, ValueTextBox, ViewSwitcher}};
+use std::sync::Arc;
+
+use druid::{Data, FileDialogOptions, ImageBuf, LifeCycle, TextAlignment, Widget, WidgetExt, commands::SHOW_OPEN_PANEL, text::format::Validation, widget::{Button, Checkbox, FillStrat, Flex, Image, Label, List, Scroll, SizedBox, TextBox, ValueTextBox, ViewSwitcher}};
 use uuid::Uuid;
 
 use crate::gui::{
@@ -85,7 +87,19 @@ pub fn edit_widget() -> impl Widget<AppState> {
         .with_child(ViewSwitcher::new(
             |data: &EditState, _env| data.image.is_some(),
             |img, _data, _env| match img {
-                true => ImageBuilder::new().boxed(),
+                true => Flex::column()
+                    .with_child(ImageBuilder::new().fix_height(175.))
+                    .with_spacer(2.0)
+                    .with_child(RECYCLE_ICON.clone()
+                        .highlight_on_hover()
+                        .on_click(|_ctx, data: &mut EditState, _env| {
+                            data.image = None;
+                        })
+                        .fix_size(30., 30.)
+                    )
+                    .expand_width()
+                    .align_left()
+                    .boxed(),
                 false => PLUS_ICON.clone()
                     .highlight_on_hover()
                     .on_click(|ctx, _data, _env| {
@@ -95,6 +109,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
                             .title("Recipe Image Selector")
                         ));
                     })
+                    .fix_size(35., 35.)
+                    .align_left()
                     .boxed()
             }
         ))
@@ -324,6 +340,18 @@ impl ImageBuilder {
             widget: SizedBox::empty().boxed()
         }
     }
+
+    /// Check if two image buffers are the same by cheaply comparing the Arcs that they hold image data in
+    fn images_same(img1: &Option<ImageBuf>, img2: &Option<ImageBuf>) -> bool {
+        match (img1, img2) {
+            (Some(_), None) | (None, Some(_)) => false,
+            (None, None) => true,
+            (Some(ref data1), Some(ref data2)) => Arc::ptr_eq(
+                &data1.raw_pixels_shared(), 
+                &data2.raw_pixels_shared()
+            )
+        }
+    }
 }
 
 impl Widget<EditState> for ImageBuilder {
@@ -335,7 +363,7 @@ impl Widget<EditState> for ImageBuilder {
         if let LifeCycle::WidgetAdded = event {
             if let Some(data) = data.image.as_ref() {
                 self.widget = Image::new(data.clone())
-                    .fill_mode(FillStrat::FitWidth)
+                    .fill_mode(FillStrat::Contain)
                     .boxed();
             }
         }
@@ -343,11 +371,11 @@ impl Widget<EditState> for ImageBuilder {
     }
 
     fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &EditState, data: &EditState, _env: &druid::Env) {
-        if !old_data.same(&data) {
+        if !old_data.same(&data) && !Self::images_same(&old_data.image, &data.image) {
             if let Some(data) = data.image.as_ref() {
                 self.widget = Image::new(data.clone())
-                .fill_mode(FillStrat::FitWidth)
-                .boxed();
+                    .fill_mode(FillStrat::Contain)
+                    .boxed();
                 ctx.children_changed()
             }
         }

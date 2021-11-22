@@ -27,8 +27,6 @@ tempfile = "3.2" # Temporary files to download updates to
 
 lazy_static = "1.4" # Lazily evaluated statics used for icons and semver
 
-# image = "0.23" # For decoding image formats
-
 log = { version = "0.4", features = ["release_max_level_warn"] } # Logging facade macros
 simplelog = "0.10" # Logging backend
 
