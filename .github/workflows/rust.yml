@@ -9,23 +9,15 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs: 
-  create_release:
-    name: Create release
+  create-release:
     runs-on: ubuntu-latest
-
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
+      - uses: actions/checkout@v2
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          title: Release $tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
           
   upload-assets:
     strategy:
