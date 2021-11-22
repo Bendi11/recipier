@@ -63,6 +63,14 @@ lazy_static! {
         flex: true,
         color: theme::COLOR_4.into(),
     };
+
+    pub static ref X_ICON: Icon = Icon {
+        path: BezPath::from_svg(include_str!("../../../assets/icons/x-path.txt")).unwrap(),
+        scale: 1.,
+        size: Size::new(16., 16.),
+        flex: true,
+        color: theme::COLOR_4.into(),
+    };
 }
 
 /// Icon that holds a bezier path, color, and size to render

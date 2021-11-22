@@ -12,7 +12,7 @@ use crate::gui::{
     },
     theme,
     widgets::{
-        icon::{PLUS_ICON, RECYCLE_ICON, SAVE_ICON},
+        icon::{PLUS_ICON, SAVE_ICON, X_ICON},
         maybe::Maybe,
         separator::Separator,
         unit::UnitSelectorController,
@@ -48,7 +48,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .with_flex_spacer(1.0)
                         .with_child(Label::new("Cancel").with_font(theme::SMALL_FONT))
                         .with_child(
-                            RECYCLE_ICON.clone()
+                            X_ICON.clone()
                                 .highlight_on_hover()
                                 .on_click(|ctx, data: &mut EditState, _env| {
                                     ctx.submit_command(CHANGE_SCREEN.with(data.return_to));
@@ -90,12 +90,12 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 true => Flex::column()
                     .with_child(ImageBuilder::new().fix_height(175.))
                     .with_spacer(2.0)
-                    .with_child(RECYCLE_ICON.clone()
+                    .with_child(X_ICON.clone()
                         .highlight_on_hover()
                         .on_click(|_ctx, data: &mut EditState, _env| {
                             data.image = None;
                         })
-                        .fix_size(30., 30.)
+                        .fix_size(25., 25.)
                     )
                     .expand_width()
                     .align_left()
@@ -145,10 +145,10 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .lens(EditState::servings),
                     )
                     .with_child(
-                        RECYCLE_ICON.clone()
+                        X_ICON.clone()
                             .highlight_on_hover()
                             .on_click(|_ctx, data: &mut EditState, _env| data.servings = None)
-                            .fix_size(35., 35.),
+                            .fix_size(20., 20.),
                     )
                     .align_left()
                     .boxed(),
@@ -240,12 +240,12 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
         )
         .with_spacer(5.)
         .with_child(
-            RECYCLE_ICON.clone()
+            X_ICON.clone()
                 .highlight_on_hover()
                 .on_click(|ctx, ingredient: &mut EditedIngredient, _env| {
                     ctx.submit_command(REMOVE_EDITED_INGREDIENT.with(ingredient.id));
                 })
-                .fix_size(30., 30.),
+                .fix_size(20., 20.),
         )
         .expand_width()
         .fix_height(50.)
@@ -304,13 +304,13 @@ fn time_editor() -> impl Widget<EditState> {
                     .lens(EditState::time),
                 )
                 .with_child(
-                    RECYCLE_ICON.clone()
+                    X_ICON.clone()
                         .highlight_on_hover()
                         .on_click(|ctx, data: &mut EditState, _env| {
                             data.time = None;
                             ctx.request_update();
                         })
-                        .fix_size(30., 30.),
+                        .fix_size(20., 20.),
                 )
                 .boxed(),
             None => PLUS_ICON.clone()

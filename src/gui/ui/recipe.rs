@@ -172,6 +172,7 @@ pub fn recipe_widget() -> impl Widget<AppState> {
         .with_child(top.lens(recipe_lens.clone()))
         .with_child(image)
         .with_child(lower.lens(recipe_lens))
+        .padding((0., 0., 10., 0.))
 }
 
 /// A remove recipe button that takes the user to a confirmation dialog
