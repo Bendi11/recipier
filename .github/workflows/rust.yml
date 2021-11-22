@@ -28,6 +28,17 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - name: install gtk+3 on ubuntu
+        run:  |
+                 if [ "$RUNNER_OS" == "Linux" ]; then
+                      apt install libgtk-4-dev
+                 elif [ "$RUNNER_OS" == "Windows" ]; then
+                      echo "Not installing GTK+3, not needed"
+                 else
+                      echo "Not installing GTK+3, not needed"
+                 fi
+        shell: bash
+      
       - uses: actions/checkout@v2
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
