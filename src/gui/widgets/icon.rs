@@ -9,9 +9,9 @@ use super::RecipierWidget;
 
 lazy_static! {
     pub static ref SAVE_ICON: Icon = Icon {
-        path: BezPath::from_svg(include_str!("../../../assets/icons/save-path.txt")).unwrap(),
+        path: BezPath::from_svg(include_str!("../../../assets/icons/floppydisk-path.txt")).unwrap(),
         scale: 1.,
-        size: Size::new(16., 16.),
+        size: Size::new(958.6, 958.6),
         flex: true,
         color: theme::COLOR_4.into(),
     };
