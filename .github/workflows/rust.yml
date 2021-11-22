@@ -30,6 +30,7 @@ jobs:
     steps:
       - name: install gtk+3 on ubuntu
         run:  |
+              sudo apt-get update
               sudo apt-get install -y libgtk-4-dev
                  
         if: runner.os == 'Linux'
