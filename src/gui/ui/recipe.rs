@@ -2,7 +2,7 @@
 
 use std::{sync::Arc, time::Duration};
 
-use druid::{Data, ImageBuf, LensExt, LifeCycle, TextAlignment, Widget, WidgetExt, lens, widget::{FillStrat, Flex, Image, Label, LineBreaking, List, Scroll, SizedBox}};
+use druid::{Data, LensExt, LifeCycle, TextAlignment, Widget, WidgetExt, lens, widget::{FillStrat, Flex, Image, Label, LineBreaking, List, Scroll, SizedBox}};
 
 use crate::{
     gui::{
@@ -76,7 +76,7 @@ pub fn recipe_widget() -> impl Widget<AppState> {
         
     );
 
-    let image = ImageBuilder::new();
+    let image = ImageBuilder::new().fix_height(175.);
     
     let lower = Maybe::or_empty(|| Flex::column()
         .with_child(
@@ -134,6 +134,7 @@ pub fn recipe_widget() -> impl Widget<AppState> {
                             .with_child(
                                 Label::raw()
                                     .with_font(theme::SYSTEM_FONT)
+                                    .with_line_break_mode(LineBreaking::WordWrap)
                                     .lens(Ingredient::name)
                                     .align_left(),
                             )
@@ -201,6 +202,7 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
         .with_child(
             Label::raw()
                 .with_font(theme::LABEL_FONT)
+                .with_line_break_mode(LineBreaking::WordWrap)
                 .lens(Recipe::name)
                 .align_left(),
         )
