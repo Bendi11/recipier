@@ -412,7 +412,7 @@ impl Widget<EditState> for ImageBuilder {
         data: &EditState,
         _env: &druid::Env,
     ) {
-        if !old_data.same(&data) && !Self::images_same(&old_data.image, &data.image) {
+        if !old_data.same(data) && !Self::images_same(&old_data.image, &data.image) {
             if let Some(data) = data.image.as_ref() {
                 self.widget = Image::new(data.clone())
                     .fill_mode(FillStrat::Contain)
@@ -470,7 +470,7 @@ impl druid::text::format::Formatter<u8> for NumberEditorFormatter {
         }
         input
             .parse()
-            .map_err(|e| druid::text::format::ValidationError::new(e))
+            .map_err(druid::text::format::ValidationError::new)
     }
 }
 
@@ -503,6 +503,6 @@ impl druid::text::format::Formatter<f32> for FloatEditorFormatter {
         }
         input
             .parse()
-            .map_err(|e| druid::text::format::ValidationError::new(e))
+            .map_err(druid::text::format::ValidationError::new)
     }
 }

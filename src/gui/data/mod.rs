@@ -98,7 +98,6 @@ impl ListIter<Recipe> for AppState {
                 Some(mut recipe) => {
                     let recipe_ref = Arc::make_mut(&mut recipe);
                     cb(recipe_ref, i);
-                    drop(recipe_ref);
                     self.recipes.update(recipe);
                 }
                 None => {

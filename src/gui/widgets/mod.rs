@@ -12,9 +12,9 @@ pub mod unit;
 /// A controller that handles hover events using the provided callback
 pub struct HoverController<D, W> {
     /// The callback function to run on hover
-    cb: Box<dyn Fn(&mut EventCtx, &mut D, &mut W, &Env) -> ()>,
+    cb: Box<dyn Fn(&mut EventCtx, &mut D, &mut W, &Env)>,
     /// The function that undos the effects of the hover callback
-    undo: Box<dyn Fn(&mut EventCtx, &mut D, &mut W, &Env) -> ()>,
+    undo: Box<dyn Fn(&mut EventCtx, &mut D, &mut W, &Env)>,
     /// If the widget is hovered, used to debounce input
     hovered: bool,
 }
@@ -47,8 +47,8 @@ pub trait RecipierWidget<D: Data>: Widget<D> + Sized {
     /// Set a callback function to execute on hover
     fn on_hover(
         self,
-        cb: impl Fn(&mut EventCtx, &mut D, &mut Self, &Env) -> () + 'static,
-        undo: impl Fn(&mut EventCtx, &mut D, &mut Self, &Env) -> () + 'static,
+        cb: impl Fn(&mut EventCtx, &mut D, &mut Self, &Env) + 'static,
+        undo: impl Fn(&mut EventCtx, &mut D, &mut Self, &Env) + 'static,
     ) -> ControllerHost<Self, HoverController<D, Self>> {
         ControllerHost::new(
             self,

@@ -25,7 +25,7 @@ use super::{
 };
 
 pub fn root_widget() -> impl Widget<AppState> {
-    let screen = ViewSwitcher::new(
+    ViewSwitcher::new(
         |state: &AppState, _env| state.screen,
         |screen, _state, _env| match screen {
             AppScreen::Delete => remove::remove_widget().boxed(),
@@ -35,9 +35,7 @@ pub fn root_widget() -> impl Widget<AppState> {
             AppScreen::View => recipe::view_screen().boxed(),
         },
     )
-    .expand();
-
-    screen
+    .expand()
 }
 
 /// Build the sidebar with search and home icon

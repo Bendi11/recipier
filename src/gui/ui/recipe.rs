@@ -93,7 +93,7 @@ pub fn recipe_widget() -> impl Widget<AppState> {
                                 format!(
                                     "Makes {} serving{}",
                                     servings,
-                                    if *servings == 1f32 { "" } else { "s" }
+                                    if (*servings - 1f32).abs() < f32::EPSILON { "" } else { "s" }
                                 )
                             })
                             .with_font(theme::SYSTEM_FONT)
@@ -342,7 +342,7 @@ impl Widget<AppState> for ImageBuilder {
         data: &AppState,
         _env: &druid::Env,
     ) {
-        if !old_data.same(&data) {
+        if !old_data.same(data) {
             if let Some(id) = data.view.viewed {
                 if let Some(data) = data.recipes.get_image(id).as_ref() {
                     self.widget = Image::new(data.clone())

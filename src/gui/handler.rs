@@ -204,9 +204,8 @@ impl AppDelegate<AppState> for RecipierDelegate {
         data: &mut AppState,
         _env: &Env,
     ) -> Option<druid::Event> {
-        match event {
-            druid::Event::WindowSize(size) => data.config.window_size = (size.width, size.height),
-            _ => (),
+        if let druid::Event::WindowSize(size) = event {
+            data.config.window_size = (size.width, size.height)
         }
         Some(event)
     }
