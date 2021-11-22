@@ -35,13 +35,13 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
     let release: Value = response.into_json()?;
 
     let release_version = release
-        .get("name")
+        .get("tag_name")
         .ok_or(UpdateError::InvalidJsonResponse(
-            "'name' field missing from release object",
+            "'tag_name' field missing from release object",
         ))?
         .as_str()
         .ok_or(UpdateError::InvalidJsonResponse(
-            "'name' field of release object is not a string",
+            "'tag_name' field of release object is not a string",
         ))?
         .trim_start_matches('v')
         .parse::<Version>()
