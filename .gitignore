@@ -1,6 +1,6 @@
 /target
 /save.json
 *.log
-recipes
+/recipes
 *.app
 *.exe
