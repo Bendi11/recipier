@@ -1,18 +1,18 @@
 //! Autoupdate functionality checking for new github releases and prompting the user to install them
 
-use druid::commands::CLOSE_WINDOW;
-use druid::widget::{Button, Flex, Label};
-use druid::{AppLauncher, Data, ExtEventSink, Lens, Target, Widget, WidgetExt, WindowDesc};
-use parking_lot::Mutex;
+use druid::commands::CLOSE_ALL_WINDOWS;
+use druid::{ExtEventSink, Target};
 use semver::Version;
 use serde_json::Value;
 use std::env::consts::EXE_SUFFIX;
-use std::{fs, rc::Rc};
+use std::sync::mpsc;
+use std::fs;
 use thiserror::Error;
 use ureq::Agent;
 use zip::ZipArchive;
 
 use crate::TARGET_TRIPLE;
+use crate::gui::SHOW_UPDATE_DIALOG;
 
 use super::VERSION;
 
@@ -63,7 +63,7 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
         let mut matching_asset = None;
         //Find a release asset matching our platform and word size
         for (name, id) in release_assets.iter().filter_map(|v| Some((v.get("name")?.as_str()?.split('.').next()?, v.get("id")?.as_u64()?))) {
-            let triple = name.split_once('-').map(|v| v.0);
+            let triple = name.split_once('-').map(|v| v.1);
             if let Some(triple) = triple {
                 if triple == TARGET_TRIPLE {
                     matching_asset = Some(id);
@@ -78,96 +78,53 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
             *VERSION
         );
 
-        let update = Rc::new(Mutex::new(false));
-        let state = PromptState {
-            update: update.clone(),
-            new_version: release_version.clone(),
-        };
+        let (choice_tx, choice_rx) = mpsc::channel();
 
-        let dialog_window = WindowDesc::new(prompt_widget)
-            .title("Update")
-            .resizable(false)
-            .show_titlebar(false)
-            .window_size((480., 100.));
-
-        AppLauncher::with_window(dialog_window)
-            .configure_env(|env, _state| super::gui::theme::set(env))
-            .launch(state)
-            .map_err(UpdateError::DialogFailed)?;
-
-        if *update.lock() {
-            sender.submit_command(CLOSE_WINDOW, (), Target::Global)?;
-            let mut temp = tempfile::tempfile()?;
-            let mut response = client
-                .get(&*format!(
-                    "https://api.github.com/repos/bendi11/recipier/releases/assets/{}",
-                    matching_asset
-                ))
-                .set("Accept", "application/octet-stream")
-                .call()?
-                .into_reader();
-            std::io::copy(&mut response, &mut temp)?;
-            drop(response);
-
-            let mut zipfile = ZipArchive::new(&mut temp)?;
-            zipfile.extract(release_version.to_string())?;
-            log::trace!("Unpacked zip archive to application directory");
-
-            drop(zipfile);
-            drop(temp);
-
-            let main_hardlink = format!("./reciper{}", EXE_SUFFIX); //The path to the main application hardlink
-            fs::remove_file(&main_hardlink)?; //Remove the old hard link
-            fs::hard_link(
-                format!("./{}/recipier{}", release_version, EXE_SUFFIX),
-                &main_hardlink,
-            )?;
-
-            log::trace!("Created all links, restarting...");
-            std::process::Command::new(main_hardlink).spawn()?;
+        if let Err(e) = sender.submit_command(SHOW_UPDATE_DIALOG, choice_tx, Target::Global) {
+            log::error!("Failed to submit update dialog prompt command: {}", e);
+            return Err(UpdateError::EventSendError(e))
+        }
+        match choice_rx.recv() {
+            Ok(choice) => if choice {
+                sender.submit_command(CLOSE_ALL_WINDOWS, (), Target::Global)?;
+                let mut temp = tempfile::tempfile()?;
+                let mut response = client
+                    .get(&*format!(
+                        "https://api.github.com/repos/bendi11/recipier/releases/assets/{}",
+                        matching_asset
+                    ))
+                    .set("Accept", "application/octet-stream")
+                    .call()?
+                    .into_reader();
+                std::io::copy(&mut response, &mut temp)?;
+                drop(response);
+    
+                let mut zipfile = ZipArchive::new(&mut temp)?;
+                zipfile.extract(release_version.to_string())?;
+                log::trace!("Unpacked zip archive to application directory");
+    
+                drop(zipfile);
+                drop(temp);
+    
+                let main_hardlink = format!("./reciper{}", EXE_SUFFIX); //The path to the main application hardlink
+                fs::remove_file(&main_hardlink)?; //Remove the old hard link
+                fs::hard_link(
+                    format!("./{}/recipier{}", release_version, EXE_SUFFIX),
+                    &main_hardlink,
+                )?;
+    
+                log::trace!("Created all links, restarting...");
+                std::process::Command::new(main_hardlink).spawn()?;
+            },
+            Err(e) => {
+                log::error!("Failed to receive an update dialog response: {}", e);
+            }
         }
     }
 
     Ok(())
 }
 
-/// Generate the root widget for the restart and update prompt
-fn prompt_widget() -> impl Widget<PromptState> {
-    Flex::column()
-        .with_default_spacer()
-        .with_child(Label::dynamic(|state: &PromptState, _| {
-            format!(
-                "Recipier version {} is available to update, would you like to update and restart?",
-                state.new_version
-            )
-        }))
-        .with_default_spacer()
-        .with_child(
-            Flex::row()
-                .with_child(
-                    Button::new("Don't Update")
-                        .on_click(|_ctx, data: &mut PromptState, _| *data.update.lock() = false),
-                )
-                .with_flex_spacer(1.0)
-                .with_child(
-                    Button::new("Restart and Update")
-                        .on_click(|_ctx, data: &mut PromptState, _| *data.update.lock() = true),
-                )
-                .padding((10., 0.)),
-        )
-        .with_default_spacer()
-}
-
-/// App state for the simple restart and update prompt
-#[derive(Clone, Debug, Data, Lens)]
-struct PromptState {
-    /// If the user wants to update
-    update: Rc<Mutex<bool>>,
-
-    /// The version that the user can upgrade to
-    #[data(same_fn = "PartialEq::eq")]
-    new_version: Version,
-}
 
 /// Enumeration defining all errors that can occur when autoupdating
 #[derive(Debug, Error)]

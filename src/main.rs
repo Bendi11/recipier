@@ -47,7 +47,7 @@ fn main() {
     match std::fs::File::create("./recipier.log") {
         Ok(log) => {
             if let Err(e) =
-                simplelog::WriteLogger::init(LevelFilter::max(), ConfigBuilder::new().build(), log)
+                simplelog::WriteLogger::init(LevelFilter::max(), ConfigBuilder::new().add_filter_ignore_str("rustls").build(), log)
             {
                 eprintln!("failed to initialize logger: {}", e);
             }

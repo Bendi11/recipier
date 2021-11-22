@@ -1534,7 +1534,7 @@ checksum = "be9e29cb19c8fe84169fcb07f8f11e66bc9e6e0280efd4715c54818296f8a4a8"
 
 [[package]]
 name = "recipier"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "chrono",
  "druid",

@@ -3,22 +3,11 @@
 use std::{borrow::Borrow, ops::Deref, sync::Arc, time::Duration};
 
 use chrono::Utc;
-use druid::{
-    commands::OPEN_FILE, piet::TextStorage, AppDelegate, Command, DelegateCtx, Env, Handled,
-    ImageBuf, Target,
-};
+use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, ImageBuf, Target, WindowDesc, commands::OPEN_FILE, piet::TextStorage, widget::{Button, Flex, Label}};
 
-use crate::{
-    gui::data::edit::EditState,
-    recipes::{db::RecipeId, recipe::Recipe},
-    SAVE_FILE,
-};
+use crate::{SAVE_FILE, gui::data::edit::EditState, recipes::{db::RecipeId, recipe::Recipe}};
 
-use super::{
-    data::{remove::RemoveState, search::SearchResults, AppState},
-    CHANGE_INGREDIENT_UNIT, CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES,
-    POPULATE_RESULTS, REMOVE_EDITED_INGREDIENT, REMOVE_RECIPE, SAVE_EDITED_RECIPE, VIEW_RECIPE,
-};
+use super::{CHANGE_INGREDIENT_UNIT, CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_EDITED_INGREDIENT, REMOVE_RECIPE, SAVE_EDITED_RECIPE, SHOW_UPDATE_DIALOG, VIEW_RECIPE, data::{remove::RemoveState, search::SearchResults, AppState}};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;
@@ -45,13 +34,49 @@ impl AppDelegate<AppState> for RecipierDelegate {
 
     fn command(
         &mut self,
-        _ctx: &mut DelegateCtx,
+        ctx: &mut DelegateCtx,
         _target: Target,
         cmd: &Command,
         data: &mut AppState,
         _env: &Env,
     ) -> Handled {
-        if let Some(screen) = cmd.get(CHANGE_SCREEN) {
+        if let Some(channel) = cmd.get(SHOW_UPDATE_DIALOG) {
+            use druid::WidgetExt;
+
+            let channel_cancel = channel.clone();
+            let channel_update = channel.clone();
+            let update_window = WindowDesc::new(move || Flex::column()
+                .with_default_spacer()
+                .with_child(Label::dynamic(|_state: &AppState, _| {
+                    format!(
+                        "Recipier version {} is available to update, would you like to update and restart?",
+                        1//version
+                    )
+                }))
+                .with_default_spacer()
+                .with_child(
+                    Flex::row()
+                        .with_child(
+                            Button::new("Don't Update")
+                                .on_click(move |_ctx, _data: &mut AppState, _| { let _ = channel_cancel.send(false); }),
+                        )
+                        .with_flex_spacer(1.0)
+                        .with_child(
+                            Button::new("Restart and Update")
+                                .on_click(move |_ctx, _data: &mut AppState, _| { let _ = channel_update.send(true); }),
+                        )
+                        .padding((10., 0.)),
+                )
+                .with_default_spacer()
+            )
+            .title("Update")
+            .show_titlebar(false)
+            .resizable(false)
+            .window_size((600., 480.));
+
+            ctx.new_window(update_window);
+            Handled::Yes
+        } else if let Some(screen) = cmd.get(CHANGE_SCREEN) {
             if *screen == data.screen {
                 return Handled::Yes;
             }
