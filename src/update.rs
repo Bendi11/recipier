@@ -5,14 +5,14 @@ use druid::{ExtEventSink, Target};
 use semver::Version;
 use serde_json::Value;
 use std::env::consts::EXE_SUFFIX;
-use std::sync::mpsc;
 use std::fs;
+use std::sync::mpsc;
 use thiserror::Error;
 use ureq::Agent;
 use zip::ZipArchive;
 
-use crate::TARGET_TRIPLE;
 use crate::gui::SHOW_UPDATE_DIALOG;
+use crate::TARGET_TRIPLE;
 
 use super::VERSION;
 
@@ -28,11 +28,15 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
                 if filetype.is_dir() {
                     let version = match entry.file_name().to_string_lossy().parse::<Version>() {
                         Ok(version) => version,
-                        Err(_) => continue
+                        Err(_) => continue,
                     };
                     if version != *VERSION {
                         if let Err(e) = fs::remove_dir_all(entry.path()) {
-                            log::error!("Failed to remove unused application directory {}: {}", entry.path().display(), e);
+                            log::error!(
+                                "Failed to remove unused application directory {}: {}",
+                                entry.path().display(),
+                                e
+                            );
                         }
                     }
                 }
@@ -81,7 +85,12 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 
         let mut matching_asset = None;
         //Find a release asset matching our platform and word size
-        for (name, id) in release_assets.iter().filter_map(|v| Some((v.get("name")?.as_str()?.split('.').next()?, v.get("id")?.as_u64()?))) {
+        for (name, id) in release_assets.iter().filter_map(|v| {
+            Some((
+                v.get("name")?.as_str()?.split('.').next()?,
+                v.get("id")?.as_u64()?,
+            ))
+        }) {
             let triple = name.split_once('-').map(|v| v.1);
             if let Some(triple) = triple {
                 if triple == TARGET_TRIPLE {
@@ -99,41 +108,44 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 
         let (choice_tx, choice_rx) = mpsc::channel();
 
-        if let Err(e) = sender.submit_command(SHOW_UPDATE_DIALOG, (choice_tx.clone(), release_version.clone()), Target::Global) {
+        if let Err(e) = sender.submit_command(
+            SHOW_UPDATE_DIALOG,
+            (choice_tx.clone(), release_version.clone()),
+            Target::Global,
+        ) {
             log::error!("Failed to submit update dialog prompt command: {}", e);
-            return Err(UpdateError::EventSendError(e))
+            return Err(UpdateError::EventSendError(e));
         }
         match choice_rx.recv() {
-            Ok(choice) => if choice {
-                let mut temp = tempfile::tempfile()?;
-                let mut response = client
-                    .get(&*format!(
-                        "https://api.github.com/repos/bendi11/recipier/releases/assets/{}",
-                        matching_asset
-                    ))
-                    .set("Accept", "application/octet-stream")
-                    .call()?
-                    .into_reader();
-                std::io::copy(&mut response, &mut temp)?;
-                drop(response);
-    
-                let mut zipfile = ZipArchive::new(&mut temp)?;
-                zipfile.extract(release_version.to_string())?;
-                log::trace!("Unpacked zip archive to application directory");
-    
-                drop(zipfile);
-                drop(temp);
-    
-                let main_hardlink = format!("recipier{}", EXE_SUFFIX); //The path to the main application hardlink
-                let new_binary = format!("./{}/recipier{}", release_version, EXE_SUFFIX);
-                fs::rename(&main_hardlink, "old-binary")?;
-                fs::hard_link(
-                    new_binary,
-                    &main_hardlink,
-                )?;
-                std::process::Command::new(main_hardlink).spawn()?;
-                sender.submit_command(CLOSE_ALL_WINDOWS, (), Target::Global)?;
-            },
+            Ok(choice) => {
+                if choice {
+                    let mut temp = tempfile::tempfile()?;
+                    let mut response = client
+                        .get(&*format!(
+                            "https://api.github.com/repos/bendi11/recipier/releases/assets/{}",
+                            matching_asset
+                        ))
+                        .set("Accept", "application/octet-stream")
+                        .call()?
+                        .into_reader();
+                    std::io::copy(&mut response, &mut temp)?;
+                    drop(response);
+
+                    let mut zipfile = ZipArchive::new(&mut temp)?;
+                    zipfile.extract(release_version.to_string())?;
+                    log::trace!("Unpacked zip archive to application directory");
+
+                    drop(zipfile);
+                    drop(temp);
+
+                    let main_hardlink = format!("recipier{}", EXE_SUFFIX); //The path to the main application hardlink
+                    let new_binary = format!("./{}/recipier{}", release_version, EXE_SUFFIX);
+                    fs::rename(&main_hardlink, "old-binary")?;
+                    fs::hard_link(new_binary, &main_hardlink)?;
+                    std::process::Command::new(main_hardlink).spawn()?;
+                    sender.submit_command(CLOSE_ALL_WINDOWS, (), Target::Global)?;
+                }
+            }
             Err(e) => {
                 log::error!("Failed to receive an update dialog response: {}", e);
             }
@@ -142,7 +154,6 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 
     Ok(())
 }
-
 
 /// Enumeration defining all errors that can occur when autoupdating
 #[derive(Debug, Error)]

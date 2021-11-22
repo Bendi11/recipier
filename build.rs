@@ -35,7 +35,10 @@ fn package() {}
 
 fn main() {
     let info = rust_info::get();
-    
-    println!("cargo:rustc-env=TARGET_TRIPLE={}", info.target_triple.unwrap());
+
+    println!(
+        "cargo:rustc-env=TARGET_TRIPLE={}",
+        info.target_triple.unwrap()
+    );
     package()
 }

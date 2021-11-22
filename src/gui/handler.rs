@@ -3,11 +3,25 @@
 use std::{borrow::Borrow, ops::Deref, sync::Arc, time::Duration};
 
 use chrono::Utc;
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, ImageBuf, Target, WindowDesc, commands::{CLOSE_WINDOW, OPEN_FILE, SHOW_WINDOW}, piet::TextStorage, widget::{Button, Flex, Label}};
+use druid::{
+    commands::{CLOSE_WINDOW, OPEN_FILE, SHOW_WINDOW},
+    piet::TextStorage,
+    widget::{Button, Flex, Label},
+    AppDelegate, Command, DelegateCtx, Env, Handled, ImageBuf, Target, WindowDesc,
+};
 
-use crate::{SAVE_FILE, gui::data::edit::EditState, recipes::{db::RecipeId, recipe::Recipe}};
+use crate::{
+    gui::data::edit::EditState,
+    recipes::{db::RecipeId, recipe::Recipe},
+    SAVE_FILE,
+};
 
-use super::{CHANGE_INGREDIENT_UNIT, CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES, POPULATE_RESULTS, REMOVE_EDITED_INGREDIENT, REMOVE_RECIPE, SAVE_EDITED_RECIPE, SHOW_UPDATE_DIALOG, VIEW_RECIPE, data::{remove::RemoveState, search::SearchResults, AppState}};
+use super::{
+    data::{remove::RemoveState, search::SearchResults, AppState},
+    CHANGE_INGREDIENT_UNIT, CHANGE_SCREEN, CREATE_RECIPE, EDIT_RECIPE, LOAD_MORE_RECIPES,
+    POPULATE_RESULTS, REMOVE_EDITED_INGREDIENT, REMOVE_RECIPE, SAVE_EDITED_RECIPE,
+    SHOW_UPDATE_DIALOG, VIEW_RECIPE,
+};
 
 /// Structure that handles top-level events and commands in the application
 pub struct RecipierDelegate;

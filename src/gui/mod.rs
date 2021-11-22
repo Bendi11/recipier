@@ -5,7 +5,6 @@ pub mod theme;
 pub mod ui;
 pub mod widgets;
 
-
 use std::sync::mpsc::Sender;
 
 use crate::recipes::{db::RecipeId, measure::AmountUnit};
@@ -20,7 +19,8 @@ use uuid::Uuid;
 pub const GOLDEN_RATIO: f64 = 1.61803;
 
 /// Show an update confirmation dialog and set the option to Some when the user selects an option
-pub const SHOW_UPDATE_DIALOG: Selector<(Sender<bool>, Version)> = Selector::new("recipier.show-update-dialog");
+pub const SHOW_UPDATE_DIALOG: Selector<(Sender<bool>, Version)> =
+    Selector::new("recipier.show-update-dialog");
 
 /// Change the currently visisble screen command
 pub const CHANGE_SCREEN: Selector<AppScreen> = Selector::new("recipier.change-screen");
