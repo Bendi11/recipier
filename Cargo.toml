@@ -35,6 +35,9 @@ thiserror = "1.0" # Error type creation
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1" # Adding icon to window build
 
+[build-dependencies]
+rust_info = "0.3" # Get the current target triple and set an environment variable
+
 [profile.release]
 codegen-units = 1
 lto = true

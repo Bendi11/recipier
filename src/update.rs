@@ -7,47 +7,17 @@ use parking_lot::Mutex;
 use semver::Version;
 use serde_json::Value;
 use std::env::consts::EXE_SUFFIX;
-use std::{fs, path, rc::Rc};
+use std::{fs, rc::Rc};
 use thiserror::Error;
 use ureq::Agent;
 use zip::ZipArchive;
+
+use crate::TARGET_TRIPLE;
 
 use super::VERSION;
 
 /// The accepted github API content type
 const ACCEPT_TYPE: &str = "application/vnd.github.v3+json";
-
-/// A structure holding platform name and word size from a github release asset filename formatted as
-/// {os}-x{width}.zip
-#[derive(Clone, Copy, Debug)]
-struct ReleaseAsset<'a> {
-    /// The operating system string of this release asset
-    os: &'a str,
-    /// The width, 32 for x86 and 64 for x64
-    width: u8,
-    /// The ID of this asset
-    id: u64,
-}
-
-impl<'a> ReleaseAsset<'a> {
-    /// Parse a release asset filename into a release asset structure
-    pub fn parse(asset: &'a Value) -> Option<Self> {
-        let file = asset.get("name")?.as_str()?;
-        let name = path::Path::new(file).file_name()?.to_str()?;
-        let mut parts = name.split('-');
-        let os = parts.next()?;
-        let width = match parts.next()?.trim_start_matches('x').parse::<u8>().ok()? {
-            86 => 32,
-            other => other,
-        };
-
-        Some(Self {
-            os,
-            width,
-            id: asset.get("id")?.as_u64()?,
-        })
-    }
-}
 
 /// Check for new github releases and prompt the user to update in a separate window if there is a new one
 pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
@@ -91,12 +61,12 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 
         let mut matching_asset = None;
         //Find a release asset matching our platform and word size
-        for asset in release_assets.iter().filter_map(ReleaseAsset::parse) {
-            if asset.os == std::env::consts::OS
-                && asset.width == (std::mem::size_of::<usize>() * 8) as u8
-            {
-                matching_asset = Some(asset);
-                break;
+        for (name, id) in release_assets.iter().filter_map(|v| Some((v.get("name")?.as_str()?.split('.').next()?, v.get("id")?.as_u64()?))) {
+            let triple = name.split_once('-').map(|v| v.0);
+            if let Some(triple) = triple {
+                if triple == TARGET_TRIPLE {
+                    matching_asset = Some(id);
+                }
             }
         }
 
@@ -130,7 +100,7 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
             let mut response = client
                 .get(&*format!(
                     "https://api.github.com/repos/bendi11/recipier/releases/assets/{}",
-                    matching_asset.id
+                    matching_asset
                 ))
                 .set("Accept", "application/octet-stream")
                 .call()?

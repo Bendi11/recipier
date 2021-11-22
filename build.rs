@@ -2,7 +2,7 @@
 extern crate winres;
 
 #[cfg(windows)]
-fn main() {
+fn package() {
     println!("cargo:rerun-if-changed=assets/icon.ico,assets/icon.png");
     if let Err(e) = winres::WindowsResource::new()
         .set_icon("assets/icon.ico")
@@ -13,7 +13,7 @@ fn main() {
 }
 
 #[cfg(all(not(debug_assertions), target_os = "macos"))]
-fn main() {
+fn package() {
     std::fs::create_dir_all("./recipier.app/Contents")
         .expect("Failed to create app bundle directory");
     std::fs::create_dir_all("./recipier.app/Contents/MacOS")
@@ -31,4 +31,11 @@ fn main() {
 }
 
 #[cfg(all(not(windows), not(target_os = "macos")))]
-fn main() {}
+fn package() {}
+
+fn main() {
+    let info = rust_info::get();
+    
+    println!("cargo:rustc-env=TARGET_TRIPLE={}", info.target_triple.unwrap());
+    package()
+}

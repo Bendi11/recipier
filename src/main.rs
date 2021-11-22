@@ -16,6 +16,9 @@ use update::autoupdate;
 /// The file name to save and load application data from
 pub const SAVE_FILE: &str = "./save.json";
 
+/// The target triple this application was compiled for
+pub const TARGET_TRIPLE: &str = env!("TARGET_TRIPLE");
+
 lazy_static! {
     /// The current crate version
     pub static ref VERSION: Version = Version::parse(env!("CARGO_PKG_VERSION")).unwrap();

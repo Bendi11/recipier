@@ -1543,6 +1543,7 @@ dependencies = [
  "log",
  "lru",
  "parking_lot",
+ "rust_info",
  "semver 1.0.4",
  "serde",
  "serde_json",
@@ -1618,6 +1619,12 @@ checksum = "dbf7d7b1ea646d380d0e8153158063a6da7efe30ddbf3184042848e3f8a6f671"
 dependencies = [
  "xmlparser",
 ]
+
+[[package]]
+name = "rust_info"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "821495e93d15e4433347b3a72e97005f1d8a620dc88d46637fecfcb16e98043d"
 
 [[package]]
 name = "rustc-hash"
