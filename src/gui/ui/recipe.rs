@@ -2,11 +2,7 @@
 
 use std::{sync::Arc, time::Duration};
 
-use druid::{
-    lens,
-    widget::{Flex, Label, LineBreaking, List, Scroll},
-    LensExt, TextAlignment, Widget, WidgetExt,
-};
+use druid::{Data, ImageBuf, LensExt, LifeCycle, TextAlignment, Widget, WidgetExt, lens, widget::{FillStrat, Flex, Image, Label, LineBreaking, List, Scroll, SizedBox}};
 
 use crate::{
     gui::{
@@ -30,28 +26,23 @@ pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
 
 /// Return a widget that displays one recipe in a maximized view
 pub fn view_screen() -> impl Widget<AppState> {
-    Flex::row().with_child(sidebar()).with_flex_child(
-        Maybe::or_empty(|| {
-            Scroll::new(recipe_widget())
+    Flex::row().with_child(sidebar()).with_flex_child(Scroll::new(recipe_widget())
                 .vertical()
-                .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
-                .expand_height()
-        })
-        .lens(lens::Identity.map(
-            |state: &AppState| state.recipes.get(state.view.viewed?),
-            |state, recipe| {
-                if let Some(recipe) = recipe {
-                    state.recipes.update(recipe);
-                }
-            },
-        )),
-        1.0,
-    )
+                .expand_height(), 1.0)
 }
 
 /// Show a widget that displays all information about the recipe
-pub fn recipe_widget() -> impl Widget<Recipe> {
-    Flex::column()
+pub fn recipe_widget() -> impl Widget<AppState> {
+    let recipe_lens = lens::Identity.map(
+        |state: &AppState| state.recipes.get(state.view.viewed?),
+        |state, recipe| {
+            if let Some(recipe) = recipe {
+                state.recipes.update(recipe);
+            }
+        },
+    );
+
+    let top = Maybe::or_empty(|| Flex::column()
         .with_default_spacer()
         .with_child(
             Flex::row()
@@ -81,6 +72,13 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
         .with_default_spacer()
         .with_child(Separator::new(2.))
         .with_default_spacer()
+        .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+        
+    );
+
+    let image = ImageBuilder::new();
+    
+    let lower = Maybe::or_empty(|| Flex::column()
         .with_child(
             Maybe::or_empty(|| {
                 Flex::column()
@@ -166,6 +164,13 @@ pub fn recipe_widget() -> impl Widget<Recipe> {
         )
         .expand_width()
         .padding((15., 0.))
+        .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+    );
+
+    Flex::column()
+        .with_child(top.lens(recipe_lens.clone()))
+        .with_child(image)
+        .with_child(lower.lens(recipe_lens))
 }
 
 /// A remove recipe button that takes the user to a confirmation dialog
@@ -238,7 +243,6 @@ pub fn recipe_brief_widget() -> impl Widget<Recipe> {
 /// A newtype over [f32] used for a custom [Display](std::fmt::Display) impl that shows
 /// the duration in a more readable way
 struct FormattedDuration(f32);
-
 impl std::fmt::Display for FormattedDuration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         const MILLIS_DAY: f32 = 86400f32;
@@ -272,5 +276,66 @@ impl std::fmt::Display for FormattedDuration {
         }
 
         Ok(())
+    }
+}
+
+/// A widget that builds an image using app state 
+struct ImageBuilder {
+    /// The internal widget to display
+    widget: Box<dyn Widget<AppState>>,
+}
+
+impl ImageBuilder {
+    /// Create a new empty image builder 
+    pub fn new() -> Self {
+        Self {
+            widget: SizedBox::empty().boxed()
+        }
+    }
+
+}
+
+impl Widget<AppState> for ImageBuilder {
+    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &druid::Env) {
+        self.widget.event(ctx, event, data, env)
+    }
+
+    fn lifecycle(&mut self, ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &AppState, env: &druid::Env) {
+        if let LifeCycle::WidgetAdded = event {
+            if let Some(id) = data.view.viewed {
+                if let Some(data) = data.recipes.get_image(id).as_ref() {
+                    self.widget = Image::new(data.clone())
+                        .fill_mode(FillStrat::Contain)
+                        .boxed();
+                }
+            }
+            
+        }
+        self.widget.lifecycle(ctx, event, data, env)
+    }
+
+    fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &AppState, data: &AppState, _env: &druid::Env) {
+        if !old_data.same(&data) {
+            if let Some(id) = data.view.viewed {
+                if let Some(data) = data.recipes.get_image(id).as_ref() {
+                    self.widget = Image::new(data.clone())
+                        .fill_mode(FillStrat::Contain)
+                        .boxed();
+                    ctx.children_changed()
+                }
+            }
+        }
+    }
+
+    fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &AppState, env: &druid::Env) -> druid::Size {
+        self.widget.layout(ctx, bc, data, env)
+    }
+
+    fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &AppState, env: &druid::Env) {
+        self.widget.paint(ctx, data, env)
+    }
+
+    fn id(&self) -> Option<druid::WidgetId> {
+        self.widget.id()
     }
 }
