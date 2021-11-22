@@ -1,10 +1,6 @@
 //! Widgets for the edit screen to change or create recipes
 
-use druid::{
-    text::format::Validation,
-    widget::{Button, Checkbox, Flex, Label, List, Scroll, TextBox, ValueTextBox, ViewSwitcher},
-    TextAlignment, Widget, WidgetExt,
-};
+use druid::{Data, FileDialogOptions, LifeCycle, TextAlignment, Widget, WidgetExt, commands::SHOW_OPEN_PANEL, text::format::Validation, widget::{Button, Checkbox, FillStrat, Flex, Image, Label, List, Scroll, SizedBox, TextBox, ValueTextBox, ViewSwitcher}};
 use uuid::Uuid;
 
 use crate::gui::{
@@ -79,6 +75,29 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .padding((2.5, 0., 10., 0.))
                 .lens(EditState::title),
         )
+        .with_default_spacer()
+        .with_child(Label::new("Image")
+            .with_font(theme::LABEL_FONT)
+            .align_left()
+            .expand_width()
+        )
+        .with_spacer(2.0)
+        .with_child(ViewSwitcher::new(
+            |data: &EditState, _env| data.image.is_some(),
+            |img, _data, _env| match img {
+                true => ImageBuilder::new().boxed(),
+                false => PLUS_ICON.clone()
+                    .highlight_on_hover()
+                    .on_click(|ctx, _data, _env| {
+                        ctx.submit_command(SHOW_OPEN_PANEL.with(FileDialogOptions::new()
+                            .button_text("Choose Image")
+                            .name_label("Recipe image")
+                            .title("Recipe Image Selector")
+                        ));
+                    })
+                    .boxed()
+            }
+        ))
         .with_default_spacer()
         .with_child(
             Label::new("Time to Make")
@@ -290,6 +309,61 @@ fn time_editor() -> impl Widget<EditState> {
     .expand_width()
     .align_left()
     .fix_height(50.)
+}
+
+/// A widget that builds an image using app state 
+struct ImageBuilder {
+    /// The internal widget to display
+    widget: Box<dyn Widget<EditState>>,
+}
+
+impl ImageBuilder {
+    /// Create a new empty image builder 
+    pub fn new() -> Self {
+        Self {
+            widget: SizedBox::empty().boxed()
+        }
+    }
+}
+
+impl Widget<EditState> for ImageBuilder {
+    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut EditState, env: &druid::Env) {
+        self.widget.event(ctx, event, data, env)
+    }
+
+    fn lifecycle(&mut self, ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &EditState, env: &druid::Env) {
+        if let LifeCycle::WidgetAdded = event {
+            if let Some(data) = data.image.as_ref() {
+                self.widget = Image::new(data.clone())
+                    .fill_mode(FillStrat::FitWidth)
+                    .boxed();
+            }
+        }
+        self.widget.lifecycle(ctx, event, data, env)
+    }
+
+    fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &EditState, data: &EditState, _env: &druid::Env) {
+        if !old_data.same(&data) {
+            if let Some(data) = data.image.as_ref() {
+                self.widget = Image::new(data.clone())
+                .fill_mode(FillStrat::FitWidth)
+                .boxed();
+                ctx.children_changed()
+            }
+        }
+    }
+
+    fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &EditState, env: &druid::Env) -> druid::Size {
+        self.widget.layout(ctx, bc, data, env)
+    }
+
+    fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &EditState, env: &druid::Env) {
+        self.widget.paint(ctx, data, env)
+    }
+
+    fn id(&self) -> Option<druid::WidgetId> {
+        self.widget.id()
+    }
 }
 
 /// A structure implementing [Formatter](druid::text::format::Formatter) to parse a `u8` from the input box
