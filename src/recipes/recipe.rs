@@ -2,7 +2,7 @@
 use chrono::{DateTime, Local, TimeZone, Utc};
 use druid::im::{vector, Vector};
 use serde::{Deserialize, Serialize};
-use std::{fmt, path::Path, sync::Arc, time};
+use std::{fmt, sync::Arc, time};
 
 use super::{
     db::RecipeId,
@@ -84,9 +84,6 @@ pub struct Recipe {
     /// The time that the recipe takes to make
     #[serde(default)]
     pub time: Option<time::Duration>,
-    /// Optional path to a image file for this recipe
-    #[serde(default)]
-    pub image: Option<Arc<Path>>
 }
 
 impl Recipe {
@@ -119,7 +116,6 @@ impl Recipe {
 - Leave for 5-10 minutes to cool and enjoy"#
                 .into(),
             time: Some(time::Duration::from_secs(600)),
-            image: None,
         }
     }
 }

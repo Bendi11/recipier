@@ -1,21 +1,17 @@
 //! State for the currently edited recipe
 
-use std::{ops::Deref, path::Path, sync::Arc, time::Duration};
+use std::{ops::Deref, sync::Arc, time::Duration};
 
-use druid::{im::HashMap, widget::ListIter, Data, Lens};
+use druid::{Data, ImageBuf, Lens, im::HashMap, widget::ListIter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::recipes::{
-    db::RecipeId,
-    measure::{AmountUnit, Mass, Volume},
-    recipe::{Ingredient, IngredientAmount, Recipe},
-};
+use crate::recipes::{db::{Database, RecipeId}, measure::{AmountUnit, Mass, Volume}, recipe::{Ingredient, IngredientAmount, Recipe}};
 
 use super::screen::AppScreen;
 
 /// Data for the currently edited recipe
-#[derive(Clone, Debug, Data, Lens, Serialize, Deserialize)]
+#[derive(Clone, Debug, Lens, Serialize, Deserialize)]
 pub struct EditState {
     /// If we are modifying the recipe, this is the ID of the modified recipe
     pub id: Option<RecipeId>,
@@ -29,10 +25,29 @@ pub struct EditState {
     pub servings: Option<f32>,
     /// The amount of time that the recipe is expected to take
     pub time: Option<EditedTime>,
-    /// Optional file path to an image file
-    pub image: Option<Arc<Path>>,
+    /// Optional image data
+    #[serde(skip)]
+    pub image: Option<ImageBuf>,
     /// The screen to return to after editing is over
     pub return_to: AppScreen,
+}
+
+impl Data for EditState {
+    fn same(&self, other: &Self) -> bool {
+        self.id.same(&other.id) &&
+        self.title.same(&other.title) &&
+        self.ingredients.same(&other.ingredients) &&
+        self.body.same(&other.body) &&
+        self.servings.same(&other.servings) &&
+        self.time.same(&other.time) && 
+        match (&self.image, &other.image) {
+            (Some(_), None) | (None, Some(_)) => false,
+            (None, None) => true,
+            (Some(ref img1), Some(ref img2)) => Arc::ptr_eq(&img1.raw_pixels_shared(), &img2.raw_pixels_shared())
+        } &&
+        self.return_to.same(&other.return_to)
+        
+    }
 }
 
 /// Data for a user-edited time that destructures a [Duration](std::time::Duration)
@@ -130,8 +145,8 @@ impl EditedIngredient {
     }
 }
 
-impl From<&Recipe> for EditState {
-    fn from(recipe: &Recipe) -> Self {
+impl EditState {
+    pub fn from_recipe(db: &Database, recipe: &Recipe) -> Self {
         Self {
             id: Some(recipe.id),
             title: recipe.name.deref().to_owned(),
@@ -147,7 +162,7 @@ impl From<&Recipe> for EditState {
             servings: recipe.servings,
             time: recipe.time.map(From::from),
             return_to: AppScreen::Home,
-            image: recipe.image.clone(),
+            image: db.get_image(recipe.id),
         }
     }
 }

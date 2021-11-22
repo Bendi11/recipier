@@ -3,7 +3,7 @@
 use std::{borrow::Borrow, ops::Deref, sync::Arc, time::Duration};
 
 use chrono::Utc;
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Target, commands::OPEN_FILE, piet::TextStorage};
+use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, ImageBuf, Target, commands::OPEN_FILE, piet::TextStorage};
 
 use crate::{
     gui::data::edit::EditState,
@@ -101,7 +101,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
             log::trace!("Populating edit data with recipe {}", id);
             data.edit.return_to = *return_to;
             match data.recipes.get(*id) {
-                Some(recipe) => data.edit = EditState::from(recipe.deref()),
+                Some(recipe) => data.edit = EditState::from_recipe(&data.recipes, recipe.deref()),
                 None => log::warn!(
                     "Edit recipe command received with ID {} that does not exist",
                     id
@@ -138,6 +138,8 @@ impl AppDelegate<AppState> for RecipierDelegate {
             }
             Handled::Yes
         } else if let Some(()) = cmd.get(SAVE_EDITED_RECIPE) {
+            let recipe_id = data.edit.id.unwrap_or_else(RecipeId::new);
+
             let recipe = Recipe {
                 name: Arc::from(data.edit.title.as_str()),
                 created_on: Utc::now(),
@@ -156,14 +158,35 @@ impl AppDelegate<AppState> for RecipierDelegate {
                             + edited.secs as u64,
                     )
                 }),
-                id: data.edit.id.unwrap_or_else(RecipeId::new),
-                image: data.edit.image.clone(),
+                id: recipe_id,
             };
             data.recipes.insert(recipe);
 
+            if let Some(ref img) = data.edit.image {
+                data.recipes.set_image(recipe_id, img.clone())
+            }
+
             Handled::Yes
         } else if let Some(info) = cmd.get(OPEN_FILE) {
-            data.edit.image = Some(Arc::from(info.path()));
+            use druid::image;
+            match image::open(info.path()) {
+                Ok(img) => {
+                    let img = img.to_rgba8();
+                    let width = img.width() as usize;
+                    let height = img.height() as usize;
+                    let buf = ImageBuf::from_raw(
+                        img.into_raw(), 
+                        druid::piet::ImageFormat::RgbaSeparate, 
+                        width, 
+                        height
+                    );
+
+                    data.edit.image = Some(buf);
+                },
+                Err(e) => {
+                    log::trace!("File {} can not be used as an image: {}", info.path().display(), e);
+                }
+            }
 
             Handled::Yes
         } else {
