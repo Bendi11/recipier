@@ -22,9 +22,24 @@ const ACCEPT_TYPE: &str = "application/vnd.github.v3+json";
 /// Check for new github releases and prompt the user to update in a separate window if there is a new one
 pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
     let _ = fs::remove_file("old-binary");
-    for dir in fs::read_dir(".") {
-        
+    if let Ok(dir) = fs::read_dir(".") {
+        for entry in dir.filter_map(Result::ok) {
+            if let Ok(filetype) = entry.file_type() {
+                if filetype.is_dir() {
+                    let version = match entry.file_name().to_string_lossy().parse::<Version>() {
+                        Ok(version) => version,
+                        Err(_) => continue
+                    };
+                    if version != *VERSION {
+                        if let Err(e) = fs::remove_dir_all(entry.path()) {
+                            log::error!("Failed to remove unused application directory {}: {}", entry.path().display(), e);
+                        }
+                    }
+                }
+            }
+        }
     }
+
     let client = Agent::new();
 
     let response = client
