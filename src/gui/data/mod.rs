@@ -111,15 +111,21 @@ impl ListIter<Recipe> for AppState {
 
 impl Default for AppState {
     fn default() -> Self {
+        let recipes = Database::new("recipes");
         Self {
             config: Config {
                 window_size: (480., 700.),
                 no_update_check: false,
             },
-            recipes: Database::new("recipes"),
             search: SearchState::default(),
             screen: AppScreen::Home,
-            home: HomeState::default(),
+            home: HomeState { 
+                loaded: {
+                    let ids = recipes.ids();
+                    druid::im::Vector::from(&ids[0..ids.len().min(10)])
+                }
+            },
+            recipes,
             view: ViewState::default(),
             edit: EditState::default(),
             remove: Option::None,

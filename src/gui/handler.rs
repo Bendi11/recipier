@@ -90,11 +90,7 @@ impl AppDelegate<AppState> for RecipierDelegate {
 
             let ids = data.recipes.ids();
             data.home.loaded = druid::im::Vector::from(
-                &ids[0..(if data.home.loaded.len() + 10 >= ids.len() {
-                    ids.len()
-                } else {
-                    data.home.loaded.len() + 10
-                })],
+                &ids[0..ids.len().min(data.home.loaded.len() + 10)],
             );
             Handled::Yes
         } else if let Some((id, return_to)) = cmd.get(EDIT_RECIPE) {
