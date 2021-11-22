@@ -2,11 +2,15 @@
 
 use std::{ops::Deref, sync::Arc, time::Duration};
 
-use druid::{Data, ImageBuf, Lens, im::HashMap, widget::ListIter};
+use druid::{im::HashMap, widget::ListIter, Data, ImageBuf, Lens};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::recipes::{db::{Database, RecipeId}, measure::{AmountUnit, Mass, Volume}, recipe::{Ingredient, IngredientAmount, Recipe}};
+use crate::recipes::{
+    db::{Database, RecipeId},
+    measure::{AmountUnit, Mass, Volume},
+    recipe::{Ingredient, IngredientAmount, Recipe},
+};
 
 use super::screen::AppScreen;
 
@@ -34,19 +38,20 @@ pub struct EditState {
 
 impl Data for EditState {
     fn same(&self, other: &Self) -> bool {
-        self.id.same(&other.id) &&
-        self.title.same(&other.title) &&
-        self.ingredients.same(&other.ingredients) &&
-        self.body.same(&other.body) &&
-        self.servings.same(&other.servings) &&
-        self.time.same(&other.time) && 
-        match (&self.image, &other.image) {
-            (Some(_), None) | (None, Some(_)) => false,
-            (None, None) => true,
-            (Some(ref img1), Some(ref img2)) => Arc::ptr_eq(&img1.raw_pixels_shared(), &img2.raw_pixels_shared())
-        } &&
-        self.return_to.same(&other.return_to)
-        
+        self.id.same(&other.id)
+            && self.title.same(&other.title)
+            && self.ingredients.same(&other.ingredients)
+            && self.body.same(&other.body)
+            && self.servings.same(&other.servings)
+            && self.time.same(&other.time)
+            && match (&self.image, &other.image) {
+                (Some(_), None) | (None, Some(_)) => false,
+                (None, None) => true,
+                (Some(ref img1), Some(ref img2)) => {
+                    Arc::ptr_eq(&img1.raw_pixels_shared(), &img2.raw_pixels_shared())
+                }
+            }
+            && self.return_to.same(&other.return_to)
     }
 }
 

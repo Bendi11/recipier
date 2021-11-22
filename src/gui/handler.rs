@@ -3,7 +3,10 @@
 use std::{borrow::Borrow, ops::Deref, sync::Arc, time::Duration};
 
 use chrono::Utc;
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, ImageBuf, Target, commands::OPEN_FILE, piet::TextStorage};
+use druid::{
+    commands::OPEN_FILE, piet::TextStorage, AppDelegate, Command, DelegateCtx, Env, Handled,
+    ImageBuf, Target,
+};
 
 use crate::{
     gui::data::edit::EditState,
@@ -89,9 +92,8 @@ impl AppDelegate<AppState> for RecipierDelegate {
             log::trace!("Loading more recipe results...");
 
             let ids = data.recipes.ids();
-            data.home.loaded = druid::im::Vector::from(
-                &ids[0..ids.len().min(data.home.loaded.len() + 10)],
-            );
+            data.home.loaded =
+                druid::im::Vector::from(&ids[0..ids.len().min(data.home.loaded.len() + 10)]);
             Handled::Yes
         } else if let Some((id, return_to)) = cmd.get(EDIT_RECIPE) {
             log::trace!("Populating edit data with recipe {}", id);
@@ -171,16 +173,20 @@ impl AppDelegate<AppState> for RecipierDelegate {
                     let width = img.width() as usize;
                     let height = img.height() as usize;
                     let buf = ImageBuf::from_raw(
-                        img.into_raw(), 
-                        druid::piet::ImageFormat::RgbaSeparate, 
-                        width, 
-                        height
+                        img.into_raw(),
+                        druid::piet::ImageFormat::RgbaSeparate,
+                        width,
+                        height,
                     );
 
                     data.edit.image = Some(buf);
-                },
+                }
                 Err(e) => {
-                    log::trace!("File {} can not be used as an image: {}", info.path().display(), e);
+                    log::trace!(
+                        "File {} can not be used as an image: {}",
+                        info.path().display(),
+                        e
+                    );
                 }
             }
 

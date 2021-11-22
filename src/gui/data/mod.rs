@@ -123,11 +123,11 @@ impl Default for AppState {
             },
             search: SearchState::default(),
             screen: AppScreen::Home,
-            home: HomeState { 
+            home: HomeState {
                 loaded: {
                     let ids = recipes.ids();
                     druid::im::Vector::from(&ids[0..ids.len().min(10)])
-                }
+                },
             },
             recipes,
             view: ViewState::default(),

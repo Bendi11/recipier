@@ -2,7 +2,11 @@
 
 use std::{sync::Arc, time::Duration};
 
-use druid::{Data, LensExt, LifeCycle, TextAlignment, Widget, WidgetExt, lens, widget::{FillStrat, Flex, Image, Label, LineBreaking, List, Scroll, SizedBox}};
+use druid::{
+    lens,
+    widget::{FillStrat, Flex, Image, Label, LineBreaking, List, Scroll, SizedBox},
+    Data, LensExt, LifeCycle, TextAlignment, Widget, WidgetExt,
+};
 
 use crate::{
     gui::{
@@ -26,9 +30,9 @@ pub const DATETIME_FORMAT: &str = "%e %B %Y %I:%M";
 
 /// Return a widget that displays one recipe in a maximized view
 pub fn view_screen() -> impl Widget<AppState> {
-    Flex::row().with_child(sidebar()).with_flex_child(Scroll::new(recipe_widget())
-                .vertical()
-                .expand_height(), 1.0)
+    Flex::row()
+        .with_child(sidebar())
+        .with_flex_child(Scroll::new(recipe_widget()).vertical().expand_height(), 1.0)
 }
 
 /// Show a widget that displays all information about the recipe
@@ -42,132 +46,133 @@ pub fn recipe_widget() -> impl Widget<AppState> {
         },
     );
 
-    let top = Maybe::or_empty(|| Flex::column()
-        .with_default_spacer()
-        .with_child(
-            Flex::row()
-                .with_child(
-                    Label::raw()
-                        .with_font(theme::HEADER_FONT)
-                        .with_line_break_mode(LineBreaking::WordWrap)
-                        .align_left()
-                        .lens(Recipe::name),
-                )
-                .with_flex_spacer(1.)
-                .with_child(
-                    Flex::column()
-                        .with_child(edit_button(AppScreen::View))
-                        .with_flex_spacer(1.0)
-                        .with_child(delete_button(AppScreen::View)),
-                )
-                .fix_height(50.),
-        )
-        .with_default_spacer()
-        .with_child(
-            Label::new(|recipe: &Recipe, _env: &'_ _| {
-                format!("Created {}", recipe.created_on.format(DATETIME_FORMAT))
-            })
-            .align_left(),
-        )
-        .with_default_spacer()
-        .with_child(Separator::new(2.))
-        .with_default_spacer()
-        .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
-        
-    );
+    let top = Maybe::or_empty(|| {
+        Flex::column()
+            .with_default_spacer()
+            .with_child(
+                Flex::row()
+                    .with_child(
+                        Label::raw()
+                            .with_font(theme::HEADER_FONT)
+                            .with_line_break_mode(LineBreaking::WordWrap)
+                            .align_left()
+                            .lens(Recipe::name),
+                    )
+                    .with_flex_spacer(1.)
+                    .with_child(
+                        Flex::column()
+                            .with_child(edit_button(AppScreen::View))
+                            .with_flex_spacer(1.0)
+                            .with_child(delete_button(AppScreen::View)),
+                    )
+                    .fix_height(50.),
+            )
+            .with_default_spacer()
+            .with_child(
+                Label::new(|recipe: &Recipe, _env: &'_ _| {
+                    format!("Created {}", recipe.created_on.format(DATETIME_FORMAT))
+                })
+                .align_left(),
+            )
+            .with_default_spacer()
+            .with_child(Separator::new(2.))
+            .with_default_spacer()
+            .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+    });
 
     let image = ImageBuilder::new().fix_height(175.);
-    
-    let lower = Maybe::or_empty(|| Flex::column()
-        .with_spacer(5.0)
-        .with_child(
-            Maybe::or_empty(|| {
-                Flex::column()
-                    .with_child(
-                        Label::new(|servings: &f32, _env: &'_ _| {
-                            format!(
-                                "Makes {} serving{}",
-                                servings,
-                                if *servings == 1f32 { "" } else { "s" }
-                            )
-                        })
-                        .with_font(theme::SYSTEM_FONT)
-                        .expand_width(),
-                    )
-                    .with_default_spacer()
-            })
-            .lens(Recipe::servings),
-        )
-        .with_child(
-            Maybe::or_empty(|| {
-                Flex::column()
-                    .with_child(
-                        Label::new(|time: &f32, _env: &'_ _| {
-                            format!("Takes {} to cook", FormattedDuration(*time))
-                        })
-                        .align_left()
-                        .expand_width(),
-                    )
-                    .with_default_spacer()
-            })
-            .lens(Recipe::time.map(
-                |duration| duration.map(|v| v.as_secs_f32()),
-                |duration, seconds| {
-                    if let Some(seconds) = seconds {
-                        *duration = Some(Duration::from_secs_f32(seconds));
-                    }
-                },
-            )),
-        )
-        .with_child(
-            Label::new("Ingredients")
-                .with_font(theme::LABEL_FONT)
-                .align_left(),
-        )
-        .with_default_spacer()
-        .with_child(
-            List::new(|| {
-                Flex::column()
-                    .with_child(
-                        Flex::row()
-                            .with_child(RIGHT_ARROW_ICON.clone().flex(false))
-                            .with_spacer(3.)
-                            .with_child(
-                                Label::raw()
-                                    .with_font(theme::SYSTEM_FONT)
-                                    .with_line_break_mode(LineBreaking::WordWrap)
-                                    .lens(Ingredient::name)
-                                    .align_left(),
-                            )
-                            .with_default_spacer()
-                            .with_child(Label::new(|ingredient: &Ingredient, _env: &'_ _| {
-                                format!("{}", ingredient.amount)
-                            }))
-                            .expand_width()
-                            .padding((2.5, 5.)),
-                    )
-                    .with_default_spacer()
-            })
-            .with_spacing(2.)
-            .expand_width()
-            .border(theme::COLOR_2, 2.)
-            .rounded(5.0),
-        )
-        .with_default_spacer()
-        .with_child(
-            Label::raw()
-                .with_font(theme::SYSTEM_FONT)
-                .with_text_size(16.)
-                .with_line_break_mode(LineBreaking::WordWrap)
-                .with_text_alignment(TextAlignment::Start)
+
+    let lower = Maybe::or_empty(|| {
+        Flex::column()
+            .with_spacer(5.0)
+            .with_child(
+                Maybe::or_empty(|| {
+                    Flex::column()
+                        .with_child(
+                            Label::new(|servings: &f32, _env: &'_ _| {
+                                format!(
+                                    "Makes {} serving{}",
+                                    servings,
+                                    if *servings == 1f32 { "" } else { "s" }
+                                )
+                            })
+                            .with_font(theme::SYSTEM_FONT)
+                            .expand_width(),
+                        )
+                        .with_default_spacer()
+                })
+                .lens(Recipe::servings),
+            )
+            .with_child(
+                Maybe::or_empty(|| {
+                    Flex::column()
+                        .with_child(
+                            Label::new(|time: &f32, _env: &'_ _| {
+                                format!("Takes {} to cook", FormattedDuration(*time))
+                            })
+                            .align_left()
+                            .expand_width(),
+                        )
+                        .with_default_spacer()
+                })
+                .lens(Recipe::time.map(
+                    |duration| duration.map(|v| v.as_secs_f32()),
+                    |duration, seconds| {
+                        if let Some(seconds) = seconds {
+                            *duration = Some(Duration::from_secs_f32(seconds));
+                        }
+                    },
+                )),
+            )
+            .with_child(
+                Label::new("Ingredients")
+                    .with_font(theme::LABEL_FONT)
+                    .align_left(),
+            )
+            .with_default_spacer()
+            .with_child(
+                List::new(|| {
+                    Flex::column()
+                        .with_child(
+                            Flex::row()
+                                .with_child(RIGHT_ARROW_ICON.clone().flex(false))
+                                .with_spacer(3.)
+                                .with_child(
+                                    Label::raw()
+                                        .with_font(theme::SYSTEM_FONT)
+                                        .with_line_break_mode(LineBreaking::WordWrap)
+                                        .lens(Ingredient::name)
+                                        .align_left(),
+                                )
+                                .with_default_spacer()
+                                .with_child(Label::new(|ingredient: &Ingredient, _env: &'_ _| {
+                                    format!("{}", ingredient.amount)
+                                }))
+                                .expand_width()
+                                .padding((2.5, 5.)),
+                        )
+                        .with_default_spacer()
+                })
+                .with_spacing(2.)
                 .expand_width()
-                .padding((5., 5.))
-                .lens(Recipe::body),
-        )
-        .expand_width()
-        .padding((15., 0.))
-        .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
-    );
+                .border(theme::COLOR_2, 2.)
+                .rounded(5.0),
+            )
+            .with_default_spacer()
+            .with_child(
+                Label::raw()
+                    .with_font(theme::SYSTEM_FONT)
+                    .with_text_size(16.)
+                    .with_line_break_mode(LineBreaking::WordWrap)
+                    .with_text_alignment(TextAlignment::Start)
+                    .expand_width()
+                    .padding((5., 5.))
+                    .lens(Recipe::body),
+            )
+            .expand_width()
+            .padding((15., 0.))
+            .lens(LensExt::<Arc<Recipe>, Arc<Recipe>>::in_arc(lens::Identity))
+    });
 
     Flex::column()
         .with_child(top.lens(recipe_lens.clone()))
@@ -178,7 +183,8 @@ pub fn recipe_widget() -> impl Widget<AppState> {
 
 /// A remove recipe button that takes the user to a confirmation dialog
 fn delete_button(screen: AppScreen) -> impl Widget<Recipe> {
-    RECYCLE_ICON.clone()
+    RECYCLE_ICON
+        .clone()
         .highlight_on_hover()
         .on_click(move |ctx, recipe: &mut Recipe, _env| {
             ctx.submit_command(REMOVE_RECIPE.with((recipe.id, screen)));
@@ -189,7 +195,8 @@ fn delete_button(screen: AppScreen) -> impl Widget<Recipe> {
 
 /// Edit icon button that takes the user to the edit screen populated with the current recipe's data
 fn edit_button(screen: AppScreen) -> impl Widget<Recipe> {
-    PEN_ICON.clone()
+    PEN_ICON
+        .clone()
         .highlight_on_hover()
         .on_click(move |ctx, recipe: &mut Recipe, _env| {
             ctx.submit_command(EDIT_RECIPE.with((recipe.id, screen)));
@@ -283,28 +290,39 @@ impl std::fmt::Display for FormattedDuration {
     }
 }
 
-/// A widget that builds an image using app state 
+/// A widget that builds an image using app state
 struct ImageBuilder {
     /// The internal widget to display
     widget: Box<dyn Widget<AppState>>,
 }
 
 impl ImageBuilder {
-    /// Create a new empty image builder 
+    /// Create a new empty image builder
     pub fn new() -> Self {
         Self {
-            widget: SizedBox::empty().boxed()
+            widget: SizedBox::empty().boxed(),
         }
     }
-
 }
 
 impl Widget<AppState> for ImageBuilder {
-    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &druid::Env) {
+    fn event(
+        &mut self,
+        ctx: &mut druid::EventCtx,
+        event: &druid::Event,
+        data: &mut AppState,
+        env: &druid::Env,
+    ) {
         self.widget.event(ctx, event, data, env)
     }
 
-    fn lifecycle(&mut self, ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &AppState, env: &druid::Env) {
+    fn lifecycle(
+        &mut self,
+        ctx: &mut druid::LifeCycleCtx,
+        event: &druid::LifeCycle,
+        data: &AppState,
+        env: &druid::Env,
+    ) {
         if let LifeCycle::WidgetAdded = event {
             if let Some(id) = data.view.viewed {
                 if let Some(data) = data.recipes.get_image(id).as_ref() {
@@ -313,12 +331,17 @@ impl Widget<AppState> for ImageBuilder {
                         .boxed();
                 }
             }
-            
         }
         self.widget.lifecycle(ctx, event, data, env)
     }
 
-    fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &AppState, data: &AppState, _env: &druid::Env) {
+    fn update(
+        &mut self,
+        ctx: &mut druid::UpdateCtx,
+        old_data: &AppState,
+        data: &AppState,
+        _env: &druid::Env,
+    ) {
         if !old_data.same(&data) {
             if let Some(id) = data.view.viewed {
                 if let Some(data) = data.recipes.get_image(id).as_ref() {
@@ -331,7 +354,13 @@ impl Widget<AppState> for ImageBuilder {
         }
     }
 
-    fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &AppState, env: &druid::Env) -> druid::Size {
+    fn layout(
+        &mut self,
+        ctx: &mut druid::LayoutCtx,
+        bc: &druid::BoxConstraints,
+        data: &AppState,
+        env: &druid::Env,
+    ) -> druid::Size {
         self.widget.layout(ctx, bc, data, env)
     }
 

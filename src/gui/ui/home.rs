@@ -8,10 +8,7 @@ use druid::{
 use crate::gui::{
     data::{screen::AppScreen, AppState},
     theme,
-    widgets::{
-        icon,
-        separator::Separator,
-    },
+    widgets::{icon, separator::Separator},
     CHANGE_SCREEN, CREATE_RECIPE, LOAD_MORE_RECIPES,
 };
 
@@ -19,20 +16,21 @@ use super::{recipe::recipe_brief_widget, sidebar};
 
 /// Construct a widget displaying a list of all saved recipes
 pub fn home_widget() -> impl Widget<AppState> {
-    let title_bar = Flex::row()
-        .with_child(
-            Label::new("Recipes")
-                .with_font(theme::HEADER_FONT)
-                .align_left(),
-        )
-        .with_flex_spacer(5.)
-        .with_child(icon::PLUS_ICON.clone().highlight_on_hover().on_click(
-            |ctx, _data, _env| {
-                ctx.submit_command(CREATE_RECIPE);
-                ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
-            },
-        ))
-        .with_spacer(10.);
+    let title_bar =
+        Flex::row()
+            .with_child(
+                Label::new("Recipes")
+                    .with_font(theme::HEADER_FONT)
+                    .align_left(),
+            )
+            .with_flex_spacer(5.)
+            .with_child(icon::PLUS_ICON.clone().highlight_on_hover().on_click(
+                |ctx, _data, _env| {
+                    ctx.submit_command(CREATE_RECIPE);
+                    ctx.submit_command(CHANGE_SCREEN.with(AppScreen::Edit));
+                },
+            ))
+            .with_spacer(10.);
 
     Flex::row().with_child(sidebar()).with_flex_child(
         Flex::column()

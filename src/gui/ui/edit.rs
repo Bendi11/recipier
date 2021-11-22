@@ -2,7 +2,15 @@
 
 use std::sync::Arc;
 
-use druid::{Data, FileDialogOptions, ImageBuf, LifeCycle, TextAlignment, Widget, WidgetExt, commands::SHOW_OPEN_PANEL, text::format::Validation, widget::{Button, Checkbox, FillStrat, Flex, Image, Label, List, Scroll, SizedBox, TextBox, ValueTextBox, ViewSwitcher}};
+use druid::{
+    commands::SHOW_OPEN_PANEL,
+    text::format::Validation,
+    widget::{
+        Button, Checkbox, FillStrat, Flex, Image, Label, List, Scroll, SizedBox, TextBox,
+        ValueTextBox, ViewSwitcher,
+    },
+    Data, FileDialogOptions, ImageBuf, LifeCycle, TextAlignment, Widget, WidgetExt,
+};
 use uuid::Uuid;
 
 use crate::gui::{
@@ -37,7 +45,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
                     Flex::column()
                         .with_child(Label::new("Save").with_font(theme::SMALL_FONT))
                         .with_child(
-                            SAVE_ICON.clone()
+                            SAVE_ICON
+                                .clone()
                                 .highlight_on_hover()
                                 .on_click(|ctx, data: &mut EditState, _env| {
                                     ctx.submit_command(SAVE_EDITED_RECIPE);
@@ -48,7 +57,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .with_flex_spacer(1.0)
                         .with_child(Label::new("Cancel").with_font(theme::SMALL_FONT))
                         .with_child(
-                            X_ICON.clone()
+                            X_ICON
+                                .clone()
                                 .highlight_on_hover()
                                 .on_click(|ctx, data: &mut EditState, _env| {
                                     ctx.submit_command(CHANGE_SCREEN.with(data.return_to));
@@ -78,10 +88,11 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .lens(EditState::title),
         )
         .with_default_spacer()
-        .with_child(Label::new("Image")
-            .with_font(theme::LABEL_FONT)
-            .align_left()
-            .expand_width()
+        .with_child(
+            Label::new("Image")
+                .with_font(theme::LABEL_FONT)
+                .align_left()
+                .expand_width(),
         )
         .with_spacer(2.0)
         .with_child(ViewSwitcher::new(
@@ -90,29 +101,35 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 true => Flex::column()
                     .with_child(ImageBuilder::new().fix_height(175.))
                     .with_spacer(2.0)
-                    .with_child(X_ICON.clone()
-                        .highlight_on_hover()
-                        .on_click(|_ctx, data: &mut EditState, _env| {
-                            data.image = None;
-                        })
-                        .fix_size(25., 25.)
+                    .with_child(
+                        X_ICON
+                            .clone()
+                            .highlight_on_hover()
+                            .on_click(|_ctx, data: &mut EditState, _env| {
+                                data.image = None;
+                            })
+                            .fix_size(25., 25.),
                     )
                     .expand_width()
                     .align_left()
                     .boxed(),
-                false => PLUS_ICON.clone()
+                false => PLUS_ICON
+                    .clone()
                     .highlight_on_hover()
                     .on_click(|ctx, _data, _env| {
-                        ctx.submit_command(SHOW_OPEN_PANEL.with(FileDialogOptions::new()
-                            .button_text("Choose Image")
-                            .name_label("Recipe image")
-                            .title("Recipe Image Selector")
-                        ));
+                        ctx.submit_command(
+                            SHOW_OPEN_PANEL.with(
+                                FileDialogOptions::new()
+                                    .button_text("Choose Image")
+                                    .name_label("Recipe image")
+                                    .title("Recipe Image Selector"),
+                            ),
+                        );
                     })
                     .fix_size(35., 35.)
                     .align_left()
-                    .boxed()
-            }
+                    .boxed(),
+            },
         ))
         .with_default_spacer()
         .with_child(
@@ -145,14 +162,16 @@ pub fn edit_widget() -> impl Widget<AppState> {
                         .lens(EditState::servings),
                     )
                     .with_child(
-                        X_ICON.clone()
+                        X_ICON
+                            .clone()
                             .highlight_on_hover()
                             .on_click(|_ctx, data: &mut EditState, _env| data.servings = None)
                             .fix_size(20., 20.),
                     )
                     .align_left()
                     .boxed(),
-                None => PLUS_ICON.clone()
+                None => PLUS_ICON
+                    .clone()
                     .highlight_on_hover()
                     .on_click(|_ctx, data: &mut EditState, _env| data.servings = Some(0f32))
                     .fix_size(35., 35.)
@@ -172,7 +191,8 @@ pub fn edit_widget() -> impl Widget<AppState> {
             Flex::column()
                 .with_child(List::new(ingredient_editor))
                 .with_child(
-                    PLUS_ICON.clone()
+                    PLUS_ICON
+                        .clone()
                         .highlight_on_hover()
                         .on_click(|_ctx, state: &mut EditState, _env| {
                             let id = Uuid::new_v4();
@@ -241,7 +261,8 @@ fn ingredient_editor() -> impl Widget<EditedIngredient> {
         )
         .with_spacer(5.)
         .with_child(
-            X_ICON.clone()
+            X_ICON
+                .clone()
                 .highlight_on_hover()
                 .on_click(|ctx, ingredient: &mut EditedIngredient, _env| {
                     ctx.submit_command(REMOVE_EDITED_INGREDIENT.with(ingredient.id));
@@ -305,7 +326,8 @@ fn time_editor() -> impl Widget<EditState> {
                     .lens(EditState::time),
                 )
                 .with_child(
-                    X_ICON.clone()
+                    X_ICON
+                        .clone()
                         .highlight_on_hover()
                         .on_click(|ctx, data: &mut EditState, _env| {
                             data.time = None;
@@ -314,7 +336,8 @@ fn time_editor() -> impl Widget<EditState> {
                         .fix_size(20., 20.),
                 )
                 .boxed(),
-            None => PLUS_ICON.clone()
+            None => PLUS_ICON
+                .clone()
                 .highlight_on_hover()
                 .on_click(|_ctx, data: &mut EditState, _env| {
                     data.time = Some(EditedTime::default())
@@ -328,17 +351,17 @@ fn time_editor() -> impl Widget<EditState> {
     .fix_height(50.)
 }
 
-/// A widget that builds an image using app state 
+/// A widget that builds an image using app state
 struct ImageBuilder {
     /// The internal widget to display
     widget: Box<dyn Widget<EditState>>,
 }
 
 impl ImageBuilder {
-    /// Create a new empty image builder 
+    /// Create a new empty image builder
     pub fn new() -> Self {
         Self {
-            widget: SizedBox::empty().boxed()
+            widget: SizedBox::empty().boxed(),
         }
     }
 
@@ -347,20 +370,31 @@ impl ImageBuilder {
         match (img1, img2) {
             (Some(_), None) | (None, Some(_)) => false,
             (None, None) => true,
-            (Some(ref data1), Some(ref data2)) => Arc::ptr_eq(
-                &data1.raw_pixels_shared(), 
-                &data2.raw_pixels_shared()
-            )
+            (Some(ref data1), Some(ref data2)) => {
+                Arc::ptr_eq(&data1.raw_pixels_shared(), &data2.raw_pixels_shared())
+            }
         }
     }
 }
 
 impl Widget<EditState> for ImageBuilder {
-    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut EditState, env: &druid::Env) {
+    fn event(
+        &mut self,
+        ctx: &mut druid::EventCtx,
+        event: &druid::Event,
+        data: &mut EditState,
+        env: &druid::Env,
+    ) {
         self.widget.event(ctx, event, data, env)
     }
 
-    fn lifecycle(&mut self, ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &EditState, env: &druid::Env) {
+    fn lifecycle(
+        &mut self,
+        ctx: &mut druid::LifeCycleCtx,
+        event: &druid::LifeCycle,
+        data: &EditState,
+        env: &druid::Env,
+    ) {
         if let LifeCycle::WidgetAdded = event {
             if let Some(data) = data.image.as_ref() {
                 self.widget = Image::new(data.clone())
@@ -371,7 +405,13 @@ impl Widget<EditState> for ImageBuilder {
         self.widget.lifecycle(ctx, event, data, env)
     }
 
-    fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &EditState, data: &EditState, _env: &druid::Env) {
+    fn update(
+        &mut self,
+        ctx: &mut druid::UpdateCtx,
+        old_data: &EditState,
+        data: &EditState,
+        _env: &druid::Env,
+    ) {
         if !old_data.same(&data) && !Self::images_same(&old_data.image, &data.image) {
             if let Some(data) = data.image.as_ref() {
                 self.widget = Image::new(data.clone())
@@ -382,7 +422,13 @@ impl Widget<EditState> for ImageBuilder {
         }
     }
 
-    fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &EditState, env: &druid::Env) -> druid::Size {
+    fn layout(
+        &mut self,
+        ctx: &mut druid::LayoutCtx,
+        bc: &druid::BoxConstraints,
+        data: &EditState,
+        env: &druid::Env,
+    ) -> druid::Size {
         self.widget.layout(ctx, bc, data, env)
     }
 

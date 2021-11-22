@@ -3,21 +3,21 @@
 use druid::commands::CLOSE_WINDOW;
 use druid::widget::{Button, Flex, Label};
 use druid::{AppLauncher, Data, ExtEventSink, Lens, Target, Widget, WidgetExt, WindowDesc};
+use parking_lot::Mutex;
 use semver::Version;
 use serde_json::Value;
-use ureq::Agent;
-use thiserror::Error;
-use zip::ZipArchive;
 use std::env::consts::EXE_SUFFIX;
-use std::{path, rc::Rc, fs};
-use parking_lot::Mutex;
+use std::{fs, path, rc::Rc};
+use thiserror::Error;
+use ureq::Agent;
+use zip::ZipArchive;
 
 use super::VERSION;
 
 /// The accepted github API content type
 const ACCEPT_TYPE: &str = "application/vnd.github.v3+json";
 
-/// A structure holding platform name and word size from a github release asset filename formatted as 
+/// A structure holding platform name and word size from a github release asset filename formatted as
 /// {os}-x{width}.zip
 #[derive(Clone, Copy, Debug)]
 struct ReleaseAsset<'a> {
@@ -38,13 +38,13 @@ impl<'a> ReleaseAsset<'a> {
         let os = parts.next()?;
         let width = match parts.next()?.trim_start_matches('x').parse::<u8>().ok()? {
             86 => 32,
-            other => other
+            other => other,
         };
 
         Some(Self {
             os,
             width,
-            id: asset.get("id")?.as_u64()?
+            id: asset.get("id")?.as_u64()?,
         })
     }
 }
@@ -53,47 +53,64 @@ impl<'a> ReleaseAsset<'a> {
 pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
     let client = Agent::new();
 
-    let response = client.get("https://api.github.com/repos/bendi11/recipier/releases/latest")
+    let response = client
+        .get("https://api.github.com/repos/bendi11/recipier/releases/latest")
         .set("accept", ACCEPT_TYPE)
         .call()?;
 
     if response.status() != 200 {
-        return Err(UpdateError::LatestReleaseNotFound)
+        return Err(UpdateError::LatestReleaseNotFound);
     }
-    
+
     let release: Value = response.into_json()?;
 
-    let release_version = release.get("name")
-        .ok_or_else(|| UpdateError::InvalidJsonResponse("'name' field missing from release object"))?
+    let release_version = release
+        .get("name")
+        .ok_or_else(|| {
+            UpdateError::InvalidJsonResponse("'name' field missing from release object")
+        })?
         .as_str()
-        .ok_or_else(|| UpdateError::InvalidJsonResponse("'name' field of release object is not a string"))?
+        .ok_or_else(|| {
+            UpdateError::InvalidJsonResponse("'name' field of release object is not a string")
+        })?
         .parse::<Version>()
-        .map_err(|_| UpdateError::InvalidJsonResponse("Latest release's name is not a valid semver version!"))?;
-
-    
+        .map_err(|_| {
+            UpdateError::InvalidJsonResponse("Latest release's name is not a valid semver version!")
+        })?;
 
     if release_version > *VERSION {
-        let release_assets = release.get("assets")
-            .ok_or_else(|| UpdateError::InvalidJsonResponse("'assets' field missing from release object"))?
+        let release_assets = release
+            .get("assets")
+            .ok_or_else(|| {
+                UpdateError::InvalidJsonResponse("'assets' field missing from release object")
+            })?
             .as_array()
-            .ok_or_else(|| UpdateError::InvalidJsonResponse("assets field of release object is not an array"))?;
+            .ok_or_else(|| {
+                UpdateError::InvalidJsonResponse("assets field of release object is not an array")
+            })?;
 
-        let mut matching_asset = None; 
+        let mut matching_asset = None;
         //Find a release asset matching our platform and word size
         for asset in release_assets.iter().filter_map(ReleaseAsset::parse) {
-            if asset.os == std::env::consts::OS && asset.width == (std::mem::size_of::<usize>() * 8) as u8 {
+            if asset.os == std::env::consts::OS
+                && asset.width == (std::mem::size_of::<usize>() * 8) as u8
+            {
                 matching_asset = Some(asset);
-                break
+                break;
             }
         }
 
         let matching_asset = matching_asset.ok_or(UpdateError::NoMatchingAsset)?;
-        log::trace!("Github release version {} is higher than current {}, prompting to update", release_version, *VERSION);
+        log::trace!(
+            "Github release version {} is higher than current {}, prompting to update",
+            release_version,
+            *VERSION
+        );
 
         let update = Rc::new(Mutex::new(false));
         let state = PromptState {
             update: update.clone(),
-            new_version: release_version.clone()
+            new_version: release_version.clone(),
         };
 
         let dialog_window = WindowDesc::new(prompt_widget)
@@ -106,11 +123,15 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
             .configure_env(|env, _state| super::gui::theme::set(env))
             .launch(state)
             .map_err(|e| UpdateError::DialogFailed(e))?;
-        
+
         if *update.lock() == true {
             sender.submit_command(CLOSE_WINDOW, (), Target::Global)?;
             let mut temp = tempfile::tempfile()?;
-            let mut response = client.get(&*format!("https://api.github.com/repos/bendi11/recipier/releases/assets/{}", matching_asset.id))
+            let mut response = client
+                .get(&*format!(
+                    "https://api.github.com/repos/bendi11/recipier/releases/assets/{}",
+                    matching_asset.id
+                ))
                 .set("Accept", "application/octet-stream")
                 .call()?
                 .into_reader();
@@ -126,7 +147,10 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 
             let main_hardlink = format!("./reciper{}", EXE_SUFFIX); //The path to the main application hardlink
             fs::remove_file(&main_hardlink)?; //Remove the old hard link
-            fs::hard_link(format!("./{}/recipier{}", release_version, EXE_SUFFIX), &main_hardlink)?;
+            fs::hard_link(
+                format!("./{}/recipier{}", release_version, EXE_SUFFIX),
+                &main_hardlink,
+            )?;
 
             log::trace!("Created all links, restarting...");
             std::process::Command::new(main_hardlink).spawn()?;
@@ -140,25 +164,31 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 fn prompt_widget() -> impl Widget<PromptState> {
     Flex::column()
         .with_default_spacer()
-        .with_child(Label::dynamic(|state: &PromptState, _| 
-            format!("Recipier version {} is available to update, would you like to update and restart?", state.new_version))
-        )
+        .with_child(Label::dynamic(|state: &PromptState, _| {
+            format!(
+                "Recipier version {} is available to update, would you like to update and restart?",
+                state.new_version
+            )
+        }))
         .with_default_spacer()
-        .with_child(Flex::row()
-            .with_child(Button::new("Don't Update")
-                .on_click(|_ctx, data: &mut PromptState, _| *data.update.lock() = false)
-            )
-            .with_flex_spacer(1.0)
-            .with_child(Button::new("Restart and Update")
-                .on_click(|_ctx, data: &mut PromptState, _| *data.update.lock() = true)
-            )
-            .padding((10., 0.))
+        .with_child(
+            Flex::row()
+                .with_child(
+                    Button::new("Don't Update")
+                        .on_click(|_ctx, data: &mut PromptState, _| *data.update.lock() = false),
+                )
+                .with_flex_spacer(1.0)
+                .with_child(
+                    Button::new("Restart and Update")
+                        .on_click(|_ctx, data: &mut PromptState, _| *data.update.lock() = true),
+                )
+                .padding((10., 0.)),
         )
         .with_default_spacer()
 }
 
 /// App state for the simple restart and update prompt
-#[derive(Clone, Debug, Data, Lens,)]
+#[derive(Clone, Debug, Data, Lens)]
 struct PromptState {
     /// If the user wants to update
     update: Rc<Mutex<bool>>,
@@ -166,7 +196,7 @@ struct PromptState {
     /// The version that the user can upgrade to
     #[data(same_fn = "PartialEq::eq")]
     new_version: Version,
-}   
+}
 
 /// Enumeration defining all errors that can occur when autoupdating
 #[derive(Debug, Error)]

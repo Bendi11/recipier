@@ -7,10 +7,10 @@ pub mod update;
 
 use druid::{AppLauncher, WindowDesc, WindowState};
 use gui::{data::AppState, root_widget};
+use lazy_static::lazy_static;
 use log::LevelFilter;
 use semver::Version;
 use simplelog::ConfigBuilder;
-use lazy_static::lazy_static;
 use update::autoupdate;
 
 /// The file name to save and load application data from
@@ -69,7 +69,7 @@ fn main() {
     }
 
     let state = AppState::init(SAVE_FILE);
-    
+
     let window = WindowDesc::new(root_widget)
         .resizable(true)
         .title("Recipier")
@@ -81,8 +81,10 @@ fn main() {
         .delegate(gui::handler::RecipierDelegate);
     let event_sink = launcher.get_external_handle();
     if !state.config.no_update_check {
-        std::thread::spawn(move || if let Err(e) = autoupdate(event_sink) {
-            log::warn!("Failed to check for updates: {}", e);
+        std::thread::spawn(move || {
+            if let Err(e) = autoupdate(event_sink) {
+                log::warn!("Failed to check for updates: {}", e);
+            }
         });
     }
 

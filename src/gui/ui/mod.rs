@@ -11,10 +11,7 @@ use druid::{
 
 use crate::gui::{
     theme,
-    widgets::{
-        icon,
-        separator::Separator,
-    },
+    widgets::{icon, separator::Separator},
 };
 
 use super::{
@@ -50,7 +47,8 @@ pub fn sidebar() -> impl Widget<AppState> {
             Flex::column()
                 .with_spacer(theme::SPACING)
                 .with_child(
-                    icon::BOWL_ICON.clone()
+                    icon::BOWL_ICON
+                        .clone()
                         .with_scale(10.)
                         .flex(false)
                         .with_color(theme::COLOR_4)

@@ -15,7 +15,6 @@ lazy_static! {
         flex: true,
         color: theme::COLOR_4.into(),
     };
-
     pub static ref RECYCLE_ICON: Icon = Icon {
         path: BezPath::from_svg(include_str!("../../../assets/icons/recycle-path.txt")).unwrap(),
         scale: 1.,
@@ -23,7 +22,6 @@ lazy_static! {
         flex: true,
         color: theme::COLOR_4.into(),
     };
-
     pub static ref PEN_ICON: Icon = Icon {
         path: BezPath::from_svg(include_str!("../../../assets/icons/pen-path.txt")).unwrap(),
         scale: 1.,
@@ -31,15 +29,14 @@ lazy_static! {
         flex: true,
         color: theme::COLOR_4.into(),
     };
-
     pub static ref RIGHT_ARROW_ICON: Icon = Icon {
-        path: BezPath::from_svg(include_str!("../../../assets/icons/right-arrow-path.txt")).unwrap(),
+        path: BezPath::from_svg(include_str!("../../../assets/icons/right-arrow-path.txt"))
+            .unwrap(),
         scale: 1.,
         size: Size::new(16., 16.),
         flex: true,
         color: theme::COLOR_4.into(),
     };
-
     pub static ref PLUS_ICON: Icon = Icon {
         path: BezPath::from_svg(include_str!("../../../assets/icons/plus-path.txt")).unwrap(),
         scale: 1.,
@@ -47,7 +44,6 @@ lazy_static! {
         flex: true,
         color: theme::COLOR_4.into(),
     };
-
     pub static ref SEARCH_ICON: Icon = Icon {
         path: BezPath::from_svg(include_str!("../../../assets/icons/search-path.txt")).unwrap(),
         scale: 1.,
@@ -55,7 +51,6 @@ lazy_static! {
         flex: true,
         color: theme::COLOR_4.into(),
     };
-
     pub static ref BOWL_ICON: Icon = Icon {
         path: BezPath::from_svg(include_str!("../../../assets/icon-path.txt")).unwrap(),
         scale: 1.,
@@ -63,7 +58,6 @@ lazy_static! {
         flex: true,
         color: theme::COLOR_4.into(),
     };
-
     pub static ref X_ICON: Icon = Icon {
         path: BezPath::from_svg(include_str!("../../../assets/icons/x-path.txt")).unwrap(),
         scale: 1.,

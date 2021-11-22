@@ -16,12 +16,7 @@ use crate::{
             AppState,
         },
         theme,
-        widgets::{
-            icon,
-            maybe::Maybe,
-            separator::Separator,
-            RecipierWidget,
-        },
+        widgets::{icon, maybe::Maybe, separator::Separator, RecipierWidget},
         CHANGE_SCREEN, POPULATE_RESULTS,
     },
     recipes::recipe::Recipe,
@@ -119,7 +114,8 @@ pub fn search_bar() -> impl Widget<String> {
         )
         .with_flex_spacer(0.1)
         .with_flex_child(
-            icon::SEARCH_ICON.clone()
+            icon::SEARCH_ICON
+                .clone()
                 .with_color(theme::COLOR_3)
                 .on_hover(
                     |ctx, _d, this, _env| {
