@@ -4,3 +4,4 @@
 /recipes
 *.app
 *.exe
+/test

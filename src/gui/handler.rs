@@ -3,7 +3,7 @@
 use std::{borrow::Borrow, ops::Deref, sync::Arc, time::Duration};
 
 use chrono::Utc;
-use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, ImageBuf, Target, WindowDesc, commands::OPEN_FILE, piet::TextStorage, widget::{Button, Flex, Label}};
+use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, ImageBuf, Target, WindowDesc, commands::{CLOSE_WINDOW, OPEN_FILE, SHOW_WINDOW}, piet::TextStorage, widget::{Button, Flex, Label}};
 
 use crate::{SAVE_FILE, gui::data::edit::EditState, recipes::{db::RecipeId, recipe::Recipe}};
 
@@ -40,41 +40,60 @@ impl AppDelegate<AppState> for RecipierDelegate {
         data: &mut AppState,
         _env: &Env,
     ) -> Handled {
-        if let Some(channel) = cmd.get(SHOW_UPDATE_DIALOG) {
+        if let Some((channel, version)) = cmd.get(SHOW_UPDATE_DIALOG) {
             use druid::WidgetExt;
 
             let channel_cancel = channel.clone();
             let channel_update = channel.clone();
+            let version = version.clone();
+
             let update_window = WindowDesc::new(move || Flex::column()
                 .with_default_spacer()
-                .with_child(Label::dynamic(|_state: &AppState, _| {
+                .with_child(Label::dynamic(move |_state: &AppState, _| {
                     format!(
                         "Recipier version {} is available to update, would you like to update and restart?",
-                        1//version
+                        version
                     )
                 }))
                 .with_default_spacer()
                 .with_child(
                     Flex::row()
+                        .with_default_spacer()
                         .with_child(
                             Button::new("Don't Update")
-                                .on_click(move |_ctx, _data: &mut AppState, _| { let _ = channel_cancel.send(false); }),
+                                .on_click(move |ctx, _data: &mut AppState, _| {
+                                    if let Err(e) = channel_cancel.send(false) {
+                                        log::error!("Failed to send cancel signal to updater thread: {}", e);
+                                        
+                                    }
+                                    let id = ctx.window_id();
+                                    ctx.submit_command(CLOSE_WINDOW.to(id));
+                                }),
                         )
                         .with_flex_spacer(1.0)
                         .with_child(
                             Button::new("Restart and Update")
-                                .on_click(move |_ctx, _data: &mut AppState, _| { let _ = channel_update.send(true); }),
+                                .on_click(move |ctx, _data: &mut AppState, _| {
+                                        if let Err(e) = channel_update.send(true) {
+                                        log::error!("Failed to send update signal to updater thread: {}", e);
+                                    }
+                                    let id = ctx.window_id();
+                                    ctx.submit_command(CLOSE_WINDOW.to(id));
+                                }),
                         )
                         .padding((10., 0.)),
                 )
                 .with_default_spacer()
             )
-            .title("Update")
-            .show_titlebar(false)
-            .resizable(false)
-            .window_size((600., 480.));
+                .title("Update")
+                .show_titlebar(false)
+                .resizable(false)
+                .window_size((600., 480.));
+            let id = update_window.id;
 
             ctx.new_window(update_window);
+            ctx.submit_command(SHOW_WINDOW.to(Target::Window(id)));
+
             Handled::Yes
         } else if let Some(screen) = cmd.get(CHANGE_SCREEN) {
             if *screen == data.screen {

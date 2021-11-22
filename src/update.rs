@@ -21,6 +21,10 @@ const ACCEPT_TYPE: &str = "application/vnd.github.v3+json";
 
 /// Check for new github releases and prompt the user to update in a separate window if there is a new one
 pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
+    let _ = fs::remove_file("old-binary");
+    for dir in fs::read_dir(".") {
+        
+    }
     let client = Agent::new();
 
     let response = client
@@ -80,13 +84,12 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 
         let (choice_tx, choice_rx) = mpsc::channel();
 
-        if let Err(e) = sender.submit_command(SHOW_UPDATE_DIALOG, choice_tx, Target::Global) {
+        if let Err(e) = sender.submit_command(SHOW_UPDATE_DIALOG, (choice_tx.clone(), release_version.clone()), Target::Global) {
             log::error!("Failed to submit update dialog prompt command: {}", e);
             return Err(UpdateError::EventSendError(e))
         }
         match choice_rx.recv() {
             Ok(choice) => if choice {
-                sender.submit_command(CLOSE_ALL_WINDOWS, (), Target::Global)?;
                 let mut temp = tempfile::tempfile()?;
                 let mut response = client
                     .get(&*format!(
@@ -106,15 +109,15 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
                 drop(zipfile);
                 drop(temp);
     
-                let main_hardlink = format!("./reciper{}", EXE_SUFFIX); //The path to the main application hardlink
-                fs::remove_file(&main_hardlink)?; //Remove the old hard link
+                let main_hardlink = format!("recipier{}", EXE_SUFFIX); //The path to the main application hardlink
+                let new_binary = format!("./{}/recipier{}", release_version, EXE_SUFFIX);
+                fs::rename(&main_hardlink, "old-binary")?;
                 fs::hard_link(
-                    format!("./{}/recipier{}", release_version, EXE_SUFFIX),
+                    new_binary,
                     &main_hardlink,
                 )?;
-    
-                log::trace!("Created all links, restarting...");
                 std::process::Command::new(main_hardlink).spawn()?;
+                sender.submit_command(CLOSE_ALL_WINDOWS, (), Target::Global)?;
             },
             Err(e) => {
                 log::error!("Failed to receive an update dialog response: {}", e);

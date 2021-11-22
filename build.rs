@@ -35,6 +35,8 @@ fn package() {}
 
 fn main() {
     let info = rust_info::get();
+
+    std::fs::hard_link("test/0.0.1/recipier.exe", "test/recipier.exe");
     
     println!("cargo:rustc-env=TARGET_TRIPLE={}", info.target_triple.unwrap());
     package()
