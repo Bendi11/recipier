@@ -93,7 +93,11 @@ pub fn recipe_widget() -> impl Widget<AppState> {
                                 format!(
                                     "Makes {} serving{}",
                                     servings,
-                                    if (*servings - 1f32).abs() < f32::EPSILON { "" } else { "s" }
+                                    if (*servings - 1f32).abs() < f32::EPSILON {
+                                        ""
+                                    } else {
+                                        "s"
+                                    }
                                 )
                             })
                             .with_font(theme::SYSTEM_FONT)

@@ -66,13 +66,13 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
 
     let release_version = release
         .get("name")
-        .ok_or(
-            UpdateError::InvalidJsonResponse("'name' field missing from release object")
-        )?
+        .ok_or(UpdateError::InvalidJsonResponse(
+            "'name' field missing from release object",
+        ))?
         .as_str()
-        .ok_or(
-            UpdateError::InvalidJsonResponse("'name' field of release object is not a string")
-        )?
+        .ok_or(UpdateError::InvalidJsonResponse(
+            "'name' field of release object is not a string",
+        ))?
         .parse::<Version>()
         .map_err(|_| {
             UpdateError::InvalidJsonResponse("Latest release's name is not a valid semver version!")
@@ -81,13 +81,13 @@ pub fn autoupdate(sender: ExtEventSink) -> Result<(), UpdateError> {
     if release_version > *VERSION {
         let release_assets = release
             .get("assets")
-            .ok_or(
-                UpdateError::InvalidJsonResponse("'assets' field missing from release object")
-            )?
+            .ok_or(UpdateError::InvalidJsonResponse(
+                "'assets' field missing from release object",
+            ))?
             .as_array()
-            .ok_or(
-                UpdateError::InvalidJsonResponse("assets field of release object is not an array")
-            )?;
+            .ok_or(UpdateError::InvalidJsonResponse(
+                "assets field of release object is not an array",
+            ))?;
 
         let mut matching_asset = None;
         //Find a release asset matching our platform and word size
