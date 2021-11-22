@@ -83,16 +83,12 @@ pub struct EditedIngredient {
     #[data(same_fn = "PartialEq::eq")]
     pub id: Uuid,
     /// The name of the ingredient
-    #[data(ignore)]
     pub name: Arc<String>,
     /// The number of the given unit for the ingredient
-    #[data(ignore)]
     pub count: f32,
     /// The amount of the ingredient needed
-    #[data(ignore)]
     pub unit: AmountUnit,
     /// Opposite of if the ingredient is optional
-    #[data(ignore)]
     pub required: bool,
 }
 
