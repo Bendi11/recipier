@@ -204,6 +204,7 @@ pub fn edit_widget() -> impl Widget<AppState> {
                 .padding((2.5, 0., 10., 10.))
                 .lens(EditState::body),
         )
+        .with_spacer(75.)
         .lens(AppState::edit)
         .padding((15., 0.))
         .expand_width();

@@ -79,6 +79,7 @@ pub fn recipe_widget() -> impl Widget<AppState> {
     let image = ImageBuilder::new().fix_height(175.);
     
     let lower = Maybe::or_empty(|| Flex::column()
+        .with_spacer(5.0)
         .with_child(
             Maybe::or_empty(|| {
                 Flex::column()
