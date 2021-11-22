@@ -30,14 +30,9 @@ jobs:
     steps:
       - name: install gtk+3 on ubuntu
         run:  |
-                 if [ "$RUNNER_OS" == "Linux" ]; then
-                      lsof /var/lib/dpkg/lock-frontend
-                      sudo apt-get install -y libgtk-3-dev
-                 elif [ "$RUNNER_OS" == "Windows" ]; then
-                      echo "Not installing GTK+3, not needed"
-                 else
-                      echo "Not installing GTK+3, not needed"
-                 fi
+              sudo apt-get install -y libgtk-3-dev
+                 
+        if: matrix.os == ubuntu-latest
         shell: bash
       
       - uses: actions/checkout@v2
