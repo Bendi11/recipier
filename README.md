@@ -4,9 +4,7 @@ Small application to record recipes on a computer
 ![screenshot](assets/screenshot.png)
 
 ## Features
- - [x] Lightweight and easy to navigate GUI
- - [x] Images attached to recipes
- - [x] Automatically check for new releases
- - [x] Recipe search function
- - [ ] Sharing of recipes via web server
- - [ ] Encrypt family recipes
+ - Lightweight and easy to navigate GUI
+ - Images attached to recipes
+ - Automatically check for new releases
+ - Recipe search function
